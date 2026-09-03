@@ -1,0 +1,47 @@
+import * as s from "../core/validation/index.js";
+import type { EnumSchema } from "../core/validation/schema.js";
+
+export const Products = {
+  Assets: "assets",
+  Auth: "auth",
+  Balance: "balance",
+  BalancePlus: "balance_plus",
+  Beacon: "beacon",
+  Identity: "identity",
+  IdentityMatch: "identity_match",
+  Investments: "investments",
+  InvestmentsAuth: "investments_auth",
+  Liabilities: "liabilities",
+  PaymentInitiation: "payment_initiation",
+  IdentityVerification: "identity_verification",
+  Transactions: "transactions",
+  CreditDetails: "credit_details",
+  Income: "income",
+  IncomeVerification: "income_verification",
+  StandingOrders: "standing_orders",
+  Transfer: "transfer",
+  Employment: "employment",
+  RecurringTransactions: "recurring_transactions",
+  TransactionsRefresh: "transactions_refresh",
+  Signal: "signal",
+  Statements: "statements",
+  ProcessorPayments: "processor_payments",
+  ProcessorIdentity: "processor_identity",
+  Profile: "profile",
+  CraBaseReport: "cra_base_report",
+  CraIncomeInsights: "cra_income_insights",
+  CraPartnerInsights: "cra_partner_insights",
+  CraNetworkInsights: "cra_network_insights",
+  CraCashflowInsights: "cra_cashflow_insights",
+  CraMonitoring: "cra_monitoring",
+  CraLendScore: "cra_lend_score",
+  CraPlaidCreditScore: "cra_plaid_credit_score",
+  CraQualify: "cra_qualify",
+  Layer: "layer",
+  PayByBank: "pay_by_bank",
+  ProtectLinkedBank: "protect_linked_bank",
+  ProtectTransactions: "protect_transactions",
+} as const;
+export type Products = (typeof Products)[keyof typeof Products] | (string & {});
+
+export const productsSchema: EnumSchema<Products> = s.enumOf<Products>(Products);

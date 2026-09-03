@@ -1,0 +1,27 @@
+import * as s from "../core/validation/index.js";
+import type { EnumSchema } from "../core/validation/schema.js";
+
+export const TotalCanonicalDescription = {
+  Bonus: "BONUS",
+  Commission: "COMMISSION",
+  Overtime: "OVERTIME",
+  PaidTimeOff: "PAID TIME OFF",
+  RegularPay: "REGULAR PAY",
+  Vacation: "VACATION",
+  EmployeeMedicare: "EMPLOYEE MEDICARE",
+  Fica: "FICA",
+  SocialSecurityEmployeeTax: "SOCIAL SECURITY EMPLOYEE TAX",
+  Medical: "MEDICAL",
+  Vision: "VISION",
+  Dental: "DENTAL",
+  NetPay: "NET PAY",
+  Taxes: "TAXES",
+  NotFound: "NOT_FOUND",
+  Other: "OTHER",
+} as const;
+export type TotalCanonicalDescription =
+  | (typeof TotalCanonicalDescription)[keyof typeof TotalCanonicalDescription]
+  | (string & {});
+
+export const totalCanonicalDescriptionSchema: EnumSchema<TotalCanonicalDescription> =
+  s.enumOf<TotalCanonicalDescription>(TotalCanonicalDescription);

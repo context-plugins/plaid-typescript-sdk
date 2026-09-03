@@ -1,0 +1,13 @@
+import * as s from "../core/validation/index.js";
+import type { EnumSchema } from "../core/validation/schema.js";
+
+export const LinkDeliveryDeliveryMethod = {
+  Sms: "SMS",
+  Email: "EMAIL",
+} as const;
+export type LinkDeliveryDeliveryMethod =
+  | (typeof LinkDeliveryDeliveryMethod)[keyof typeof LinkDeliveryDeliveryMethod]
+  | (string & {});
+
+export const linkDeliveryDeliveryMethodSchema: EnumSchema<LinkDeliveryDeliveryMethod> =
+  s.enumOf<LinkDeliveryDeliveryMethod>(LinkDeliveryDeliveryMethod);
