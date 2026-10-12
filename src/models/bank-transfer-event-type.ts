@@ -1,6 +1,19 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * The type of event that this bank transfer represents.
+ *
+ * `pending`: A new transfer was created; it is in the pending state.
+ *
+ * `cancelled`: The transfer was cancelled by the client.
+ *
+ * `failed`: The transfer failed, no funds were moved.
+ *
+ * `posted`: The transfer has been successfully submitted to the payment network.
+ *
+ * `reversed`: A posted transfer was reversed.
+ */
 export const BankTransferEventType = {
   Pending: "pending",
   Cancelled: "cancelled",

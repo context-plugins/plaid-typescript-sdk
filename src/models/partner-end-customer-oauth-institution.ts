@@ -6,12 +6,25 @@ import {
   type PartnerEndCustomerOAuthInstitutionEnvironments,
 } from "./partner-end-customer-oauth-institution-environments.js";
 
+/** The OAuth registration information for an institution. */
 export type PartnerEndCustomerOAuthInstitution = {
   name?: string;
   institutionId?: string;
+  /** Registration statuses by environment. */
   environments?: PartnerEndCustomerOAuthInstitutionEnvironments;
+  /**
+   * The date on which the end customer's application was approved by the institution, or an empty
+   * string if their application has not yet been approved.
+   */
   productionEnablementDate?: string | null;
+  /**
+   * The date on which non-OAuth Item adds will no longer be supported for this institution, or an
+   * empty string if no such date has been set by the institution.
+   */
   classicDisablementDate?: string | null;
+  /**
+   * The errors encountered while registering the end customer's application with the institutions.
+   */
   errors?: (Error | null)[];
 };
 

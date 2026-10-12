@@ -2,9 +2,18 @@ import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 import { transferEventSchema, type TransferEvent } from "./transfer-event.js";
 
+/** Defines the response schema for `/transfer/event/sync` */
 export type TransferEventSyncResponse = {
   transferEvents: TransferEvent[];
+  /**
+   * Whether there are more events to be pulled from the endpoint that have not already been
+   * returned
+   */
   hasMore: boolean;
+  /**
+   * A unique identifier for the request, which can be used for troubleshooting. This identifier,
+   * like all Plaid identifiers, is case sensitive.
+   */
   requestId: string;
 };
 

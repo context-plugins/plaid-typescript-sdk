@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Form 1099 Type */
 export const Form1099Type = {
   Form1099TypeUnknown: "FORM_1099_TYPE_UNKNOWN",
   Form1099TypeMisc: "FORM_1099_TYPE_MISC",

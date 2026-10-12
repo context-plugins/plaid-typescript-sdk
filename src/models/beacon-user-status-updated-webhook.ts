@@ -5,10 +5,18 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/**
+ * Fired when a Beacon User status has changed, which can occur manually via the dashboard or when
+ * information is reported to the Beacon network.
+ */
 export type BeaconUserStatusUpdatedWebhook = {
+  /** `BEACON` */
   webhookType: string;
+  /** `USER_STATUS_UPDATED` */
   webhookCode: string;
+  /** The ID of the associated Beacon user. */
   beaconUserId: string;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

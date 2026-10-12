@@ -5,7 +5,9 @@ import {
   type CashflowAttributesVersion,
 } from "./cashflow-attributes-version.js";
 
+/** Specifies options for initializing Link for use with the Cashflow Insights product. */
 export type LinkTokenCreateRequestCraOptionsCashflowInsights = {
+  /** The version of cashflow attributes. Required if using Cash Flow Insights. */
   attributesVersion?: CashflowAttributesVersion | null;
 };
 

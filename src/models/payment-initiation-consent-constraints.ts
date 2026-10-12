@@ -10,9 +10,16 @@ import {
   type PaymentConsentValidDateTime,
 } from "./payment-consent-valid-date-time.js";
 
+/** Limitations that will be applied to payments initiated using the payment consent. */
 export type PaymentInitiationConsentConstraints = {
+  /**
+   * Life span for the payment consent. After the `to` date the payment consent expires and can no
+   * longer be used for payment initiation.
+   */
   validDateTime?: PaymentConsentValidDateTime | null;
+  /** Maximum amount of a single payment initiated using the payment consent. */
   maxPaymentAmount: PaymentAmount;
+  /** A list of amount limitations per period of time. */
   periodicAmounts: PaymentConsentPeriodicAmount[];
 };
 

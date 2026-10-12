@@ -4,10 +4,15 @@ import { fdxConsentGrantStatusSchema, type FdxConsentGrantStatus } from "./fdx-c
 import { fdxUpdateReasonSchema, type FdxUpdateReason } from "./fdx-update-reason.js";
 import { partyTypeSchema, type PartyType } from "./party-type.js";
 
+/** One revocation record on a consent grant, mirroring the FDX ConsentRevocation entity. */
 export type FdxConsentRevocationRecord = {
+  /** Current status of a consent grant. One of `ACTIVE`, `REVOKED`, `EXPIRED`. */
   status: FdxConsentGrantStatus;
+  /** Reason for lifecycle event status change */
   reason: FdxUpdateReason;
+  /** Identifies the type of a party */
   initiator: PartyType;
+  /** When the consent grant was revoked */
   updatedTime: Date;
 };
 

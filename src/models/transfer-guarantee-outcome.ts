@@ -1,6 +1,19 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * The adaptive guarantee outcome for a transfer.
+ *
+ * `FULL_INSTANT`: The full transfer amount is guaranteed and funds are available instantly.
+ *
+ * `PARTIAL_INSTANT_ONLY`: A partial amount is guaranteed and available instantly; the remainder is
+ * not guaranteed.
+ *
+ * `PARTIAL_INSTANT_WITH_OBSERVATION_WINDOW`: A partial amount is guaranteed instantly; an
+ * additional amount is conditionally guaranteed subject to an observation window.
+ *
+ * `NOT_GUARANTEED`: Plaid did not provide a guarantee for this transfer.
+ */
 export const TransferGuaranteeOutcome = {
   FullInstant: "FULL_INSTANT",
   PartialInstantOnly: "PARTIAL_INSTANT_ONLY",

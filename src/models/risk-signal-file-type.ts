@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The file type for risk signal analysis */
 export const RiskSignalFileType = {
   Unknown: "UNKNOWN",
   ImagePdf: "IMAGE_PDF",

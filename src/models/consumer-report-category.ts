@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Type of data being disputed by the consumer */
 export const ConsumerReportCategory = {
   Transaction: "TRANSACTION",
   Balance: "BALANCE",

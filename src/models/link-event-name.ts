@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** A string representing the event that has just occurred in the Link flow. */
 export const LinkEventName = {
   BankIncomeInsightsCompleted: "BANK_INCOME_INSIGHTS_COMPLETED",
   CloseOauth: "CLOSE_OAUTH",

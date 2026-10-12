@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The tier of the user. */
 export const CraUserTier = {
   Free: "free",
   Paid: "paid",

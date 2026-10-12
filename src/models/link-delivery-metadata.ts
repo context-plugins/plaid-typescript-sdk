@@ -9,8 +9,11 @@ import {
   type LinkDeliveryWebhookDeliveryStatus,
 } from "./link-delivery-webhook-delivery-status.js";
 
+/** Information related to the delivery of the link session to users */
 export type LinkDeliveryMetadata = {
+  /** The communication method used to deliver the Hosted Link session */
   communicationMethod?: LinkDeliveryWebhookCommunicationMethod;
+  /** The status of the delivery of the Hosted Link to the user */
   deliveryStatus?: LinkDeliveryWebhookDeliveryStatus;
 };
 

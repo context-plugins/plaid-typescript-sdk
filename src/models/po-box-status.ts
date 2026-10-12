@@ -1,6 +1,11 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * Field describing whether the associated address is a post office box. Will be `yes` when a P.O.
+ * box is detected, `no` when Plaid confirmed the address is not a P.O. box, and `no_data` when
+ * Plaid was not able to determine if the address is a P.O. box.
+ */
 export const PoBoxStatus = {
   Yes: "yes",
   No: "no",

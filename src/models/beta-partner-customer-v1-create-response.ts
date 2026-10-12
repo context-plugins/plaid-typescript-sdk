@@ -5,8 +5,17 @@ import {
   type BetaPartnerEndCustomerWithSecrets,
 } from "./beta-partner-end-customer-with-secrets.js";
 
+/** Response schema for `/beta/partner/customer/v1/create`. */
 export type BetaPartnerCustomerV1CreateResponse = {
+  /**
+   * The details for the newly created end customer, including secrets for non-Production
+   * environments.
+   */
   endCustomer?: BetaPartnerEndCustomerWithSecrets;
+  /**
+   * A unique identifier for the request, which can be used for troubleshooting. This identifier,
+   * like all Plaid identifiers, is case sensitive.
+   */
   requestId?: string;
 };
 

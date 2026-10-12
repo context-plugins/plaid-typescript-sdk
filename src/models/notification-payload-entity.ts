@@ -6,9 +6,16 @@ import {
   type NotificationPayloadIdType,
 } from "./notification-payload-id-type.js";
 
+/** Custom key-value pairs payload for a notification */
 export type NotificationPayloadEntity = {
+  /** ID for the origination entity related to the notification */
   id?: string;
+  /** Type of entity causing origination of a notification */
   idType?: NotificationPayloadIdType;
+  /**
+   * Details of consent or payment network identifier or other entity's revocation request or other
+   * lifecycle status change event
+   */
   event?: FdxLifecycleEventEntity;
 };
 

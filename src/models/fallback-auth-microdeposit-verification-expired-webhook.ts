@@ -5,12 +5,19 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/** Fires when an account has an expired verification when using micro-deposits */
 export type FallbackAuthMicrodepositVerificationExpiredWebhook = {
+  /** `AUTH` */
   webhookType: string;
+  /** `VERIFICATION_EXPIRED` */
   webhookCode: string;
+  /** The error code associated with the webhook. */
   error?: string | null;
+  /** The external account ID associated with the micro-deposit */
   accountId: string;
+  /** The `item_id` of the Item associated with this webhook, warning, or error */
   itemId: string;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

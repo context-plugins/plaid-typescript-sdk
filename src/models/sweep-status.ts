@@ -1,6 +1,18 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * The status of a sweep transfer
+ *
+ * `"pending"` - The sweep is currently pending `"posted"` - The sweep has been posted `"settled"` -
+ * The sweep has settled. This is the terminal state of a successful credit sweep. `"returned"` -
+ * The sweep has been returned. This is the terminal state of a returned sweep. Returns of a sweep
+ * are extremely rare, since sweeps are money movement between your own bank account and your own
+ * Ledger. `"funds_available"` - Funds from the sweep have been released from hold and applied to
+ * the ledger's available balance. (Only applicable to deposits.) This is the terminal state of a
+ * successful deposit sweep. `"failed"` - The sweep has failed. This is the terminal state of a
+ * failed sweep.
+ */
 export const SweepStatus = {
   Pending: "pending",
   Posted: "posted",

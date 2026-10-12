@@ -5,8 +5,14 @@ import {
   type NetworkStatusGetResponseNetworkStatus,
 } from "./network-status-get-response-network-status.js";
 
+/** ProfileNetworkStatusGetResponse defines the response schema for `/profile/network_status/get` */
 export type ProfileNetworkStatusGetResponse = {
+  /** Enum representing the overall network status of the user. */
   networkStatus: NetworkStatusGetResponseNetworkStatus;
+  /**
+   * A unique identifier for the request, which can be used for troubleshooting. This identifier,
+   * like all Plaid identifiers, is case sensitive.
+   */
   requestId: string;
 };
 

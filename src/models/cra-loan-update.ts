@@ -6,9 +6,16 @@ import {
   type CraLoanStatusHistoryUpdate,
 } from "./cra-loan-status-history-update.js";
 
+/** Contains loan data to update. */
 export type CraLoanUpdate = {
+  /**
+   * A unique identifier for the loan. Personally identifiable information, such as an email address
+   * or phone number, should not be used in the `loan_id`.
+   */
   loanId?: string;
+  /** A list of status update history of the loan. */
   statusHistory?: CraLoanStatusHistoryUpdate[];
+  /** The updates to the payment history for the loan. */
   paymentHistory?: CraLoanPaymentHistory[];
 };
 

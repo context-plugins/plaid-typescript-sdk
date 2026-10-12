@@ -4,9 +4,13 @@ import { itemStatusInvestmentsSchema, type ItemStatusInvestments } from "./item-
 import { itemStatusLastWebhookSchema, type ItemStatusLastWebhook } from "./item-status-last-webhook.js";
 import { itemStatusTransactionsSchema, type ItemStatusTransactions } from "./item-status-transactions.js";
 
+/** An object with information about the status of the Item. */
 export type ItemStatus = {
+  /** Information about the last successful and failed investments update for the Item. */
   investments?: ItemStatusInvestments | null;
+  /** Information about the last successful and failed transactions update for the Item. */
   transactions?: ItemStatusTransactions | null;
+  /** Information about the last webhook fired for the Item. */
   lastWebhook?: ItemStatusLastWebhook | null;
 };
 

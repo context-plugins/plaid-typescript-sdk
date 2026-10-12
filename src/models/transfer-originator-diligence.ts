@@ -14,14 +14,31 @@ import {
   type TransferOriginatorAddress,
 } from "./transfer-originator-address.js";
 
+/** The diligence information for the originator. */
 export type TransferOriginatorDiligence = {
+  /** The business name of the originator. */
   dba: string;
+  /** The tax ID of the originator. */
   taxId: string;
+  /**
+   * Specifies the originator's expected usage of credits. For all dollar amounts, use a decimal
+   * string with two digits of precision e.g. "10.00". This field is required if the originator is
+   * expected to process credit transfers.
+   */
   creditUsageConfiguration?: TransferCreditUsageConfiguration | null;
+  /**
+   * Specifies the originator's expected usage of debits. For all dollar amounts, use a decimal
+   * string with two digits of precision e.g. "10.00". This field is required if the originator is
+   * expected to process debit transfers.
+   */
   debitUsageConfiguration?: TransferDebitUsageConfiguration | null;
+  /** The originator's address. */
   address: TransferOriginatorAddress;
+  /** The website of the originator. */
   website: string;
+  /** The NAICS code of the originator. */
   naicsCode: string;
+  /** The originator's funding account, linked with Plaid Link or `/transfer/migrate_account`. */
   fundingAccount: TransferFundingAccount;
 };
 

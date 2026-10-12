@@ -6,9 +6,16 @@ import {
 } from "./account-identity-match-score.js";
 import { itemSchema, type Item } from "./item.js";
 
+/** IdentityMatchResponse defines the response schema for `/identity/match` */
 export type IdentityMatchResponse = {
+  /** The accounts for which Identity match has been requested */
   accounts: AccountIdentityMatchScore[];
+  /** Metadata about the Item. */
   item: Item;
+  /**
+   * A unique identifier for the request, which can be used for troubleshooting. This identifier,
+   * like all Plaid identifiers, is case sensitive.
+   */
   requestId: string;
 };
 

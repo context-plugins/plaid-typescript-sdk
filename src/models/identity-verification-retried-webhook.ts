@@ -5,10 +5,18 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/**
+ * Fired when an identity verification has been retried, which can be triggered via the dashboard or
+ * the API.
+ */
 export type IdentityVerificationRetriedWebhook = {
+  /** `IDENTITY_VERIFICATION` */
   webhookType: string;
+  /** `RETRIED` */
   webhookCode: string;
+  /** The ID of the associated Identity Verification attempt. */
   identityVerificationId: string;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The type of Link callback event */
 export const LinkDeliveryWebhookCallbackType = {
   OnSuccess: "ON_SUCCESS",
   OnEvent: "ON_EVENT",

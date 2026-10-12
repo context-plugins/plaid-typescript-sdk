@@ -5,8 +5,14 @@ import {
   type ClientProvidedEnrichedTransaction,
 } from "./client-provided-enriched-transaction.js";
 
+/** TransactionsEnrichResponse defines the response schema for `/transactions/enrich`. */
 export type TransactionsEnrichResponse = {
+  /** A list of enriched transactions. */
   enrichedTransactions: ClientProvidedEnrichedTransaction[];
+  /**
+   * A unique identifier for the request, which can be used for troubleshooting. This identifier,
+   * like all Plaid identifiers, is case sensitive.
+   */
   requestId?: string;
 };
 

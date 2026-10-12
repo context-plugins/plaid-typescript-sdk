@@ -1,10 +1,15 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/** Recipient metadata fields that are defined by FDX. */
 export type FdxRecipientMetadata = {
+  /** The recipient identifier */
   recipientId: string;
+  /** The recipient name displayed by the Data Provider during the consent flow */
   clientName: string;
+  /** Data Recipient Logo URL location */
   logoUri?: string | null;
+  /** The legal name of the recipient */
   thirdPartyLegalName: string;
 };
 

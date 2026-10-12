@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Fees on the account, e.g. commission, bookkeeping, options-related. */
 export const FeeType = {
   AccountFee: "account fee",
   Adjustment: "adjustment",

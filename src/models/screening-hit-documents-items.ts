@@ -6,8 +6,14 @@ import {
   type WatchlistScreeningDocument,
 } from "./watchlist-screening-document.js";
 
+/** Analyzed document information for the associated hit */
 export type ScreeningHitDocumentsItems = {
+  /** Summary object reflecting the match result of the associated data */
   analysis?: MatchSummary;
+  /**
+   * An official document, usually issued by a governing body or institution, with an associated
+   * identifier.
+   */
   data?: WatchlistScreeningDocument;
 };
 

@@ -1,6 +1,26 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * A decision regarding the proposed transfer.
+ *
+ * `approved` - The proposed transfer has received the end user's consent and has been approved for
+ * processing by Plaid. The `decision_rationale` field is set if Plaid was unable to fetch the
+ * account information. You may proceed with the transfer, but further review is recommended. Refer
+ * to the `code` field in the `decision_rationale` object for details.
+ *
+ * `declined` - Plaid reviewed the proposed transfer and declined processing. Refer to the `code`
+ * field in the `decision_rationale` object for details.
+ *
+ * `user_action_required` - An action is required before Plaid can assess the transfer risk and make
+ * a decision. The most common scenario is to update authentication for an Item. To complete the
+ * required action, initialize Link by setting `transfer.authorization_id` in the request of
+ * `/link/token/create`. After Link flow is completed, you may re-attempt the authorization request.
+ *
+ * For `guarantee` requests, `approved` indicates the transfer is eligible for Plaid's guarantee,
+ * and `declined` indicates Plaid will not provide guarantee coverage for the transfer.
+ * `user_action_required` indicates you should follow the above guidance before re-attempting.
+ */
 export const TransferAuthorizationDecision = {
   Approved: "approved",
   Declined: "declined",

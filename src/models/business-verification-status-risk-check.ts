@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Status of the business risk assessment check */
 export const BusinessVerificationStatusRiskCheck = {
   Active: "active",
   Success: "success",

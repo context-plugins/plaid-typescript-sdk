@@ -1,6 +1,9 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * The network or rails used for the transfer. Valid options are `ach`, `same-day-ach`, or `wire`.
+ */
 export const BankTransferNetwork = {
   Ach: "ach",
   SameDayAch: "same-day-ach",

@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The legal structure or type of business entity */
 export const BusinessEntityType = {
   SoleProprietorship: "sole_proprietorship",
   GeneralPartnership: "general_partnership",

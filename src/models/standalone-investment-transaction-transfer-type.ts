@@ -1,6 +1,10 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * Activity that modifies a position, but not through buy/sell activity e.g. options exercise,
+ * portfolio transfer
+ */
 export const StandaloneInvestmentTransactionTransferType = {
   Assignment: "assignment",
   Adjustment: "adjustment",

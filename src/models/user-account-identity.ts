@@ -6,13 +6,25 @@ import {
 } from "./user-account-identity-address.js";
 import { userAccountIdentityNameSchema, type UserAccountIdentityName } from "./user-account-identity-name.js";
 
+/** The identity data permissioned by the end user during the authorization flow. */
 export type UserAccountIdentity = {
+  /** The user's first name and last name. */
   name?: UserAccountIdentityName | null;
+  /** The user's address. */
   address?: UserAccountIdentityAddress | null;
+  /** The user's phone number in [E.164](https://en.wikipedia.org/wiki/E.164) format */
   phoneNumber?: string;
+  /**
+   * The user's email address.
+   *
+   * Note: email is currently not returned.
+   */
   email?: string | null;
+  /** The user's date of birth. */
   dateOfBirth?: string | null;
+  /** The user's Social Security number. */
   ssn?: string | null;
+  /** The last 4 digits of the user's Social Security number. */
   ssnLast4?: string | null;
 };
 

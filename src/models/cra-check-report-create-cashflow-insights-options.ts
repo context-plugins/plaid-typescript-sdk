@@ -5,7 +5,9 @@ import {
   type CashflowAttributesVersion,
 } from "./cashflow-attributes-version.js";
 
+/** Defines configuration options to generate Cashflow Insights */
 export type CraCheckReportCreateCashflowInsightsOptions = {
+  /** The version of cashflow attributes. Required if using Cash Flow Insights. */
   attributesVersion?: CashflowAttributesVersion | null;
 };
 

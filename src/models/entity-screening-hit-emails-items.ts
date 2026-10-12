@@ -6,8 +6,11 @@ import {
 } from "./entity-screening-hit-emails.js";
 import { matchSummarySchema, type MatchSummary } from "./match-summary.js";
 
+/** Analyzed emails for the associated hit */
 export type EntityScreeningHitEmailsItems = {
+  /** Summary object reflecting the match result of the associated data */
   analysis?: MatchSummary;
+  /** Email address information for the associated entity watchlist hit */
   data?: EntityScreeningHitEmails;
 };
 

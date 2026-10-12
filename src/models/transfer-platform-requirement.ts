@@ -1,8 +1,14 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/** A piece of information that is required for originator onboarding. */
 export type TransferPlatformRequirement = {
+  /** The type of requirement. */
   requirementType?: string;
+  /**
+   * UUID of the person associated with the requirement. Only present for individual-scoped
+   * requirements.
+   */
   personId?: string | null;
 };
 

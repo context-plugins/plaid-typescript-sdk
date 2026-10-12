@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The version of the LendScore to use. Required if using LendScore. */
 export const PlaidLendScoreVersion = {
   V10: "v1.0",
   V20: "v2.0",

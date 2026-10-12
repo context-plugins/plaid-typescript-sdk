@@ -1,6 +1,19 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * Shorthand identifier for a specific screening list for entities. `AU_CON`: Australia Department
+ * of Foreign Affairs and Trade Consolidated List `CA_CON`: Government of Canada Consolidated List
+ * of Sanctions `EU_CON`: European External Action Service Consolidated List `IZ_SOE`: State Owned
+ * Enterprise List `IZ_UNC`: United Nations Consolidated Sanctions `IZ_WBK`: World Bank Listing of
+ * Ineligible Firms and Individuals `US_CAP`: US OFAC Correspondent Account or Payable-Through
+ * Account Sanctions `US_FSE`: US OFAC Foreign Sanctions Evaders `US_MBS`: US Non-SDN Menu-Based
+ * Sanctions `US_SDN`: US OFAC Specially Designated Nationals List `US_SSI`: US OFAC Sectoral
+ * Sanctions Identifications `US_CMC`: US OFAC Non-SDN Chinese Military-Industrial Complex List
+ * `US_UVL`: Bureau of Industry and Security Unverified List `US_SAM`: US System for Award
+ * Management Exclusion List `US_TEL`: US Terrorist Exclusion List `UK_HMC`: Foreign, Commonwealth &
+ * Development Office UK Sanctions List
+ */
 export const EntityWatchlistCode = {
   CaCon: "CA_CON",
   EuCon: "EU_CON",

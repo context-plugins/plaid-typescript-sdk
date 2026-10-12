@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The Plaid environment the webhook was sent from */
 export const WebhookEnvironmentValues = {
   Sandbox: "sandbox",
   Production: "production",

@@ -1,6 +1,10 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * Transaction rule's match type. For `TRANSACTION_ID` field, `EXACT_MATCH` is available. Matches
+ * are case sensitive.
+ */
 export const TransactionsRuleType = {
   ExactMatch: "EXACT_MATCH",
   SubstringMatch: "SUBSTRING_MATCH",

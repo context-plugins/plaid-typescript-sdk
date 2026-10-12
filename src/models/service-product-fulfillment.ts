@@ -5,7 +5,12 @@ import {
   type ServiceProductFulfillmentDetail,
 } from "./service-product-fulfillment-detail.js";
 
+/**
+ * A collection of details related to a fulfillment service or product in terms of request, process
+ * and result.
+ */
 export type ServiceProductFulfillment = {
+  /** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
   serviceProductFulfillmentDetail: ServiceProductFulfillmentDetail;
 };
 

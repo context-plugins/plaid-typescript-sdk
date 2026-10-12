@@ -5,12 +5,36 @@ import {
   type InvestmentsTransactionsGetRequestOptions,
 } from "./investments-transactions-get-request-options.js";
 
+/**
+ * ProcessorInvestmentsTransactionsGetRequest defines the request schema for
+ * `/processor/investments/transactions/get`
+ */
 export type ProcessorInvestmentsTransactionsGetRequest = {
+  /**
+   * Your Plaid API `client_id`. The `client_id` is required and may be provided either in the
+   * `PLAID-CLIENT-ID` header or as part of a request body.
+   */
   clientId?: string;
+  /**
+   * An optional object to filter `/investments/transactions/get` results. If provided, must be
+   * non-`null`.
+   */
   options?: InvestmentsTransactionsGetRequestOptions;
+  /**
+   * The processor token obtained from the Plaid integration partner. Processor tokens are in the
+   * format: `processor-<environment>-<identifier>`
+   */
   processorToken: string;
+  /**
+   * Your Plaid API `secret`. The `secret` is required and may be provided either in the
+   * `PLAID-SECRET` header or as part of a request body.
+   */
   secret?: string;
+  /**
+   * The earliest date for which data should be returned. Dates should be formatted as YYYY-MM-DD.
+   */
   startDate: string;
+  /** The latest date for which data should be returned. Dates should be formatted as YYYY-MM-DD. */
   endDate: string;
 };
 

@@ -5,8 +5,20 @@ import {
   type LinkDeliveryDeliveryMethod,
 } from "./link-delivery-delivery-method.js";
 
+/** The communication method containing both the type and address to send the URL. */
 export type LinkDeliveryCommunicationMethod = {
+  /**
+   * The delivery method to be used to deliver the Hosted Link session URL.
+   *
+   * `SMS`: The URL will be delivered through SMS
+   *
+   * `EMAIL`: The URL will be delivered through email
+   */
   method?: LinkDeliveryDeliveryMethod;
+  /**
+   * The phone number / email address that Hosted Link sessions are delivered to. Phone numbers must
+   * be in E.164 format.
+   */
   address?: string;
 };
 

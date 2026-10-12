@@ -1,9 +1,13 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/** Details regarding return rates. */
 export type TransferMetricsGetReturnRatesOverInterval = {
+  /** The overall return rate. */
   overallReturnRate?: string;
+  /** The unauthorized return rate. */
   unauthorizedReturnRate?: string;
+  /** The administrative return rate. */
   administrativeReturnRate?: string;
 };
 

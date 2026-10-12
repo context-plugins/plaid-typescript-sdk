@@ -9,10 +9,24 @@ import {
   type LinkTokenCreateRequestCraOptionsBaseReportGseOptions,
 } from "./link-token-create-request-cra-options-base-report-gse-options.js";
 
+/**
+ * Specifies options for initializing Link for use with the Base Report product, specifically the
+ * `client_report_id`.
+ */
 export type LinkTokenCreateRequestCraOptionsBaseReport = {
+  /** Client-generated identifier, which can be used by lenders to track loan applications. */
   clientReportId?: string | null;
+  /**
+   * Specifies options for initializing Link to create reports that can be shared with GSEs for
+   * mortgage verification.
+   */
   gseOptions?: LinkTokenCreateRequestCraOptionsBaseReportGseOptions | null;
+  /**
+   * Indicates that the report must include identity information. If identity information is not
+   * available, the report will fail.
+   */
   requireIdentity?: boolean | null;
+  /** Options for configuring Home Lending Report (Verification Report) generation. */
   homeLendingReportOptions?: CraCheckReportHomeLendingReportOptions | null;
 };
 

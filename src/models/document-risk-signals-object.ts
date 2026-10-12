@@ -6,9 +6,16 @@ import {
   type SingleDocumentRiskSignal,
 } from "./single-document-risk-signal.js";
 
+/** Object containing fraud risk data for a set of income documents. */
 export type DocumentRiskSignalsObject = {
+  /** ID of the payroll provider account. */
   accountId: string | null;
+  /** Array of document metadata and associated risk signals per document */
   singleDocumentRiskSignals: SingleDocumentRiskSignal[];
+  /**
+   * Array of risk signals computed from a set of uploaded documents and the associated documents'
+   * metadata
+   */
   multiDocumentRiskSignals: MultiDocumentRiskSignal[];
 };
 

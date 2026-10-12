@@ -14,13 +14,23 @@ import {
   type PaystubOverridePayPeriodDetails,
 } from "./paystub-override-pay-period-details.js";
 
+/** An object representing data from a paystub. */
 export type PaystubOverride = {
+  /** The employer on the paystub. */
   employer?: PaystubOverrideEmployer;
+  /** The employee on the paystub. */
   employee?: PaystubOverrideEmployee;
+  /**
+   * @deprecated
+   */
   incomeBreakdown?: IncomeBreakdown[];
+  /** An object representing information about the net pay amount on the paystub. */
   netPay?: PaystubOverrideNetPay;
+  /** An object with the deduction information found on a paystub. */
   deductions?: PaystubOverrideDeductions;
+  /** An object representing both a breakdown of earnings on a paystub and the total earnings. */
   earnings?: PaystubOverrideEarnings;
+  /** Details about the pay period. */
   payPeriodDetails?: PaystubOverridePayPeriodDetails;
 };
 

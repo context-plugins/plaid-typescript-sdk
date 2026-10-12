@@ -1,6 +1,10 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * The frequency at which the employee is paid. Possible values: `MONTHLY`, `BI-WEEKLY`, `WEEKLY`,
+ * `SEMI-MONTHLY`.
+ */
 export const PaystubPayFrequency = {
   Monthly: "MONTHLY",
   BiWeekly: "BI-WEEKLY",

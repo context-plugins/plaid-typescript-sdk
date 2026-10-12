@@ -1,6 +1,10 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * Information about the comparison between the selfie and the document (if documentary verification
+ * also ran).
+ */
 export const SelfieAnalysisDocumentComparison = {
   Match: "match",
   NoMatch: "no_match",

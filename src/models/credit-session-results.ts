@@ -21,11 +21,17 @@ import {
   type CreditSessionPayrollIncomeResult,
 } from "./credit-session-payroll-income-result.js";
 
+/** The set of results for a Link session. */
 export type CreditSessionResults = {
+  /** The set of Item adds for the Link session. */
   itemAddResults?: CreditSessionItemAddResult[];
+  /** The set of bank income verifications for the Link session. */
   bankIncomeResults?: CreditSessionBankIncomeResult[];
+  /** The set of bank employment verifications for the Link session. */
   bankEmploymentResults?: CreditSessionBankEmploymentResult[];
+  /** The set of payroll income verifications for the Link session. */
   payrollIncomeResults?: CreditSessionPayrollIncomeResult[];
+  /** The details of a document income verification in Link */
   documentIncomeResults?: CreditSessionDocumentIncomeResult | null;
 };
 

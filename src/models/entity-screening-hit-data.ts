@@ -25,12 +25,19 @@ import {
   type GenericScreeningHitLocationItems,
 } from "./generic-screening-hit-location-items.js";
 
+/** Information associated with the entity watchlist hit */
 export type EntityScreeningHitData = {
+  /** Documents associated with the watchlist hit */
   documents?: EntityScreeningHitDocumentsItems[];
+  /** Email addresses associated with the watchlist hit */
   emailAddresses?: EntityScreeningHitEmailsItems[];
+  /** Locations associated with the watchlist hit */
   locations?: GenericScreeningHitLocationItems[];
+  /** Names associated with the watchlist hit */
   names?: EntityScreeningHitNamesItems[];
+  /** Phone numbers associated with the watchlist hit */
   phoneNumbers?: EntityScreeningHitsPhoneNumberItems[];
+  /** URLs associated with the watchlist hit */
   urls?: EntityScreeningHitUrlsItems[];
 };
 

@@ -14,10 +14,15 @@ import {
 } from "./screening-hit-documents-items.js";
 import { screeningHitNamesItemsSchema, type ScreeningHitNamesItems } from "./screening-hit-names-items.js";
 
+/** Information associated with the watchlist hit */
 export type ScreeningHitData = {
+  /** Dates of birth associated with the watchlist hit */
   datesOfBirth?: ScreeningHitDateOfBirthItem[];
+  /** Documents associated with the watchlist hit */
   documents?: ScreeningHitDocumentsItems[];
+  /** Locations associated with the watchlist hit */
   locations?: GenericScreeningHitLocationItems[];
+  /** Names associated with the watchlist hit */
   names?: ScreeningHitNamesItems[];
 };
 

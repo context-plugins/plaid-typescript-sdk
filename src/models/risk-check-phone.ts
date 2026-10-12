@@ -3,9 +3,19 @@ import type { Schema } from "../core/validation/schema.js";
 import { riskCheckLinkedServiceSchema, type RiskCheckLinkedService } from "./risk-check-linked-service.js";
 import { riskLevelSchema, type RiskLevel } from "./risk-level.js";
 
+/** Result summary object specifying values for `phone` attributes of risk check. */
 export type RiskCheckPhone = {
+  /**
+   * A list of online services where this phone number has been detected to have accounts or other
+   * activity.
+   */
   linkedServices: RiskCheckLinkedService[];
+  /** Risk level for the given risk check type. */
   riskLevel?: RiskLevel;
+  /**
+   * List of factors, when available, that contribute towards the risk level of the given risk check
+   * type.
+   */
   factors?: string[];
 };
 

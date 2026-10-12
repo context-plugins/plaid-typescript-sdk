@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Payment consent periodic interval. */
 export const PaymentConsentPeriodicInterval = {
   Day: "DAY",
   Week: "WEEK",

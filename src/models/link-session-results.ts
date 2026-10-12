@@ -29,13 +29,25 @@ import {
   type LinkSessionPayrollIncomeResult,
 } from "./link-session-payroll-income-result.js";
 
+/** The set of results for a Link session. */
 export type LinkSessionResults = {
+  /**
+   * The set of Item adds for the Link session. If you are not receiving this field and are instead
+   * receiving the deprecated `on_success` field, contact your account manager to update your
+   * integration.
+   */
   itemAddResults: LinkSessionItemAddResult[];
+  /** The set of Plaid Check Item adds for the Link session. */
   craItemAddResults: LinkSessionCraItemAddResult[];
+  /** The set of Plaid Check Item updates for the Link session. */
   craUpdateResults: LinkSessionCraUpdateResult[];
+  /** The set of bank income verifications for the Link session. */
   bankIncomeResults: LinkSessionBankIncomeResult[];
+  /** The set of payroll income verifications for the Link session. */
   payrollIncomeResults: LinkSessionPayrollIncomeResult[];
+  /** The details of a document income verification in Link */
   documentIncomeResults: CreditSessionDocumentIncomeResult | null;
+  /** The details of a document upload CRA session in Link */
   craDocumentUploadResults?: LinkSessionCraDocumentUploadResult | null;
 };
 

@@ -13,12 +13,19 @@ import {
   type UserStatedIncomeSourcePayType,
 } from "./user-stated-income-source-pay-type.js";
 
+/** Specifies user stated income sources for the Income product */
 export type LinkTokenCreateRequestUserStatedIncomeSource = {
+  /** The employer corresponding to an income source specified by the user */
   employer?: string;
+  /** The income category for a specified income source */
   category?: UserStatedIncomeSourceCategory;
+  /** The income amount paid per cycle for a specified income source */
   payPerCycle?: number;
+  /** The income amount paid annually for a specified income source */
   payAnnual?: number;
+  /** The pay type - `GROSS`, `NET`, or `UNKNOWN` for a specified income source */
   payType?: UserStatedIncomeSourcePayType;
+  /** The pay frequency of a specified income source */
   payFrequency?: UserStatedIncomeSourceFrequency;
 };
 
@@ -26,8 +33,8 @@ export const linkTokenCreateRequestUserStatedIncomeSourceSchema: Schema<LinkToke
   s.object<LinkTokenCreateRequestUserStatedIncomeSource>({
     employer: s.optional(s.string()),
     category: s.optional(s.lazy(() => userStatedIncomeSourceCategorySchema)),
-    payPerCycle: s.optional(s.number()),
-    payAnnual: s.optional(s.number()),
+    payPerCycle: s.optional(s.float64()),
+    payAnnual: s.optional(s.float64()),
     payType: s.optional(s.lazy(() => userStatedIncomeSourcePayTypeSchema)),
     payFrequency: s.optional(s.lazy(() => userStatedIncomeSourceFrequencySchema)),
     _keysMap: {

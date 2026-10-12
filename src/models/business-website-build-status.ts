@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Build status of the business website. */
 export const BusinessWebsiteBuildStatus = {
   ComingSoon: "coming_soon",
   Active: "active",

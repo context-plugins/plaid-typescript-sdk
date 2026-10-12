@@ -9,30 +9,95 @@ import { totalOutflowAmount30DSchema, type TotalOutflowAmount30D } from "./total
 import { totalOutflowAmount60DSchema, type TotalOutflowAmount60D } from "./total-outflow-amount60-d.js";
 import { totalOutflowAmount90DSchema, type TotalOutflowAmount90D } from "./total-outflow-amount90-d.js";
 
+/** Calculated attributes derived from transaction-level data. */
 export type BaseReportAttributes = {
+  /**
+   * Prediction indicator of whether the account is a primary account. Only one account per account
+   * type across the items connected will have a value of true.
+   */
   isPrimaryAccount?: boolean | null;
+  /**
+   * Value ranging from 0-1. The higher the score, the more confident we are of the account being
+   * the primary account.
+   */
   primaryAccountScore?: number | null;
+  /**
+   * The number of net NSF fee transactions for a given account within the report time range (not
+   * counting any fees that were reversed within the time range).
+   */
   nsfOverdraftTransactionsCount?: number;
+  /**
+   * The number of net NSF fee transactions within the last 30 days for a given account (not
+   * counting any fees that were reversed within the time range).
+   */
   nsfOverdraftTransactionsCount30D?: number;
+  /**
+   * The number of net NSF fee transactions within the last 60 days for a given account (not
+   * counting any fees that were reversed within the time range).
+   */
   nsfOverdraftTransactionsCount60D?: number;
+  /**
+   * The number of net NSF fee transactions within the last 90 days for a given account (not
+   * counting any fees that were reversed within the time range).
+   */
   nsfOverdraftTransactionsCount90D?: number;
+  /**
+   * Total amount of debit transactions into the account in the time period of the report. This
+   * field will be empty for non-depository accounts. This field only takes into account USD
+   * transactions from the account.
+   */
   totalInflowAmount?: TotalInflowAmount | null;
+  /**
+   * Total amount of debit transactions into the account in the last 30 days. This field will be
+   * empty for non-depository accounts. This field only takes into account USD transactions from the
+   * account.
+   */
   totalInflowAmount30D?: TotalInflowAmount30D | null;
+  /**
+   * Total amount of debit transactions into the account in the last 60 days. This field will be
+   * empty for non-depository accounts. This field only takes into account USD transactions from the
+   * account.
+   */
   totalInflowAmount60D?: TotalInflowAmount60D | null;
+  /**
+   * Total amount of debit transactions into the account in the last 90 days. This field will be
+   * empty for non-depository accounts. This field only takes into account USD transactions from the
+   * account.
+   */
   totalInflowAmount90D?: TotalInflowAmount90D | null;
+  /**
+   * Total amount of credit transactions out of the account in the time period of the report. This
+   * field will be empty for non-depository accounts. This field only takes into account USD
+   * transactions from the account.
+   */
   totalOutflowAmount?: TotalOutflowAmount | null;
+  /**
+   * Total amount of credit transactions out of the account in the last 30 days. This field will be
+   * empty for non-depository accounts. This field only takes into account USD transactions from the
+   * account.
+   */
   totalOutflowAmount30D?: TotalOutflowAmount30D | null;
+  /**
+   * Total amount of credit transactions out of the account in the last 60 days. This field will be
+   * empty for non-depository accounts. This field only takes into account USD transactions from the
+   * account.
+   */
   totalOutflowAmount60D?: TotalOutflowAmount60D | null;
+  /**
+   * Total amount of credit transactions out of the account in the last 90 days. This field will be
+   * empty for non-depository accounts. This field only takes into account USD transactions from the
+   * account.
+   */
   totalOutflowAmount90D?: TotalOutflowAmount90D | null;
 };
 
 export const baseReportAttributesSchema: Schema<BaseReportAttributes> = s.object<BaseReportAttributes>({
   isPrimaryAccount: s.optionalNullable(s.boolean()),
-  primaryAccountScore: s.optionalNullable(s.number()),
-  nsfOverdraftTransactionsCount: s.optional(s.number()),
-  nsfOverdraftTransactionsCount30D: s.optional(s.number()),
-  nsfOverdraftTransactionsCount60D: s.optional(s.number()),
-  nsfOverdraftTransactionsCount90D: s.optional(s.number()),
+  primaryAccountScore: s.optionalNullable(s.float64()),
+  nsfOverdraftTransactionsCount: s.optional(s.int()),
+  nsfOverdraftTransactionsCount30D: s.optional(s.int()),
+  nsfOverdraftTransactionsCount60D: s.optional(s.int()),
+  nsfOverdraftTransactionsCount90D: s.optional(s.int()),
   totalInflowAmount: s.optionalNullable(s.lazy(() => totalInflowAmountSchema)),
   totalInflowAmount30D: s.optionalNullable(s.lazy(() => totalInflowAmount30DSchema)),
   totalInflowAmount60D: s.optionalNullable(s.lazy(() => totalInflowAmount60DSchema)),

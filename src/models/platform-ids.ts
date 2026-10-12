@@ -1,9 +1,13 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/** An object containing a set of ids related to an employee */
 export type PlatformIds = {
+  /** The ID of an employee as given by their employer */
   employeeId?: string | null;
+  /** The ID of an employee as given by their payroll */
   payrollId?: string | null;
+  /** The ID of the position of the employee */
   positionId?: string | null;
 };
 

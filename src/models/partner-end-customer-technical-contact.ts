@@ -1,6 +1,9 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/**
+ * The technical contact for the end customer. Defaults to partner's technical contact if omitted.
+ */
 export type PartnerEndCustomerTechnicalContact = {
   givenName?: string;
   familyName?: string;

@@ -1,7 +1,17 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/**
+ * This information is public. Users of your app will see this information when managing connections
+ * between your app and their bank accounts in Plaid Portal. Defaults to partner's customer support
+ * info if omitted. This field is mandatory for partners whose Plaid accounts were created after
+ * November 26, 2024 and will be mandatory for all partners by the 1033 compliance deadline.
+ */
 export type PartnerEndCustomerCustomerSupportInfo = {
+  /**
+   * This field is mandatory for partners whose Plaid accounts were created after November 26, 2024
+   * and will be mandatory for all partners by the 1033 compliance deadline.
+   */
   email?: string;
   phoneNumber?: string;
   contactUrl?: string;

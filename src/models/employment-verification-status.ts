@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Current employment status. */
 export const EmploymentVerificationStatus = {
   EmploymentStatusActive: "EMPLOYMENT_STATUS_ACTIVE",
   EmploymentStatusInactive: "EMPLOYMENT_STATUS_INACTIVE",

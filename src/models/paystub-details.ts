@@ -2,11 +2,20 @@ import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 import { paystubPayFrequencySchema, type PaystubPayFrequency } from "./paystub-pay-frequency.js";
 
+/** An object representing details that can be found on the paystub. */
 export type PaystubDetails = {
+  /** Beginning date of the pay period on the paystub in the 'YYYY-MM-DD' format. */
   payPeriodStartDate?: string | null;
+  /** Ending date of the pay period on the paystub in the 'YYYY-MM-DD' format. */
   payPeriodEndDate?: string | null;
+  /** Pay date on the paystub in the 'YYYY-MM-DD' format. */
   payDate?: string | null;
+  /** The name of the payroll provider that generated the paystub, e.g. ADP */
   paystubProvider?: string | null;
+  /**
+   * The frequency at which the employee is paid. Possible values: `MONTHLY`, `BI-WEEKLY`, `WEEKLY`,
+   * `SEMI-MONTHLY`.
+   */
   payFrequency?: PaystubPayFrequency | null;
 };
 

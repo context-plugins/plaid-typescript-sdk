@@ -6,8 +6,11 @@ import {
   type WatchlistScreeningHitLocations,
 } from "./watchlist-screening-hit-locations.js";
 
+/** Analyzed location information for the associated hit */
 export type GenericScreeningHitLocationItems = {
+  /** Summary object reflecting the match result of the associated data */
   analysis?: MatchSummary;
+  /** Location information for the associated watchlist hit */
   data?: WatchlistScreeningHitLocations;
 };
 

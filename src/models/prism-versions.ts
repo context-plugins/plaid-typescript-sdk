@@ -6,11 +6,17 @@ import { prismExtendVersionSchema, type PrismExtendVersion } from "./prism-exten
 import { prismFirstDetectVersionSchema, type PrismFirstDetectVersion } from "./prism-first-detect-version.js";
 import { prismInsightsVersionSchema, type PrismInsightsVersion } from "./prism-insights-version.js";
 
+/** The versions of Prism products to evaluate */
 export type PrismVersions = {
+  /** The version of Prism FirstDetect. If not specified, will default to v3. */
   firstdetect?: PrismFirstDetectVersion | null;
+  /** The version of Prism Detect */
   detect?: PrismDetectVersion | null;
+  /** The version of Prism CashScore. If not specified, will default to v3. */
   cashscore?: PrismCashScoreVersion | null;
+  /** The version of Prism Extend */
   extend?: PrismExtendVersion | null;
+  /** The version of Prism Insights. If not specified, will default to v3. */
   insights?: PrismInsightsVersion | null;
 };
 

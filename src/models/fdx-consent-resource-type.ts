@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Type of resource permissioned on a consent grant. */
 export const FdxConsentResourceType = {
   Account: "ACCOUNT",
   Customer: "CUSTOMER",

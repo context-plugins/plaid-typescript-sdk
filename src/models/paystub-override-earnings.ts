@@ -9,8 +9,13 @@ import {
   type PaystubOverrideEarningsTotal,
 } from "./paystub-override-earnings-total.js";
 
+/** An object representing both a breakdown of earnings on a paystub and the total earnings. */
 export type PaystubOverrideEarnings = {
   breakdown?: PaystubOverrideEarningsBreakdown[];
+  /**
+   * An object representing both the current pay period and year to date amount for an earning
+   * category.
+   */
   total?: PaystubOverrideEarningsTotal;
 };
 

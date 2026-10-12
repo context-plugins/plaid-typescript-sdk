@@ -6,8 +6,14 @@ import {
 } from "./financial-institution-insights.js";
 import { merchantInsightsSchema, type MerchantInsights } from "./merchant-insights.js";
 
+/** Insights around a user's counterparties */
 export type CounterpartyInsights = {
+  /**
+   * Insights related to a user's transactions with other financial institutions, including detected
+   * account types.
+   */
   financialInstitutionInsights?: FinancialInstitutionInsights[];
+  /** Insights about a user's top merchants, ranked by spend. */
   merchantInsights?: MerchantInsights[];
 };
 

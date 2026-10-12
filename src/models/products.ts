@@ -1,6 +1,11 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * A list of products that an institution can support. All Items must be initialized with at least
+ * one product. The Balance product is always available and does not need to be specified during
+ * initialization.
+ */
 export const Products = {
   Assets: "assets",
   Auth: "auth",

@@ -1,6 +1,10 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * A data scope for the products that a user can consent to in [Data Transparency
+ * Messaging](https://plaid.com/docs/link/data-transparency-messaging-migration-guide)
+ */
 export const ConsentedDataScope = {
   AccountBalanceInfo: "account_balance_info",
   ContactInfo: "contact_info",

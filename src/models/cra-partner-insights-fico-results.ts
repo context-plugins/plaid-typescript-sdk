@@ -9,9 +9,18 @@ import {
   type CraPartnerInsightsUltraFicoScoreResult,
 } from "./cra-partner-insights-ultra-fico-score-result.js";
 
+/** The calculated UltraFICO® scores returned as part of the Partner Insights report. */
 export type CraPartnerInsightsFicoResults = {
+  /**
+   * Client-generated identifier that uniquely identifies the FICO Application across FICO systems.
+   */
   lenderApplicationId: string;
+  /** UltraFICO® scoring results, one per provided UltraFICO scoring request. */
   ultraficoScoreResults: CraPartnerInsightsUltraFicoScoreResult[];
+  /**
+   * Report characteristics returned by FICO describing the banking data used to generate the
+   * UltraFICO® score.
+   */
   reportCharacteristics?: CraPartnerInsightsFicoReportCharacteristics | null;
 };
 

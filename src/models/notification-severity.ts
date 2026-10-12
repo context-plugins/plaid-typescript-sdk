@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Severity level of notification */
 export const NotificationSeverity = {
   Emergency: "EMERGENCY",
   Alert: "ALERT",

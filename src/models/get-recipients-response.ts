@@ -5,6 +5,7 @@ import {
   type ExtendedRecipientMetadata,
 } from "./extended-recipient-metadata.js";
 
+/** GetRecipientsResponse defines the response schema for `/fdx/recipients` */
 export type GetRecipientsResponse = {
   recipients: ExtendedRecipientMetadata[];
 };

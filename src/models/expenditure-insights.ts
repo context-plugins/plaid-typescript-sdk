@@ -10,13 +10,42 @@ import {
   type OutlierTransactionsInsights,
 } from "./outlier-transactions-insights.js";
 
+/**
+ * Comprehensive analysis of spending patterns, categorizing expenses into essential, non-essential,
+ * and other categories.
+ */
 export type ExpenditureInsights = {
+  /** Net cash flow for the period (inflows minus outflows), including a monthly average. */
   cashFlow?: AmountWithCurrencyWithMonthlyAverage | null;
+  /**
+   * Summary statistics for a specific expenditure category, including total amount, monthly
+   * average, and percentage of income.
+   */
   totalExpenditure?: ExpenditureSummary | null;
+  /**
+   * Summary statistics for a specific expenditure category, including total amount, monthly
+   * average, and percentage of income.
+   */
   essentialExpenditure?: ExpenditureSummary | null;
+  /**
+   * Summary statistics for a specific expenditure category, including total amount, monthly
+   * average, and percentage of income.
+   */
   nonEssentialExpenditure?: ExpenditureSummary | null;
+  /**
+   * Summary statistics for a specific expenditure category, including total amount, monthly
+   * average, and percentage of income.
+   */
   other?: ExpenditureSummary | null;
+  /**
+   * Summary statistics for a specific expenditure category, including total amount, monthly
+   * average, and percentage of income.
+   */
   transfersOut?: ExpenditureSummary | null;
+  /**
+   * Insights into unusually large transactions that exceed typical spending patterns for the
+   * account.
+   */
   outlierTransactions?: OutlierTransactionsInsights | null;
 };
 

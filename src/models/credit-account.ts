@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** A credit card type account. */
 export const CreditAccount = {
   CreditCard: "credit card",
   Paypal: "paypal",

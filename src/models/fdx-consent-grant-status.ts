@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Current status of a consent grant. One of `ACTIVE`, `REVOKED`, `EXPIRED`. */
 export const FdxConsentGrantStatus = {
   Active: "ACTIVE",
   Revoked: "REVOKED",

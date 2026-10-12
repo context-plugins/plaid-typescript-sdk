@@ -1,6 +1,21 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * Payment scheme. If not specified - the default in the region will be used (e.g.
+ * `SEPA_CREDIT_TRANSFER` for EU). In responses, if the scheme is not explicitly specified in the
+ * request, this value will be `null`. Using unsupported values will result in a failed payment.
+ *
+ * `LOCAL_DEFAULT`: The default payment scheme for the selected market and currency will be used.
+ *
+ * `LOCAL_INSTANT`: The instant payment scheme for the selected market and currency will be used (if
+ * applicable). Fees may be applied by the institution.
+ *
+ * `SEPA_CREDIT_TRANSFER`: The standard payment to a beneficiary within the SEPA area.
+ *
+ * `SEPA_CREDIT_TRANSFER_INSTANT`: Instant payment within the SEPA area. May involve additional fees
+ * and may not be available at some banks.
+ */
 export const PaymentScheme = {
   LocalDefault: "LOCAL_DEFAULT",
   LocalInstant: "LOCAL_INSTANT",

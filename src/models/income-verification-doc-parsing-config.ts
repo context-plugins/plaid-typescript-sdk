@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Analysis options to enable for document parsing */
 export const IncomeVerificationDocParsingConfig = {
   Ocr: "ocr",
   RiskSignals: "risk_signals",

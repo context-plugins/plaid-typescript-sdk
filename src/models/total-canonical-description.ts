@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Commonly used term to describe the line item. */
 export const TotalCanonicalDescription = {
   Bonus: "BONUS",
   Commission: "COMMISSION",

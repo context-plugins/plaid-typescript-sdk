@@ -10,12 +10,19 @@ import {
 } from "./credit-freddie-mac-asset-transactions.js";
 import { validationSourcesSchema, type ValidationSources } from "./validation-sources.js";
 
+/** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
 export type CreditFreddieMacAsset = {
+  /** Details about an asset. */
   assetDetail: AssetDetail;
+  /** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
   assetOwners: AssetOwners;
+  /** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
   assetHolder: AssetHolder;
+  /** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
   assetHoldings?: AssetHoldings;
+  /** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
   assetTransactions: CreditFreddieMacAssetTransactions;
+  /** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
   validationSources: ValidationSources;
 };
 

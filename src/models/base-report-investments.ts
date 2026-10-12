@@ -13,9 +13,16 @@ import {
   type BaseReportInvestmentTransaction,
 } from "./base-report-investment-transaction.js";
 
+/** A set of fields describing the investments data on an account. */
 export type BaseReportInvestments = {
+  /**
+   * Quantities and values of securities held in the investment account. Map to the `securities`
+   * array for security details.
+   */
   holdings: BaseReportInvestmentHolding[];
+  /** Details of specific securities held in the investment account. */
   securities: BaseReportInvestmentSecurity[];
+  /** Transaction history on the investment account. */
   investmentTransactions: BaseReportInvestmentTransaction[];
 };
 

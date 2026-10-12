@@ -1,6 +1,26 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * The source that identified or reported the incident.
+ *
+ * `INTERNAL_REVIEW` - Incident was identified through internal fraud investigations or review
+ * processes.
+ *
+ * `USER_SELF_REPORTED` - Incident was reported directly by the affected user.
+ *
+ * `BANK_FEEDBACK` - Incident was identified through bank feedback, including ACH returns and
+ * connection revocations.
+ *
+ * `NETWORK_FEEDBACK` - Incident was identified through card network alerts or chargebacks.
+ *
+ * `AUTOMATED_SYSTEM` - Incident was detected by automated systems such as fraud models or rule
+ * engines.
+ *
+ * `THIRD_PARTY_ALERT` - Incident was identified through external vendor or consortium alerts.
+ *
+ * `OTHER` - Incident was identified through a source not covered by other categories.
+ */
 export const ProtectReportSource = {
   InternalReview: "INTERNAL_REVIEW",
   UserSelfReported: "USER_SELF_REPORTED",

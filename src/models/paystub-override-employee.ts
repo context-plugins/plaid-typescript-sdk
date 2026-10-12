@@ -9,10 +9,15 @@ import {
   type PaystubOverrideTaxpayerId,
 } from "./paystub-override-taxpayer-id.js";
 
+/** The employee on the paystub. */
 export type PaystubOverrideEmployee = {
+  /** The name of the employee. */
   name?: string;
+  /** The address of the employee. */
   address?: PaystubOverrideEmployeeAddress;
+  /** Marital status of the employee - either `single` or `married`. */
   maritalStatus?: string | null;
+  /** Taxpayer ID of the individual receiving the paystub. */
   taxpayerId?: PaystubOverrideTaxpayerId;
 };
 

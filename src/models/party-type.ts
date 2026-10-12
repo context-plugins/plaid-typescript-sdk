@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Identifies the type of a party */
 export const PartyType = {
   DataAccessPlatform: "DATA_ACCESS_PLATFORM",
   DataProvider: "DATA_PROVIDER",

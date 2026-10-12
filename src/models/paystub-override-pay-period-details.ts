@@ -9,23 +9,45 @@ import {
   type PaystubOverrideDistributionBreakdown,
 } from "./paystub-override-distribution-breakdown.js";
 
+/** Details about the pay period. */
 export type PaystubOverridePayPeriodDetails = {
+  /** The amount of the paycheck. */
   checkAmount?: number | null;
   distributionBreakdown?: PaystubOverrideDistributionBreakdown[];
+  /**
+   * The pay period end date, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format:
+   * "yyyy-mm-dd".
+   */
   endDate?: string | null;
+  /** Total earnings before tax/deductions. */
   grossEarnings?: number | null;
+  /**
+   * The date on which the paystub was issued, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+   * format ("yyyy-mm-dd").
+   */
   payDate?: string | null;
+  /** The frequency at which an individual is paid. */
   payFrequency?: PayPeriodDetailsPayFrequency | null;
+  /**
+   * The date on which the paystub was issued, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+   * format ("yyyy-mm-dd").
+   *
+   * @deprecated
+   */
   payDay?: string | null;
+  /**
+   * The pay period start date, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format:
+   * "yyyy-mm-dd".
+   */
   startDate?: string | null;
 };
 
 export const paystubOverridePayPeriodDetailsSchema: Schema<PaystubOverridePayPeriodDetails> =
   s.object<PaystubOverridePayPeriodDetails>({
-    checkAmount: s.optionalNullable(s.number()),
+    checkAmount: s.optionalNullable(s.float64()),
     distributionBreakdown: s.optional(s.array(s.lazy(() => paystubOverrideDistributionBreakdownSchema))),
     endDate: s.optionalNullable(s.dateOnly()),
-    grossEarnings: s.optionalNullable(s.number()),
+    grossEarnings: s.optionalNullable(s.float64()),
     payDate: s.optionalNullable(s.dateOnly()),
     payFrequency: s.optionalNullable(s.lazy(() => payPeriodDetailsPayFrequencySchema)),
     payDay: s.optionalNullable(s.dateOnly()),

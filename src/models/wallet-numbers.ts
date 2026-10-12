@@ -6,8 +6,14 @@ import {
 } from "./numbers-international-iban.js";
 import { recipientBacsSchema, type RecipientBacs } from "./recipient-bacs.js";
 
+/** An object representing the e-wallet account numbers */
 export type WalletNumbers = {
+  /**
+   * An object containing a Bacs account number and sort code. If an IBAN is not provided or if you
+   * need to accept domestic GBP-denominated payments, Bacs data is required.
+   */
   bacs?: RecipientBacs | null;
+  /** Account numbers using the International Bank Account Number and BIC/SWIFT code format. */
   international?: NumbersInternationalIban | null;
 };
 

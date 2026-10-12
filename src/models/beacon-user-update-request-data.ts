@@ -11,13 +11,31 @@ import {
   type BeaconUserRequestDepositoryAccount,
 } from "./beacon-user-request-depository-account.js";
 
+/**
+ * A subset of a Beacon User's data which is used to patch the existing identity data associated
+ * with a Beacon User. At least one field must be provided. If left unset or null, user data will
+ * not be patched.
+ */
 export type BeaconUserUpdateRequestData = {
+  /** A date in the format YYYY-MM-DD (RFC 3339 Section 5.6). */
   dateOfBirth?: string;
+  /** The full name for a given Beacon User. */
   name?: BeaconUserNameNullable | null;
+  /**
+   * Home address for the associated user. For more context on this field, see [Input Validation by
+   * Country](https://plaid.com/docs/identity-verification/hybrid-input-validation/#input-validation-by-country).
+   */
   address?: BeaconUserRequestAddressNullable | null;
+  /**
+   * A valid email address. Must not have leading or trailing spaces and address must be RFC
+   * compliant. For more information, see [RFC 3696](https://datatracker.ietf.org/doc/html/rfc3696).
+   */
   emailAddress?: string;
+  /** A phone number in E.164 format. */
   phoneNumber?: string | null;
+  /** The ID number associated with a Beacon User. */
   idNumber?: BeaconUserIdNumber | null;
+  /** An IPv4 or IPv6 address. */
   ipAddress?: string | null;
   depositoryAccounts?: BeaconUserRequestDepositoryAccount[];
 };

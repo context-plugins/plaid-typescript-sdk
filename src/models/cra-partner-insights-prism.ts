@@ -6,12 +6,19 @@ import { prismExtendSchema, type PrismExtend } from "./prism-extend.js";
 import { prismFirstDetectSchema, type PrismFirstDetect } from "./prism-first-detect.js";
 import { prismInsightsSchema, type PrismInsights } from "./prism-insights.js";
 
+/** The Prism Data insights for the user. */
 export type CraPartnerInsightsPrism = {
+  /** The data from the Insights product returned by Prism Data. */
   insights?: PrismInsights | null;
+  /** The data from the CashScore® product returned by Prism Data. */
   cashScore?: PrismCashScore | null;
+  /** The data from the CashScore® Extend product returned by Prism Data. */
   extend?: PrismExtend | null;
+  /** The data from the FirstDetect product returned by Prism Data. */
   firstDetect?: PrismFirstDetect | null;
+  /** The data from the CashScore® Detect product returned by Prism Data. */
   detect?: PrismDetect | null;
+  /** Details on whether the Prism Data attributes succeeded or failed to be generated. */
   status: string;
 };
 

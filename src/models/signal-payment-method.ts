@@ -1,6 +1,18 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * The payment method to complete the transaction after the risk assessment. It may be different
+ * from the default payment method.
+ *
+ * `SAME_DAY_ACH`: Same Day ACH by Nacha. The debit transaction is processed and settled on the same
+ * day.
+ *
+ * `STANDARD_ACH`: Standard ACH by Nacha.
+ *
+ * `MULTIPLE_PAYMENT_METHODS`: if there is no default debit rail or there are multiple payment
+ * methods.
+ */
 export const SignalPaymentMethod = {
   SameDayAch: "SAME_DAY_ACH",
   NextDayAch: "NEXT_DAY_ACH",

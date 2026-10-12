@@ -7,9 +7,17 @@ import {
 import { rolesSchema, type Roles } from "./roles.js";
 import { taxpayerIdentifiersSchema, type TaxpayerIdentifiers } from "./taxpayer-identifiers.js";
 
+/**
+ * A collection of information about a single party to a transaction. Includes direct participants
+ * like the borrower and seller as well as indirect participants such as the flood certificate
+ * provider.
+ */
 export type CreditFreddieMacParty = {
+  /** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
   individual: CreditFreddieMacPartyIndividual;
+  /** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
   roles: Roles;
+  /** The collection of `TAXPAYER_IDENTIFICATION` elements */
   taxpayerIdentifiers: TaxpayerIdentifiers;
 };
 

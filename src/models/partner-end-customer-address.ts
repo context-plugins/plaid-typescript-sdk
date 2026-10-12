@@ -1,11 +1,13 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/** The end customer's address. */
 export type PartnerEndCustomerAddress = {
   city?: string;
   street?: string;
   region?: string;
   postalCode?: string;
+  /** ISO-3166-1 alpha-2 country code standard. */
   countryCode?: string;
 };
 

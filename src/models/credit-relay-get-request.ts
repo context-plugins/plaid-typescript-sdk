@@ -1,11 +1,29 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
+import { reportTypeSchema, type ReportType } from "./report-type.js";
 
+/** CreditRelayGetRequest defines the request schema for `/credit/relay/get` */
 export type CreditRelayGetRequest = {
+  /**
+   * Your Plaid API `client_id`. The `client_id` is required and may be provided either in the
+   * `PLAID-CLIENT-ID` header or as part of a request body.
+   */
   clientId?: string;
+  /**
+   * Your Plaid API `secret`. The `secret` is required and may be provided either in the
+   * `PLAID-SECRET` header or as part of a request body.
+   */
   secret?: string;
+  /** The `relay_token` granting access to the report you would like to get. */
   relayToken: string;
-  reportType: "asset";
+  /** The report type. It can be `asset`. Income report types are not yet supported. */
+  reportType: ReportType;
+  /**
+   * `true` if you would like to retrieve the Asset Report with Insights, `false` otherwise. This
+   * field defaults to `false` if omitted.
+   *
+   * @default false
+   */
   includeInsights?: boolean;
 };
 
@@ -13,8 +31,8 @@ export const creditRelayGetRequestSchema: Schema<CreditRelayGetRequest> = s.obje
   clientId: s.optional(s.string()),
   secret: s.optional(s.string()),
   relayToken: s.string(),
-  reportType: s.literal("asset"),
-  includeInsights: s.optional(s.boolean()),
+  reportType: reportTypeSchema,
+  includeInsights: s.defaulted(s.boolean(), false),
   _keysMap: {
     clientId: "client_id",
     relayToken: "relay_token",

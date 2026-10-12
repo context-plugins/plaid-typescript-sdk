@@ -1,7 +1,12 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/** In closed beta. Object representing metadata pertaining to the document. */
 export type IdentityDocumentMetadata = {
+  /**
+   * Boolean field indicating if the uploaded document's account number matches the account number
+   * we have on file
+   */
   isAccountNumberMatch?: boolean;
   lastUpdated?: Date;
   uploadedAt?: Date;

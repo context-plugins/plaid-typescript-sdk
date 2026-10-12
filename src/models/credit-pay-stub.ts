@@ -11,14 +11,23 @@ import {
   type PayStubPayPeriodDetails,
 } from "./pay-stub-pay-period-details.js";
 
+/** An object representing an end user's pay stub. */
 export type CreditPayStub = {
+  /** An object with the deduction information found on a pay stub. */
   deductions: CreditPayStubDeductions;
+  /** An identifier of the document referenced by the document metadata. */
   documentId: string | null;
+  /** Object representing metadata pertaining to the document. */
   documentMetadata: CreditDocumentMetadata;
+  /** An object representing both a breakdown of earnings on a pay stub and the total earnings. */
   earnings: CreditPayStubEarnings;
+  /** Data about the employee. */
   employee: CreditPayStubEmployee;
+  /** Information about the employer on the pay stub. */
   employer: CreditPayStubEmployer;
+  /** An object representing information about the net pay amount on the pay stub. */
   netPay: CreditPayStubNetPay;
+  /** Details about the pay period. */
   payPeriodDetails: PayStubPayPeriodDetails;
 };
 

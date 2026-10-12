@@ -9,8 +9,14 @@ import {
   type IdentityDocumentUploadRiskSummary,
 } from "./identity-document-upload-risk-summary.js";
 
+/**
+ * Object representing fraud risk data of the uploaded document. Only provided when using Identity
+ * Document Upload with Fraud Risk enabled.
+ */
 export type IdentityDocumentUploadRiskInsights = {
+  /** Risk summary of an uploaded document. */
   riskSummary?: IdentityDocumentUploadRiskSummary;
+  /** An array of risk signals. */
   riskSignals?: IdentityDocumentUploadRiskSignal[];
 };
 

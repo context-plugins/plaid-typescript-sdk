@@ -5,27 +5,101 @@ import {
   type CraVoaReportAccountHistoricalBalance,
 } from "./cra-voa-report-account-historical-balance.js";
 
+/** VOA Report information about an account's balances. */
 export type CraVoaReportAccountBalances = {
+  /**
+   * The amount of funds available to be withdrawn from the account, as determined by the financial
+   * institution.
+   *
+   * For `credit`-type accounts, the `available` balance typically equals the `limit` less the
+   * `current` balance, less any pending outflows plus any pending inflows.
+   *
+   * For `depository`-type accounts, the `available` balance typically equals the `current` balance
+   * less any pending outflows plus any pending inflows. For `depository`-type accounts, the
+   * `available` balance does not include the overdraft limit.
+   *
+   * For `investment`-type accounts (or `brokerage`-type accounts for API versions 2018-05-22 and
+   * earlier), the `available` balance is the total cash available to withdraw as presented by the
+   * institution.
+   *
+   * Note that not all institutions calculate the `available` balance. In the event that `available`
+   * balance is unavailable, Plaid will return an `available` balance value of `null`.
+   *
+   * Available balance may be cached and is not guaranteed to be up-to-date in real-time unless the
+   * value was returned by `/accounts/balance/get`.
+   *
+   * If `current` is `null` this field is guaranteed not to be `null`.
+   */
   available: number | null;
+  /**
+   * The total amount of funds in or owed by the account.
+   *
+   * For `credit`-type accounts, a positive balance indicates the amount owed; a negative amount
+   * indicates the lender owing the account holder.
+   *
+   * For `loan`-type accounts, the current balance is the principal remaining on the loan, except in
+   * the case of student loan accounts at Sallie Mae (`ins_116944`). For Sallie Mae student loans,
+   * the account's balance includes both principal and any outstanding interest.
+   *
+   * For `investment`-type accounts (or `brokerage`-type accounts for API versions 2018-05-22 and
+   * earlier), the current balance is the total value of assets as presented by the institution.
+   *
+   * Note that balance information may be cached unless the value was returned by
+   * `/accounts/balance/get`; if the Item is enabled for Transactions, the balance will be at least
+   * as recent as the most recent Transaction update. If you require real-time balance information,
+   * use the `available` balance as provided by `/accounts/balance/get`.
+   *
+   * When returned by `/accounts/balance/get`, this field may be `null`. When this happens,
+   * `available` is guaranteed not to be `null`.
+   */
   current: number | null;
+  /**
+   * The ISO-4217 currency code of the balance. Always null if `unofficial_currency_code` is
+   * non-null.
+   */
   isoCurrencyCode: string | null;
+  /**
+   * The unofficial currency code associated with the balance. Always null if `iso_currency_code` is
+   * non-null. Unofficial currency codes are used for currencies that do not have official ISO
+   * currency codes, such as cryptocurrencies and the currencies of certain countries.
+   *
+   * See the [currency code schema](https://plaid.com/docs/api/accounts#currency-code-schema) for a
+   * full listing of supported `unofficial_currency_code`s.
+   */
   unofficialCurrencyCode: string | null;
+  /**
+   * Calculated data about the historical balances on the account.
+   *
+   * Available for `credit` and `depository` type accounts.
+   */
   historicalBalances: CraVoaReportAccountHistoricalBalance[];
+  /**
+   * The average balance in the account over the last 30 days. Calculated using the derived
+   * historical balances.
+   */
   averageBalance30Days: number | null;
+  /**
+   * The average balance in the account over the last 60 days. Calculated using the derived
+   * historical balances.
+   */
   averageBalance60Days: number | null;
+  /**
+   * The number of net NSF fee transactions in the time range for the report in the given account
+   * (not counting any fees that were reversed within the time range).
+   */
   nsfOverdraftTransactionsCount: number;
 };
 
 export const craVoaReportAccountBalancesSchema: Schema<CraVoaReportAccountBalances> =
   s.object<CraVoaReportAccountBalances>({
-    available: s.nullable(s.number()),
-    current: s.nullable(s.number()),
+    available: s.nullable(s.float64()),
+    current: s.nullable(s.float64()),
     isoCurrencyCode: s.nullable(s.string()),
     unofficialCurrencyCode: s.nullable(s.string()),
     historicalBalances: s.array(s.lazy(() => craVoaReportAccountHistoricalBalanceSchema)),
-    averageBalance30Days: s.nullable(s.number()),
-    averageBalance60Days: s.nullable(s.number()),
-    nsfOverdraftTransactionsCount: s.number(),
+    averageBalance30Days: s.nullable(s.float64()),
+    averageBalance60Days: s.nullable(s.float64()),
+    nsfOverdraftTransactionsCount: s.float64(),
     _keysMap: {
       isoCurrencyCode: "iso_currency_code",
       unofficialCurrencyCode: "unofficial_currency_code",

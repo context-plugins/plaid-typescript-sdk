@@ -3,12 +3,19 @@ import type { Schema } from "../core/validation/schema.js";
 import { creditBankIncomeAccountSchema, type CreditBankIncomeAccount } from "./credit-bank-income-account.js";
 import { creditBankIncomeSourceSchema, type CreditBankIncomeSource } from "./credit-bank-income-source.js";
 
+/** The details and metadata for an end user's Item. */
 export type CreditBankIncomeItem = {
+  /** The Item's accounts that have Bank Income data. */
   bankIncomeAccounts?: CreditBankIncomeAccount[];
+  /** The income sources for this Item. Each entry in the array is a single income source. */
   bankIncomeSources?: CreditBankIncomeSource[];
+  /** The time when this Item's data was last retrieved from the financial institution. */
   lastUpdatedTime?: Date;
+  /** The unique identifier of the institution associated with the Item. */
   institutionId?: string;
+  /** The name of the institution associated with the Item. */
   institutionName?: string;
+  /** The unique identifier for the Item. */
   itemId?: string;
 };
 

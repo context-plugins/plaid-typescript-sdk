@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Commonly used term to describe the earning line item. */
 export const EarningsBreakdownCanonicalDescription = {
   Bonus: "BONUS",
   Commission: "COMMISSION",

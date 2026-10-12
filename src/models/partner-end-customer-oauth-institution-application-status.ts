@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The registration status for the end customer's application. */
 export const PartnerEndCustomerOAuthInstitutionApplicationStatus = {
   NotStarted: "NOT_STARTED",
   Processing: "PROCESSING",

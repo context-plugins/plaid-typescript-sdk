@@ -5,10 +5,18 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/**
+ * Fired when the attempt to refresh Payroll Income data for a user via
+ * `/credit/payroll_income/refresh` failed because the user must re-connect their payroll account.
+ */
 export type IncomeVerificationRefreshReconnectNeededWebhook = {
+  /** `INCOME` */
   webhookType: string;
+  /** `INCOME_VERIFICATION_REFRESH_RECONNECT_NEEDED` */
   webhookCode: string;
+  /** The `user_id` corresponding to the user the webhook has fired for. */
   userId: string;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

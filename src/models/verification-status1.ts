@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The verification status to set the account to. */
 export const VerificationStatus1 = {
   AutomaticallyVerified: "automatically_verified",
   VerificationExpired: "verification_expired",

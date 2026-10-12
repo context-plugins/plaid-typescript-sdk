@@ -5,7 +5,9 @@ import {
   type UserAccountIdentityEditCounts,
 } from "./user-account-identity-edit-counts.js";
 
+/** Official identity document edit statistics. */
 export type UserAccountIdentityOfficialDocument = {
+  /** Edit counts over various time periods. */
   ssn?: UserAccountIdentityEditCounts;
 };
 

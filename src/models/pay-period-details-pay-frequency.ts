@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The frequency at which an individual is paid. */
 export const PayPeriodDetailsPayFrequency = {
   PayFrequencyUnknown: "PAY_FREQUENCY_UNKNOWN",
   PayFrequencyWeekly: "PAY_FREQUENCY_WEEKLY",

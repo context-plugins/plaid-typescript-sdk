@@ -1,6 +1,10 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * An enum indicating the type of a linked service. Note that `adult_sites` refers to explicit video
+ * content, and includes a number of related services.
+ */
 export const RiskCheckLinkedService = {
   Aboutme: "aboutme",
   Adobe: "adobe",

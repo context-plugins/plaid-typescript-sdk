@@ -1,7 +1,14 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/**
+ * CreditBankIncomeRefreshResponse defines the response schema for `/credit/bank_income/refresh`.
+ */
 export type CreditBankIncomeRefreshResponse = {
+  /**
+   * A unique identifier for the request, which can be used for troubleshooting. This identifier,
+   * like all Plaid identifiers, is case sensitive.
+   */
   requestId: string;
 };
 

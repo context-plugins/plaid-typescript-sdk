@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Selling an investment */
 export const SellType = {
   Distribution: "distribution",
   Exercise: "exercise",

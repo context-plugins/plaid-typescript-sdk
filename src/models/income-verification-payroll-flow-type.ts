@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Flow types to retrieve payroll income data */
 export const IncomeVerificationPayrollFlowType = {
   PayrollDigitalIncome: "payroll_digital_income",
   PayrollDocumentIncome: "payroll_document_income",

@@ -7,11 +7,17 @@ import {
 import { riskSignalDocumentTypeSchema, type RiskSignalDocumentType } from "./risk-signal-document-type.js";
 import { riskSignalFileTypeSchema, type RiskSignalFileType } from "./risk-signal-file-type.js";
 
+/** Object containing metadata for the document */
 export type RiskSignalDocumentReference = {
+  /** An identifier of the document referenced by the document metadata. */
   documentId?: string | null;
+  /** The name of the document */
   documentName?: string;
+  /** Status of a document for risk signal analysis */
   status?: RiskSignalDocumentStatus;
+  /** Type of a document for risk signal analysis */
   documentType?: RiskSignalDocumentType | null;
+  /** The file type for risk signal analysis */
   fileType?: RiskSignalFileType | null;
 };
 

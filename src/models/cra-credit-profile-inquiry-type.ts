@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The inquiry type of credit profile report. */
 export const CraCreditProfileInquiryType = {
   SoftInquiry: "SOFT_INQUIRY",
   StandardInquiry: "STANDARD_INQUIRY",

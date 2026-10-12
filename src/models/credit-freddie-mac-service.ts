@@ -6,8 +6,13 @@ import {
 } from "./credit-freddie-mac-verification-of-asset.js";
 import { statusesSchema, type Statuses } from "./statuses.js";
 
+/**
+ * A collection of details related to a fulfillment service or product in terms of request, process
+ * and result.
+ */
 export type CreditFreddieMacService = {
   verificationOfAsset: CreditFreddieMacVerificationOfAsset[];
+  /** A collection of STATUS containers. */
   statuses: Statuses;
 };
 

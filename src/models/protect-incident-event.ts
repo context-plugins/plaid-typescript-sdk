@@ -2,15 +2,42 @@ import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 import { protectIncidentAmountSchema, type ProtectIncidentAmount } from "./protect-incident-amount.js";
 
+/** Details about the incident event. */
 export type ProtectIncidentEvent = {
+  /**
+   * A globally unique identifier representing a Protect event that may be associated with this
+   * incident.
+   */
   protectEventId?: string | null;
+  /** A unique identifier for a Link session that may be associated with this incident. */
   linkSessionId?: string | null;
+  /**
+   * A unique identifier for an Identity Verification session that may be associated with this
+   * incident.
+   */
   idvSessionId?: string | null;
+  /**
+   * The unique ID used to refer to a Signal transaction evaluation that may be associated with this
+   * incident.
+   */
   signalClientTransactionId?: string | null;
+  /**
+   * A unique ID representing the incident in your system. Personally identifiable information, such
+   * as an email address or phone number, should not be used in this field.
+   */
   internalReference?: string | null;
+  /**
+   * The timestamp when the incident occurred, in ISO 8601 format (e.g., '2020-07-24T03:26:02Z').
+   */
   time?: Date | null;
+  /** The monetary amount associated with the incident. */
   amount?: ProtectIncidentAmount | null;
+  /** An access token associated with the Item related to this incident. */
   accessToken?: string | null;
+  /**
+   * An `item_id` associated with the Item related to this incident. To identify an Item when
+   * creating a report, provide `access_token`.
+   */
   itemId?: string | null;
 };
 

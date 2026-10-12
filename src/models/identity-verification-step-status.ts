@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The status of a step in the Identity Verification process. */
 export const IdentityVerificationStepStatus = {
   Success: "success",
   Active: "active",

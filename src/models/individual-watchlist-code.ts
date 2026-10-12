@@ -1,6 +1,24 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * Shorthand identifier for a specific screening list for individuals. `AU_CON`: Australia
+ * Department of Foreign Affairs and Trade Consolidated List `CA_CON`: Government of Canada
+ * Consolidated List of Sanctions `EU_CON`: European External Action Service Consolidated List
+ * `IZ_CIA`: CIA List of Chiefs of State and Cabinet Members `IZ_IPL`: Interpol Red Notices for
+ * Wanted Persons List `IZ_PEP`: Politically Exposed Persons List `IZ_UNC`: United Nations
+ * Consolidated Sanctions `IZ_WBK`: World Bank Listing of Ineligible Firms and Individuals `UK_HMC`:
+ * Foreign, Commonwealth & Development Office UK Sanctions List `US_DPL`: Bureau of Industry and
+ * Security Denied Persons List `US_DTC`: US Department of State AECA Debarred `US_FBI`: US
+ * Department of Justice FBI Wanted List `US_FSE`: US OFAC Foreign Sanctions Evaders `US_ISN`: US
+ * Department of State Nonproliferation Sanctions `US_MBS`: US Non-SDN Menu-Based Sanctions
+ * `US_PLC`: US OFAC Palestinian Legislative Council `US_SAM`: US System for Award Management
+ * Exclusion List `US_SDN`: US OFAC Specially Designated Nationals List `US_SSI`: US OFAC Sectoral
+ * Sanctions Identifications `SG_SOF`: Government of Singapore Terrorists and Terrorist Entities
+ * `TR_TWL`: Government of Turkey Terrorist Wanted List `TR_DFD`: Government of Turkey Domestic
+ * Freezing Decisions `TR_FOR`: Government of Turkey Foreign Freezing Requests `TR_WMD`: Government
+ * of Turkey Weapons of Mass Destruction `TR_CMB`: Government of Turkey Capital Markets Board
+ */
 export const IndividualWatchlistCode = {
   AuCon: "AU_CON",
   CaCon: "CA_CON",

@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Name of a cluster of data elements permissioned by a consent grant. */
 export const FdxDataCluster = {
   AccountBasic: "ACCOUNT_BASIC",
   AccountDetailed: "ACCOUNT_DETAILED",

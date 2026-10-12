@@ -20,19 +20,44 @@ Note: If you are getting real-time balance for the purpose of assessing the retu
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.accountsBalanceGet({ body });
+  const response = await client.accountsBalanceGet({
+    body: {
+      accessToken: "string",
+      secret: "string",
+      clientId: "string",
+      options: { accountIds: ["string"] },
+    },
+  });
   // TODO: Handle 'response' of type AccountsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.AccountsBalanceGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.AccountsBalanceGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.accountsBalanceGet({
+  body: { accessToken: "string", secret: "string", clientId: "string", options: { accountIds: ["string"] } },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type AccountsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -56,9 +81,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[AccountsGetResponse](src/models/accounts-get-response.ts)</code>
+**Direct**: `await client.accountsBalanceGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.AccountsBalanceGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[AccountsGetResponse](src/models/accounts-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.AccountsBalanceGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.accountsBalanceGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;AccountsGetResponse, ThePlaidApiClient.AccountsBalanceGetError&gt;</code>, with `result.value` of type <code>[AccountsGetResponse](src/models/accounts-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -89,19 +122,44 @@ For real-time balance information, use the paid endpoints `/accounts/balance/get
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.accountsGet({ body });
+  const response = await client.accountsGet({
+    body: {
+      clientId: "string",
+      secret: "string",
+      accessToken: "string",
+      options: { accountIds: ["string"] },
+    },
+  });
   // TODO: Handle 'response' of type AccountsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.AccountsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.AccountsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.accountsGet({
+  body: { clientId: "string", secret: "string", accessToken: "string", options: { accountIds: ["string"] } },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type AccountsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -125,9 +183,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[AccountsGetResponse](src/models/accounts-get-response.ts)</code>
+**Direct**: `await client.accountsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.AccountsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[AccountsGetResponse](src/models/accounts-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.AccountsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.accountsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;AccountsGetResponse, ThePlaidApiClient.AccountsGetError&gt;</code>, with `result.value` of type <code>[AccountsGetResponse](src/models/accounts-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -153,19 +219,47 @@ Allows financial institutions to retrieve information about Plaid clients for th
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.applicationGet({ body });
+  const response = await client.applicationGet({
+    body: {
+      clientId: "some example string",
+      secret: "some example string",
+      applicationId: "some example string",
+    },
+  });
   // TODO: Handle 'response' of type ApplicationGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ApplicationGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ApplicationGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.applicationGet({
+  body: {
+    clientId: "some example string",
+    secret: "some example string",
+    applicationId: "some example string",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ApplicationGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -189,9 +283,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ApplicationGetResponse](src/models/application-get-response.ts)</code>
+**Direct**: `await client.applicationGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ApplicationGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[ApplicationGetResponse](src/models/application-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ApplicationGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.applicationGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ApplicationGetResponse, ThePlaidApiClient.ApplicationGetError&gt;</code>, with `result.value` of type <code>[ApplicationGetResponse](src/models/application-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -219,19 +321,39 @@ To grant access to an Audit Copy, use the `/asset_report/audit_copy/create` endp
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.assetReportAuditCopyCreate({ body });
+  const response = await client.assetReportAuditCopyCreate({
+    body: { assetReportToken: "some example string" },
+  });
   // TODO: Handle 'response' of type AssetReportAuditCopyCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.AssetReportAuditCopyCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.AssetReportAuditCopyCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.assetReportAuditCopyCreate({
+  body: { assetReportToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type AssetReportAuditCopyCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -255,9 +377,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[AssetReportAuditCopyCreateResponse](src/models/asset-report-audit-copy-create-response.ts)</code>
+**Direct**: `await client.assetReportAuditCopyCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.AssetReportAuditCopyCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[AssetReportAuditCopyCreateResponse](src/models/asset-report-audit-copy-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.AssetReportAuditCopyCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.assetReportAuditCopyCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;AssetReportAuditCopyCreateResponse, ThePlaidApiClient.AssetReportAuditCopyCreateError&gt;</code>, with `result.value` of type <code>[AssetReportAuditCopyCreateResponse](src/models/asset-report-audit-copy-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -283,19 +413,37 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.assetReportAuditCopyGet({ body });
+  const response = await client.assetReportAuditCopyGet({ body: { auditCopyToken: "some example string" } });
   // TODO: Handle 'response' of type AssetReportGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.AssetReportAuditCopyGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.AssetReportAuditCopyGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.assetReportAuditCopyGet({
+  body: { auditCopyToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type AssetReportGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -319,9 +467,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[AssetReportGetResponse](src/models/asset-report-get-response.ts)</code>
+**Direct**: `await client.assetReportAuditCopyGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.AssetReportAuditCopyGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[AssetReportGetResponse](src/models/asset-report-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.AssetReportAuditCopyGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.assetReportAuditCopyGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;AssetReportGetResponse, ThePlaidApiClient.AssetReportAuditCopyGetError&gt;</code>, with `result.value` of type <code>[AssetReportGetResponse](src/models/asset-report-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -351,18 +507,36 @@ The response to `/asset_report/audit_copy/pdf/get` is the PDF binary data. The `
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  await client.assetReportAuditCopyPdfGet({ body });
+  await client.assetReportAuditCopyPdfGet({ body: { auditCopyToken: "some example string" } });
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.AssetReportAuditCopyPdfGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.AssetReportAuditCopyPdfGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.assetReportAuditCopyPdfGet({
+  body: { auditCopyToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: The call succeeded and resolves to no body
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -386,9 +560,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>undefined</code>
+**Direct**: `await client.assetReportAuditCopyPdfGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.AssetReportAuditCopyPdfGetError](src/client.ts)</code>
+- **OnSuccess**: <code>undefined</code>
+- **OnError**: throws <code>[ThePlaidApiClient.AssetReportAuditCopyPdfGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.assetReportAuditCopyPdfGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;undefined, ThePlaidApiClient.AssetReportAuditCopyPdfGetError&gt;</code>, with `result.value` of type <code>undefined</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -414,19 +596,39 @@ The `/asset_report/audit_copy/remove` endpoint allows you to remove an Audit Cop
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.assetReportAuditCopyRemove({ body });
+  const response = await client.assetReportAuditCopyRemove({
+    body: { auditCopyToken: "some example string" },
+  });
   // TODO: Handle 'response' of type AssetReportAuditCopyRemoveResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.AssetReportAuditCopyRemoveError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.AssetReportAuditCopyRemoveError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.assetReportAuditCopyRemove({
+  body: { auditCopyToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type AssetReportAuditCopyRemoveResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -450,9 +652,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[AssetReportAuditCopyRemoveResponse](src/models/asset-report-audit-copy-remove-response.ts)</code>
+**Direct**: `await client.assetReportAuditCopyRemove(request)`
 
-**OnError**: <code>[ThePlaidApiClient.AssetReportAuditCopyRemoveError](src/client.ts)</code>
+- **OnSuccess**: <code>[AssetReportAuditCopyRemoveResponse](src/models/asset-report-audit-copy-remove-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.AssetReportAuditCopyRemoveError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.assetReportAuditCopyRemove(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;AssetReportAuditCopyRemoveResponse, ThePlaidApiClient.AssetReportAuditCopyRemoveError&gt;</code>, with `result.value` of type <code>[AssetReportAuditCopyRemoveResponse](src/models/asset-report-audit-copy-remove-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -482,19 +692,35 @@ The `/asset_report/create` endpoint creates an Asset Report at a moment in time.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.assetReportCreate({ body });
+  const response = await client.assetReportCreate({ body: { daysRequested: 1 } });
   // TODO: Handle 'response' of type AssetReportCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.AssetReportCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.AssetReportCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.assetReportCreate({ body: { daysRequested: 1 } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type AssetReportCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -518,9 +744,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[AssetReportCreateResponse](src/models/asset-report-create-response.ts)</code>
+**Direct**: `await client.assetReportCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.AssetReportCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[AssetReportCreateResponse](src/models/asset-report-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.AssetReportCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.assetReportCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;AssetReportCreateResponse, ThePlaidApiClient.AssetReportCreateError&gt;</code>, with `result.value` of type <code>[AssetReportCreateResponse](src/models/asset-report-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -552,19 +786,39 @@ Plaid will fire a [`PRODUCT_READY`](https://plaid.com/docs/api/products/assets/#
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.assetReportFilter({ body });
+  const response = await client.assetReportFilter({
+    body: { assetReportToken: "some example string", accountIdsToExclude: ["some example string"] },
+  });
   // TODO: Handle 'response' of type AssetReportFilterResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.AssetReportFilterError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.AssetReportFilterError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.assetReportFilter({
+  body: { assetReportToken: "some example string", accountIdsToExclude: ["some example string"] },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type AssetReportFilterResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -588,9 +842,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[AssetReportFilterResponse](src/models/asset-report-filter-response.ts)</code>
+**Direct**: `await client.assetReportFilter(request)`
 
-**OnError**: <code>[ThePlaidApiClient.AssetReportFilterError](src/client.ts)</code>
+- **OnSuccess**: <code>[AssetReportFilterResponse](src/models/asset-report-filter-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.AssetReportFilterError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.assetReportFilter(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;AssetReportFilterResponse, ThePlaidApiClient.AssetReportFilterError&gt;</code>, with `result.value` of type <code>[AssetReportFilterResponse](src/models/asset-report-filter-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -620,19 +882,35 @@ For latency-sensitive applications, you can optionally call `/asset_report/creat
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.assetReportGet({ body });
+  const response = await client.assetReportGet({ body: {} });
   // TODO: Handle 'response' of type AssetReportGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.AssetReportGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.AssetReportGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.assetReportGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type AssetReportGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -656,9 +934,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[AssetReportGetResponse](src/models/asset-report-get-response.ts)</code>
+**Direct**: `await client.assetReportGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.AssetReportGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[AssetReportGetResponse](src/models/asset-report-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.AssetReportGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.assetReportGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;AssetReportGetResponse, ThePlaidApiClient.AssetReportGetError&gt;</code>, with `result.value` of type <code>[AssetReportGetResponse](src/models/asset-report-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -688,18 +974,36 @@ The response to `/asset_report/pdf/get` is the PDF binary data. The `request_id`
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  await client.assetReportPdfGet({ body });
+  await client.assetReportPdfGet({ body: { assetReportToken: "some example string" } });
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.AssetReportPdfGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.AssetReportPdfGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.assetReportPdfGet({
+  body: { assetReportToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: The call succeeded and resolves to no body
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -723,9 +1027,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>undefined</code>
+**Direct**: `await client.assetReportPdfGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.AssetReportPdfGetError](src/client.ts)</code>
+- **OnSuccess**: <code>undefined</code>
+- **OnError**: throws <code>[ThePlaidApiClient.AssetReportPdfGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.assetReportPdfGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;undefined, ThePlaidApiClient.AssetReportPdfGetError&gt;</code>, with `result.value` of type <code>undefined</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -753,19 +1065,37 @@ The new Asset Report will contain the same Items as the original Report, as well
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.assetReportRefresh({ body });
+  const response = await client.assetReportRefresh({ body: { assetReportToken: "some example string" } });
   // TODO: Handle 'response' of type AssetReportRefreshResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.AssetReportRefreshError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.AssetReportRefreshError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.assetReportRefresh({
+  body: { assetReportToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type AssetReportRefreshResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -789,9 +1119,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[AssetReportRefreshResponse](src/models/asset-report-refresh-response.ts)</code>
+**Direct**: `await client.assetReportRefresh(request)`
 
-**OnError**: <code>[ThePlaidApiClient.AssetReportRefreshError](src/client.ts)</code>
+- **OnSuccess**: <code>[AssetReportRefreshResponse](src/models/asset-report-refresh-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.AssetReportRefreshError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.assetReportRefresh(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;AssetReportRefreshResponse, ThePlaidApiClient.AssetReportRefreshError&gt;</code>, with `result.value` of type <code>[AssetReportRefreshResponse](src/models/asset-report-refresh-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -819,19 +1157,37 @@ The `/asset_report/remove` endpoint allows you to remove access to an Asset Repo
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.assetReportRemove({ body });
+  const response = await client.assetReportRemove({ body: { assetReportToken: "some example string" } });
   // TODO: Handle 'response' of type AssetReportRemoveResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.AssetReportRemoveError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.AssetReportRemoveError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.assetReportRemove({
+  body: { assetReportToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type AssetReportRemoveResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -855,9 +1211,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[AssetReportRemoveResponse](src/models/asset-report-remove-response.ts)</code>
+**Direct**: `await client.assetReportRemove(request)`
 
-**OnError**: <code>[ThePlaidApiClient.AssetReportRemoveError](src/client.ts)</code>
+- **OnSuccess**: <code>[AssetReportRemoveResponse](src/models/asset-report-remove-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.AssetReportRemoveError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.assetReportRemove(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;AssetReportRemoveResponse, ThePlaidApiClient.AssetReportRemoveError&gt;</code>, with `result.value` of type <code>[AssetReportRemoveResponse](src/models/asset-report-remove-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -885,19 +1249,35 @@ Versioning note: In API version 2017-03-08, the schema of the `numbers` object r
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.authGet({ body });
+  const response = await client.authGet({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type AuthGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.AuthGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.AuthGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.authGet({ body: { accessToken: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type AuthGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -921,9 +1301,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[AuthGetResponse](src/models/auth-get-response.ts)</code>
+**Direct**: `await client.authGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.AuthGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[AuthGetResponse](src/models/auth-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.AuthGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.authGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;AuthGetResponse, ThePlaidApiClient.AuthGetError&gt;</code>, with `result.value` of type <code>[AuthGetResponse](src/models/auth-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -951,19 +1339,39 @@ This endpoint is currently in Early Availability; contact sales or your Plaid ac
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.authVerify({ body });
+  const response = await client.authVerify({
+    body: { numbers: { ach: { account: "some example string", routing: "some example string" } } },
+  });
   // TODO: Handle 'response' of type AuthVerifyResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.AuthVerifyError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.AuthVerifyError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.authVerify({
+  body: { numbers: { ach: { account: "some example string", routing: "some example string" } } },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type AuthVerifyResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -987,9 +1395,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[AuthVerifyResponse](src/models/auth-verify-response.ts)</code>
+**Direct**: `await client.authVerify(request)`
 
-**OnError**: <code>[ThePlaidApiClient.AuthVerifyError](src/client.ts)</code>
+- **OnSuccess**: <code>[AuthVerifyResponse](src/models/auth-verify-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.AuthVerifyError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.authVerify(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;AuthVerifyResponse, ThePlaidApiClient.AuthVerifyError&gt;</code>, with `result.value` of type <code>[AuthVerifyResponse](src/models/auth-verify-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -1019,19 +1435,35 @@ Note that this endpoint can only be used with FBO accounts, when using Bank Tran
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.bankTransferBalanceGet({ body });
+  const response = await client.bankTransferBalanceGet({ body: {} });
   // TODO: Handle 'response' of type BankTransferBalanceGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.BankTransferBalanceGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.BankTransferBalanceGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.bankTransferBalanceGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BankTransferBalanceGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -1055,9 +1487,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BankTransferBalanceGetResponse](src/models/bank-transfer-balance-get-response.ts)</code>
+**Direct**: `await client.bankTransferBalanceGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.BankTransferBalanceGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[BankTransferBalanceGetResponse](src/models/bank-transfer-balance-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.BankTransferBalanceGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.bankTransferBalanceGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BankTransferBalanceGetResponse, ThePlaidApiClient.BankTransferBalanceGetError&gt;</code>, with `result.value` of type <code>[BankTransferBalanceGetResponse](src/models/bank-transfer-balance-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -1083,19 +1523,37 @@ Use the `/bank_transfer/cancel` endpoint to cancel a bank transfer.  A transfer 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.bankTransferCancel({ body });
+  const response = await client.bankTransferCancel({ body: { bankTransferId: "some example string" } });
   // TODO: Handle 'response' of type BankTransferCancelResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.BankTransferCancelError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.BankTransferCancelError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.bankTransferCancel({
+  body: { bankTransferId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BankTransferCancelResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -1119,9 +1577,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BankTransferCancelResponse](src/models/bank-transfer-cancel-response.ts)</code>
+**Direct**: `await client.bankTransferCancel(request)`
 
-**OnError**: <code>[ThePlaidApiClient.BankTransferCancelError](src/client.ts)</code>
+- **OnSuccess**: <code>[BankTransferCancelResponse](src/models/bank-transfer-cancel-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.BankTransferCancelError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.bankTransferCancel(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BankTransferCancelResponse, ThePlaidApiClient.BankTransferCancelError&gt;</code>, with `result.value` of type <code>[BankTransferCancelResponse](src/models/bank-transfer-cancel-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -1147,19 +1613,59 @@ Use the `/bank_transfer/create` endpoint to initiate a new bank transfer.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.bankTransferCreate({ body });
+  const response = await client.bankTransferCreate({
+    body: {
+      idempotencyKey: "some example string",
+      accessToken: "some example string",
+      accountId: "some example string",
+      type: BankTransferType.Debit,
+      network: BankTransferNetwork.Ach,
+      amount: "some example string",
+      isoCurrencyCode: "some example string",
+      description: "some example string",
+      user: { legalName: "some example string" },
+    },
+  });
   // TODO: Handle 'response' of type BankTransferCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.BankTransferCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.BankTransferCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.bankTransferCreate({
+  body: {
+    idempotencyKey: "some example string",
+    accessToken: "some example string",
+    accountId: "some example string",
+    type: BankTransferType.Debit,
+    network: BankTransferNetwork.Ach,
+    amount: "some example string",
+    isoCurrencyCode: "some example string",
+    description: "some example string",
+    user: { legalName: "some example string" },
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BankTransferCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -1183,9 +1689,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BankTransferCreateResponse](src/models/bank-transfer-create-response.ts)</code>
+**Direct**: `await client.bankTransferCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.BankTransferCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[BankTransferCreateResponse](src/models/bank-transfer-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.BankTransferCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.bankTransferCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BankTransferCreateResponse, ThePlaidApiClient.BankTransferCreateError&gt;</code>, with `result.value` of type <code>[BankTransferCreateResponse](src/models/bank-transfer-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -1211,19 +1725,35 @@ Use the `/bank_transfer/event/list` endpoint to get a list of Plaid-initiated AC
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.bankTransferEventList({ body });
+  const response = await client.bankTransferEventList({ body: {} });
   // TODO: Handle 'response' of type BankTransferEventListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.BankTransferEventListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.BankTransferEventListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.bankTransferEventList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BankTransferEventListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -1247,9 +1777,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BankTransferEventListResponse](src/models/bank-transfer-event-list-response.ts)</code>
+**Direct**: `await client.bankTransferEventList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.BankTransferEventListError](src/client.ts)</code>
+- **OnSuccess**: <code>[BankTransferEventListResponse](src/models/bank-transfer-event-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.BankTransferEventListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.bankTransferEventList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BankTransferEventListResponse, ThePlaidApiClient.BankTransferEventListError&gt;</code>, with `result.value` of type <code>[BankTransferEventListResponse](src/models/bank-transfer-event-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -1275,19 +1813,35 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.bankTransferEventSync({ body });
+  const response = await client.bankTransferEventSync({ body: { afterId: 1 } });
   // TODO: Handle 'response' of type BankTransferEventSyncResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.BankTransferEventSyncError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.BankTransferEventSyncError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.bankTransferEventSync({ body: { afterId: 1 } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BankTransferEventSyncResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -1311,9 +1865,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BankTransferEventSyncResponse](src/models/bank-transfer-event-sync-response.ts)</code>
+**Direct**: `await client.bankTransferEventSync(request)`
 
-**OnError**: <code>[ThePlaidApiClient.BankTransferEventSyncError](src/client.ts)</code>
+- **OnSuccess**: <code>[BankTransferEventSyncResponse](src/models/bank-transfer-event-sync-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.BankTransferEventSyncError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.bankTransferEventSync(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BankTransferEventSyncResponse, ThePlaidApiClient.BankTransferEventSyncError&gt;</code>, with `result.value` of type <code>[BankTransferEventSyncResponse](src/models/bank-transfer-event-sync-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -1339,19 +1901,37 @@ The `/bank_transfer/get` fetches information about the bank transfer correspondi
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.bankTransferGet({ body });
+  const response = await client.bankTransferGet({ body: { bankTransferId: "some example string" } });
   // TODO: Handle 'response' of type BankTransferGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.BankTransferGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.BankTransferGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.bankTransferGet({
+  body: { bankTransferId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BankTransferGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -1375,9 +1955,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BankTransferGetResponse](src/models/bank-transfer-get-response.ts)</code>
+**Direct**: `await client.bankTransferGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.BankTransferGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[BankTransferGetResponse](src/models/bank-transfer-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.BankTransferGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.bankTransferGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BankTransferGetResponse, ThePlaidApiClient.BankTransferGetError&gt;</code>, with `result.value` of type <code>[BankTransferGetResponse](src/models/bank-transfer-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -1404,19 +1992,35 @@ Use the `/bank_transfer/list` endpoint to see a list of all your bank transfers 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.bankTransferList({ body });
+  const response = await client.bankTransferList({ body: {} });
   // TODO: Handle 'response' of type BankTransferListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.BankTransferListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.BankTransferListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.bankTransferList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BankTransferListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -1440,9 +2044,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BankTransferListResponse](src/models/bank-transfer-list-response.ts)</code>
+**Direct**: `await client.bankTransferList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.BankTransferListError](src/client.ts)</code>
+- **OnSuccess**: <code>[BankTransferListResponse](src/models/bank-transfer-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.BankTransferListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.bankTransferList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BankTransferListResponse, ThePlaidApiClient.BankTransferListError&gt;</code>, with `result.value` of type <code>[BankTransferListResponse](src/models/bank-transfer-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -1468,19 +2080,47 @@ As an alternative to adding Items via Link, you can also use the `/bank_transfer
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.bankTransferMigrateAccount({ body });
+  const response = await client.bankTransferMigrateAccount({
+    body: {
+      accountNumber: "some example string",
+      routingNumber: "some example string",
+      accountType: "some example string",
+    },
+  });
   // TODO: Handle 'response' of type BankTransferMigrateAccountResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.BankTransferMigrateAccountError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.BankTransferMigrateAccountError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.bankTransferMigrateAccount({
+  body: {
+    accountNumber: "some example string",
+    routingNumber: "some example string",
+    accountType: "some example string",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BankTransferMigrateAccountResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -1504,9 +2144,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BankTransferMigrateAccountResponse](src/models/bank-transfer-migrate-account-response.ts)</code>
+**Direct**: `await client.bankTransferMigrateAccount(request)`
 
-**OnError**: <code>[ThePlaidApiClient.BankTransferMigrateAccountError](src/client.ts)</code>
+- **OnSuccess**: <code>[BankTransferMigrateAccountResponse](src/models/bank-transfer-migrate-account-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.BankTransferMigrateAccountError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.bankTransferMigrateAccount(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BankTransferMigrateAccountResponse, ThePlaidApiClient.BankTransferMigrateAccountError&gt;</code>, with `result.value` of type <code>[BankTransferMigrateAccountResponse](src/models/bank-transfer-migrate-account-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -1532,19 +2180,35 @@ The `/bank_transfer/sweep/get` endpoint fetches information about the sweep corr
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.bankTransferSweepGet({ body });
+  const response = await client.bankTransferSweepGet({ body: { sweepId: "some example string" } });
   // TODO: Handle 'response' of type BankTransferSweepGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.BankTransferSweepGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.BankTransferSweepGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.bankTransferSweepGet({ body: { sweepId: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BankTransferSweepGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -1568,9 +2232,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BankTransferSweepGetResponse](src/models/bank-transfer-sweep-get-response.ts)</code>
+**Direct**: `await client.bankTransferSweepGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.BankTransferSweepGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[BankTransferSweepGetResponse](src/models/bank-transfer-sweep-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.BankTransferSweepGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.bankTransferSweepGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BankTransferSweepGetResponse, ThePlaidApiClient.BankTransferSweepGetError&gt;</code>, with `result.value` of type <code>[BankTransferSweepGetResponse](src/models/bank-transfer-sweep-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -1596,19 +2268,35 @@ The `/bank_transfer/sweep/list` endpoint fetches information about the sweeps ma
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.bankTransferSweepList({ body });
+  const response = await client.bankTransferSweepList({ body: {} });
   // TODO: Handle 'response' of type BankTransferSweepListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.BankTransferSweepListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.BankTransferSweepListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.bankTransferSweepList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BankTransferSweepListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -1632,9 +2320,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BankTransferSweepListResponse](src/models/bank-transfer-sweep-list-response.ts)</code>
+**Direct**: `await client.bankTransferSweepList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.BankTransferSweepListError](src/client.ts)</code>
+- **OnSuccess**: <code>[BankTransferSweepListResponse](src/models/bank-transfer-sweep-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.BankTransferSweepListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.bankTransferSweepList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BankTransferSweepListResponse, ThePlaidApiClient.BankTransferSweepListError&gt;</code>, with `result.value` of type <code>[BankTransferSweepListResponse](src/models/bank-transfer-sweep-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -1660,19 +2356,35 @@ Use `/beacon/account_risk/v1/evaluate` to get risk insights for a linked account
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.beaconAccountRiskEvaluate({ body });
+  const response = await client.beaconAccountRiskEvaluate({ body: {} });
   // TODO: Handle 'response' of type BeaconAccountRiskEvaluateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.BeaconAccountRiskEvaluateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.BeaconAccountRiskEvaluateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.beaconAccountRiskEvaluate({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BeaconAccountRiskEvaluateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -1696,9 +2408,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BeaconAccountRiskEvaluateResponse](src/models/beacon-account-risk-evaluate-response.ts)</code>
+**Direct**: `await client.beaconAccountRiskEvaluate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.BeaconAccountRiskEvaluateError](src/client.ts)</code>
+- **OnSuccess**: <code>[BeaconAccountRiskEvaluateResponse](src/models/beacon-account-risk-evaluate-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.BeaconAccountRiskEvaluateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.beaconAccountRiskEvaluate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BeaconAccountRiskEvaluateResponse, ThePlaidApiClient.BeaconAccountRiskEvaluateError&gt;</code>, with `result.value` of type <code>[BeaconAccountRiskEvaluateResponse](src/models/beacon-account-risk-evaluate-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -1709,7 +2429,7 @@ try {
 </details>
 
 <details>
-<summary><code>beaconDuplicateGet(request: ThePlaidApiClient.BeaconDuplicateGetRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconDuplicateGetResponse, ResponseError&gt;</code></summary>
+<summary><code>beaconDuplicateGet(request: ThePlaidApiClient.BeaconDuplicateGetRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconDuplicateGetResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -1731,17 +2451,37 @@ The `analysis` field in the response indicates which fields matched between `bea
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.beaconDuplicateGet({ body });
+  const response = await client.beaconDuplicateGet({ body: { beaconDuplicateId: "some example string" } });
   // TODO: Handle 'response' of type BeaconDuplicateGetResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.beaconDuplicateGet({
+  body: { beaconDuplicateId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BeaconDuplicateGetResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -1765,9 +2505,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BeaconDuplicateGetResponse](src/models/beacon-duplicate-get-response.ts)</code>
+**Direct**: `await client.beaconDuplicateGet(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[BeaconDuplicateGetResponse](src/models/beacon-duplicate-get-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.beaconDuplicateGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BeaconDuplicateGetResponse, ApiError&gt;</code>, with `result.value` of type <code>[BeaconDuplicateGetResponse](src/models/beacon-duplicate-get-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -1778,7 +2526,7 @@ try {
 </details>
 
 <details>
-<summary><code>beaconReportCreate(request: ThePlaidApiClient.BeaconReportCreateRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconReportCreateResponse, ResponseError&gt;</code></summary>
+<summary><code>beaconReportCreate(request: ThePlaidApiClient.BeaconReportCreateRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconReportCreateResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -1793,17 +2541,47 @@ Create a fraud report for a given Beacon User.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.beaconReportCreate({ body });
+  const response = await client.beaconReportCreate({
+    body: {
+      beaconUserId: "some example string",
+      type: BeaconReportCreateType.FirstParty,
+      fraudDate: "2024-01-15",
+    },
+  });
   // TODO: Handle 'response' of type BeaconReportCreateResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.beaconReportCreate({
+  body: {
+    beaconUserId: "some example string",
+    type: BeaconReportCreateType.FirstParty,
+    fraudDate: "2024-01-15",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BeaconReportCreateResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -1827,9 +2605,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BeaconReportCreateResponse](src/models/beacon-report-create-response.ts)</code>
+**Direct**: `await client.beaconReportCreate(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[BeaconReportCreateResponse](src/models/beacon-report-create-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.beaconReportCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BeaconReportCreateResponse, ApiError&gt;</code>, with `result.value` of type <code>[BeaconReportCreateResponse](src/models/beacon-report-create-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -1840,7 +2626,7 @@ try {
 </details>
 
 <details>
-<summary><code>beaconReportGet(request: ThePlaidApiClient.BeaconReportGetRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconReportGetResponse, ResponseError&gt;</code></summary>
+<summary><code>beaconReportGet(request: ThePlaidApiClient.BeaconReportGetRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconReportGetResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -1855,17 +2641,37 @@ Returns a Beacon Report for a given Beacon Report ID.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.beaconReportGet({ body });
+  const response = await client.beaconReportGet({ body: { beaconReportId: "some example string" } });
   // TODO: Handle 'response' of type BeaconReportGetResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.beaconReportGet({
+  body: { beaconReportId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BeaconReportGetResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -1889,9 +2695,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BeaconReportGetResponse](src/models/beacon-report-get-response.ts)</code>
+**Direct**: `await client.beaconReportGet(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[BeaconReportGetResponse](src/models/beacon-report-get-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.beaconReportGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BeaconReportGetResponse, ApiError&gt;</code>, with `result.value` of type <code>[BeaconReportGetResponse](src/models/beacon-report-get-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -1902,7 +2716,7 @@ try {
 </details>
 
 <details>
-<summary><code>beaconReportList(request: ThePlaidApiClient.BeaconReportListRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconReportListResponse, ResponseError&gt;</code></summary>
+<summary><code>beaconReportList(request: ThePlaidApiClient.BeaconReportListRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconReportListResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -1917,17 +2731,35 @@ Use the `/beacon/report/list` endpoint to view all Beacon Reports you created fo
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.beaconReportList({ body });
+  const response = await client.beaconReportList({ body: { beaconUserId: "some example string" } });
   // TODO: Handle 'response' of type BeaconReportListResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.beaconReportList({ body: { beaconUserId: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BeaconReportListResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -1951,9 +2783,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BeaconReportListResponse](src/models/beacon-report-list-response.ts)</code>
+**Direct**: `await client.beaconReportList(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[BeaconReportListResponse](src/models/beacon-report-list-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.beaconReportList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BeaconReportListResponse, ApiError&gt;</code>, with `result.value` of type <code>[BeaconReportListResponse](src/models/beacon-report-list-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -1964,7 +2804,7 @@ try {
 </details>
 
 <details>
-<summary><code>beaconReportSyndicationGet(request: ThePlaidApiClient.BeaconReportSyndicationGetRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconReportSyndicationGetResponse, ResponseError&gt;</code></summary>
+<summary><code>beaconReportSyndicationGet(request: ThePlaidApiClient.BeaconReportSyndicationGetRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconReportSyndicationGetResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -1979,17 +2819,39 @@ Returns a Beacon Report Syndication for a given Beacon Report Syndication id.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.beaconReportSyndicationGet({ body });
+  const response = await client.beaconReportSyndicationGet({
+    body: { beaconReportSyndicationId: "some example string" },
+  });
   // TODO: Handle 'response' of type BeaconReportSyndicationGetResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.beaconReportSyndicationGet({
+  body: { beaconReportSyndicationId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BeaconReportSyndicationGetResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -2013,9 +2875,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BeaconReportSyndicationGetResponse](src/models/beacon-report-syndication-get-response.ts)</code>
+**Direct**: `await client.beaconReportSyndicationGet(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[BeaconReportSyndicationGetResponse](src/models/beacon-report-syndication-get-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.beaconReportSyndicationGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BeaconReportSyndicationGetResponse, ApiError&gt;</code>, with `result.value` of type <code>[BeaconReportSyndicationGetResponse](src/models/beacon-report-syndication-get-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -2026,7 +2896,7 @@ try {
 </details>
 
 <details>
-<summary><code>beaconReportSyndicationList(request: ThePlaidApiClient.BeaconReportSyndicationListRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconReportSyndicationListResponse, ResponseError&gt;</code></summary>
+<summary><code>beaconReportSyndicationList(request: ThePlaidApiClient.BeaconReportSyndicationListRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconReportSyndicationListResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -2041,17 +2911,39 @@ Use the `/beacon/report_syndication/list` endpoint to view all Beacon Reports th
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.beaconReportSyndicationList({ body });
+  const response = await client.beaconReportSyndicationList({
+    body: { beaconUserId: "some example string" },
+  });
   // TODO: Handle 'response' of type BeaconReportSyndicationListResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.beaconReportSyndicationList({
+  body: { beaconUserId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BeaconReportSyndicationListResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -2075,9 +2967,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BeaconReportSyndicationListResponse](src/models/beacon-report-syndication-list-response.ts)</code>
+**Direct**: `await client.beaconReportSyndicationList(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[BeaconReportSyndicationListResponse](src/models/beacon-report-syndication-list-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.beaconReportSyndicationList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BeaconReportSyndicationListResponse, ApiError&gt;</code>, with `result.value` of type <code>[BeaconReportSyndicationListResponse](src/models/beacon-report-syndication-list-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -2088,7 +2988,7 @@ try {
 </details>
 
 <details>
-<summary><code>beaconUserAccountInsightsGet(request: ThePlaidApiClient.BeaconUserAccountInsightsGetRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconUserAccountInsightsGetResponse, ResponseError&gt;</code></summary>
+<summary><code>beaconUserAccountInsightsGet(request: ThePlaidApiClient.BeaconUserAccountInsightsGetRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconUserAccountInsightsGetResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -2103,17 +3003,39 @@ Get Account Insights for all Accounts linked to this Beacon User. The insights f
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.beaconUserAccountInsightsGet({ body });
+  const response = await client.beaconUserAccountInsightsGet({
+    body: { beaconUserId: "some example string", accessToken: "some example string" },
+  });
   // TODO: Handle 'response' of type BeaconUserAccountInsightsGetResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.beaconUserAccountInsightsGet({
+  body: { beaconUserId: "some example string", accessToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BeaconUserAccountInsightsGetResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -2137,9 +3059,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BeaconUserAccountInsightsGetResponse](src/models/beacon-user-account-insights-get-response.ts)</code>
+**Direct**: `await client.beaconUserAccountInsightsGet(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[BeaconUserAccountInsightsGetResponse](src/models/beacon-user-account-insights-get-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.beaconUserAccountInsightsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BeaconUserAccountInsightsGetResponse, ApiError&gt;</code>, with `result.value` of type <code>[BeaconUserAccountInsightsGetResponse](src/models/beacon-user-account-insights-get-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -2150,7 +3080,7 @@ try {
 </details>
 
 <details>
-<summary><code>beaconUserCreate(request: ThePlaidApiClient.BeaconUserCreateRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconUserCreateResponse, ResponseError&gt;</code></summary>
+<summary><code>beaconUserCreate(request: ThePlaidApiClient.BeaconUserCreateRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconUserCreateResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -2173,17 +3103,47 @@ When you submit a new user to `/beacon/user/create`, several checks are performe
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.beaconUserCreate({ body });
+  const response = await client.beaconUserCreate({
+    body: {
+      programId: "some example string",
+      clientUserId: "some example string",
+      user: { name: { givenName: "some example string", familyName: "some example string" } },
+    },
+  });
   // TODO: Handle 'response' of type BeaconUserCreateResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.beaconUserCreate({
+  body: {
+    programId: "some example string",
+    clientUserId: "some example string",
+    user: { name: { givenName: "some example string", familyName: "some example string" } },
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BeaconUserCreateResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -2207,9 +3167,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BeaconUserCreateResponse](src/models/beacon-user-create-response.ts)</code>
+**Direct**: `await client.beaconUserCreate(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[BeaconUserCreateResponse](src/models/beacon-user-create-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.beaconUserCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BeaconUserCreateResponse, ApiError&gt;</code>, with `result.value` of type <code>[BeaconUserCreateResponse](src/models/beacon-user-create-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -2220,7 +3188,7 @@ try {
 </details>
 
 <details>
-<summary><code>beaconUserGet(request: ThePlaidApiClient.BeaconUserGetRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconUserGetResponse, ResponseError&gt;</code></summary>
+<summary><code>beaconUserGet(request: ThePlaidApiClient.BeaconUserGetRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconUserGetResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -2238,17 +3206,35 @@ The Beacon User is returned with all of their associated information and a `stat
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.beaconUserGet({ body });
+  const response = await client.beaconUserGet({ body: { beaconUserId: "some example string" } });
   // TODO: Handle 'response' of type BeaconUserGetResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.beaconUserGet({ body: { beaconUserId: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BeaconUserGetResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -2272,9 +3258,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BeaconUserGetResponse](src/models/beacon-user-get-response.ts)</code>
+**Direct**: `await client.beaconUserGet(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[BeaconUserGetResponse](src/models/beacon-user-get-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.beaconUserGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BeaconUserGetResponse, ApiError&gt;</code>, with `result.value` of type <code>[BeaconUserGetResponse](src/models/beacon-user-get-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -2285,7 +3279,7 @@ try {
 </details>
 
 <details>
-<summary><code>beaconUserHistoryList(request: ThePlaidApiClient.BeaconUserHistoryListRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconUserHistoryListResponse, ResponseError&gt;</code></summary>
+<summary><code>beaconUserHistoryList(request: ThePlaidApiClient.BeaconUserHistoryListRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconUserHistoryListResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -2300,17 +3294,37 @@ List all changes to the Beacon User in reverse-chronological order.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.beaconUserHistoryList({ body });
+  const response = await client.beaconUserHistoryList({ body: { beaconUserId: "some example string" } });
   // TODO: Handle 'response' of type BeaconUserHistoryListResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.beaconUserHistoryList({
+  body: { beaconUserId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BeaconUserHistoryListResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -2334,9 +3348,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BeaconUserHistoryListResponse](src/models/beacon-user-history-list-response.ts)</code>
+**Direct**: `await client.beaconUserHistoryList(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[BeaconUserHistoryListResponse](src/models/beacon-user-history-list-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.beaconUserHistoryList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BeaconUserHistoryListResponse, ApiError&gt;</code>, with `result.value` of type <code>[BeaconUserHistoryListResponse](src/models/beacon-user-history-list-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -2347,7 +3369,7 @@ try {
 </details>
 
 <details>
-<summary><code>beaconUserReview(request: ThePlaidApiClient.BeaconUserReviewRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconUserGetResponse, ResponseError&gt;</code></summary>
+<summary><code>beaconUserReview(request: ThePlaidApiClient.BeaconUserReviewRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconUserGetResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -2373,17 +3395,39 @@ If these conditions are not met, the request will be rejected with an error expl
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.beaconUserReview({ body });
+  const response = await client.beaconUserReview({
+    body: { beaconUserId: "some example string", status: BeaconUserStatus.Rejected },
+  });
   // TODO: Handle 'response' of type BeaconUserGetResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.beaconUserReview({
+  body: { beaconUserId: "some example string", status: BeaconUserStatus.Rejected },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BeaconUserGetResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -2407,9 +3451,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BeaconUserGetResponse](src/models/beacon-user-get-response.ts)</code>
+**Direct**: `await client.beaconUserReview(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[BeaconUserGetResponse](src/models/beacon-user-get-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.beaconUserReview(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BeaconUserGetResponse, ApiError&gt;</code>, with `result.value` of type <code>[BeaconUserGetResponse](src/models/beacon-user-get-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -2420,7 +3472,7 @@ try {
 </details>
 
 <details>
-<summary><code>beaconUserUpdate(request: ThePlaidApiClient.BeaconUserUpdateRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconUserUpdateResponse, ResponseError&gt;</code></summary>
+<summary><code>beaconUserUpdate(request: ThePlaidApiClient.BeaconUserUpdateRequestParams, options?: RequestOptions): ApiPromise&lt;BeaconUserUpdateResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -2445,17 +3497,35 @@ Plaid maintains a version history for each Beacon User, so the Beacon User's ide
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.beaconUserUpdate({ body });
+  const response = await client.beaconUserUpdate({ body: { beaconUserId: "some example string" } });
   // TODO: Handle 'response' of type BeaconUserUpdateResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.beaconUserUpdate({ body: { beaconUserId: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BeaconUserUpdateResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -2479,9 +3549,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BeaconUserUpdateResponse](src/models/beacon-user-update-response.ts)</code>
+**Direct**: `await client.beaconUserUpdate(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[BeaconUserUpdateResponse](src/models/beacon-user-update-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.beaconUserUpdate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BeaconUserUpdateResponse, ApiError&gt;</code>, with `result.value` of type <code>[BeaconUserUpdateResponse](src/models/beacon-user-update-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -2515,19 +3593,39 @@ This endpoint enables clients to assess repayment risk and make data-driven deci
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.betaEwaReportV1Get({ body });
+  const response = await client.betaEwaReportV1Get({
+    body: { accessToken: "access-sandbox-71e02f71-0960-4a27-abd2-5631e04f2175" },
+  });
   // TODO: Handle 'response' of type BetaEwaReportV1GetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.BetaEwaReportV1GetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.BetaEwaReportV1GetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.betaEwaReportV1Get({
+  body: { accessToken: "access-sandbox-71e02f71-0960-4a27-abd2-5631e04f2175" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BetaEwaReportV1GetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -2551,9 +3649,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BetaEwaReportV1GetResponse](src/models/beta-ewa-report-v1-get-response.ts)</code>
+**Direct**: `await client.betaEwaReportV1Get(request)`
 
-**OnError**: <code>[ThePlaidApiClient.BetaEwaReportV1GetError](src/client.ts)</code>
+- **OnSuccess**: <code>[BetaEwaReportV1GetResponse](src/models/beta-ewa-report-v1-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.BetaEwaReportV1GetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.betaEwaReportV1Get(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BetaEwaReportV1GetResponse, ThePlaidApiClient.BetaEwaReportV1GetError&gt;</code>, with `result.value` of type <code>[BetaEwaReportV1GetResponse](src/models/beta-ewa-report-v1-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -2579,19 +3685,89 @@ The `/beta/partner/customer/v1/create` endpoint creates a new end customer recor
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.betaPartnerCustomerV1Create({ body });
+  const response = await client.betaPartnerCustomerV1Create({
+    body: {
+      clientId: "7f57eb3d2a9j6480121fx361",
+      secret: "79g03eoofwl8240v776r2h667442119",
+      companyName: "Plaid",
+      products: [Products.Auth, Products.Identity],
+      createLinkCustomization: true,
+      legalEntityName: "Plaid",
+      website: "plaid.com",
+      applicationName: "Plaid",
+      technicalContact: { givenName: "Alice", familyName: "Smith", email: "alice.smith@example.com" },
+      billingContact: { givenName: "Bob", familyName: "Jones", email: "bob.jones@example.com" },
+      customerSupportInfo: {
+        email: "support@example.com",
+        phoneNumber: "1234567890",
+        contactUrl: "example.com/contact",
+        linkUpdateUrl: "example.com/update",
+      },
+      address: {
+        city: "New York",
+        street: "123 Main St",
+        region: "NY",
+        postalCode: "12345",
+        countryCode: "US",
+      },
+      redirectUris: ["http://localhost/oauth.html", "https://www.example.com/oauth.html"],
+    },
+  });
   // TODO: Handle 'response' of type BetaPartnerCustomerV1CreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.BetaPartnerCustomerV1CreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.BetaPartnerCustomerV1CreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.betaPartnerCustomerV1Create({
+  body: {
+    clientId: "7f57eb3d2a9j6480121fx361",
+    secret: "79g03eoofwl8240v776r2h667442119",
+    companyName: "Plaid",
+    products: [Products.Auth, Products.Identity],
+    createLinkCustomization: true,
+    legalEntityName: "Plaid",
+    website: "plaid.com",
+    applicationName: "Plaid",
+    technicalContact: { givenName: "Alice", familyName: "Smith", email: "alice.smith@example.com" },
+    billingContact: { givenName: "Bob", familyName: "Jones", email: "bob.jones@example.com" },
+    customerSupportInfo: {
+      email: "support@example.com",
+      phoneNumber: "1234567890",
+      contactUrl: "example.com/contact",
+      linkUpdateUrl: "example.com/update",
+    },
+    address: {
+      city: "New York",
+      street: "123 Main St",
+      region: "NY",
+      postalCode: "12345",
+      countryCode: "US",
+    },
+    redirectUris: ["http://localhost/oauth.html", "https://www.example.com/oauth.html"],
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BetaPartnerCustomerV1CreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -2615,9 +3791,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BetaPartnerCustomerV1CreateResponse](src/models/beta-partner-customer-v1-create-response.ts)</code>
+**Direct**: `await client.betaPartnerCustomerV1Create(request)`
 
-**OnError**: <code>[ThePlaidApiClient.BetaPartnerCustomerV1CreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[BetaPartnerCustomerV1CreateResponse](src/models/beta-partner-customer-v1-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.BetaPartnerCustomerV1CreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.betaPartnerCustomerV1Create(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BetaPartnerCustomerV1CreateResponse, ThePlaidApiClient.BetaPartnerCustomerV1CreateError&gt;</code>, with `result.value` of type <code>[BetaPartnerCustomerV1CreateResponse](src/models/beta-partner-customer-v1-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -2643,19 +3827,49 @@ The `/beta/partner/customer/v1/enable` endpoint is used by reseller partners to 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.betaPartnerCustomerV1Enable({ body });
+  const response = await client.betaPartnerCustomerV1Enable({
+    body: {
+      clientId: "7f57eb3d2a9j6480121fx361",
+      secret: "79g03eoofwl8240v776r2h667442119",
+      endCustomerClientId: "634758733ebb4f00134b85ea",
+      products: [Products.Auth],
+    },
+  });
   // TODO: Handle 'response' of type BetaPartnerCustomerV1EnableResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.BetaPartnerCustomerV1EnableError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.BetaPartnerCustomerV1EnableError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.betaPartnerCustomerV1Enable({
+  body: {
+    clientId: "7f57eb3d2a9j6480121fx361",
+    secret: "79g03eoofwl8240v776r2h667442119",
+    endCustomerClientId: "634758733ebb4f00134b85ea",
+    products: [Products.Auth],
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BetaPartnerCustomerV1EnableResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -2679,9 +3893,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BetaPartnerCustomerV1EnableResponse](src/models/beta-partner-customer-v1-enable-response.ts)</code>
+**Direct**: `await client.betaPartnerCustomerV1Enable(request)`
 
-**OnError**: <code>[ThePlaidApiClient.BetaPartnerCustomerV1EnableError](src/client.ts)</code>
+- **OnSuccess**: <code>[BetaPartnerCustomerV1EnableResponse](src/models/beta-partner-customer-v1-enable-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.BetaPartnerCustomerV1EnableError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.betaPartnerCustomerV1Enable(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BetaPartnerCustomerV1EnableResponse, ThePlaidApiClient.BetaPartnerCustomerV1EnableError&gt;</code>, with `result.value` of type <code>[BetaPartnerCustomerV1EnableResponse](src/models/beta-partner-customer-v1-enable-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -2707,19 +3929,47 @@ The `/beta/partner/customer/v1/get` endpoint is used by reseller partners to ret
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.betaPartnerCustomerV1Get({ body });
+  const response = await client.betaPartnerCustomerV1Get({
+    body: {
+      clientId: "7f57eb3d2a9j6480121fx361",
+      secret: "79g03eoofwl8240v776r2h667442119",
+      endCustomerClientId: "634758733ebb4f00134b85ea",
+    },
+  });
   // TODO: Handle 'response' of type BetaPartnerCustomerV1GetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.BetaPartnerCustomerV1GetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.BetaPartnerCustomerV1GetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.betaPartnerCustomerV1Get({
+  body: {
+    clientId: "7f57eb3d2a9j6480121fx361",
+    secret: "79g03eoofwl8240v776r2h667442119",
+    endCustomerClientId: "634758733ebb4f00134b85ea",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BetaPartnerCustomerV1GetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -2743,9 +3993,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BetaPartnerCustomerV1GetResponse](src/models/beta-partner-customer-v1-get-response.ts)</code>
+**Direct**: `await client.betaPartnerCustomerV1Get(request)`
 
-**OnError**: <code>[ThePlaidApiClient.BetaPartnerCustomerV1GetError](src/client.ts)</code>
+- **OnSuccess**: <code>[BetaPartnerCustomerV1GetResponse](src/models/beta-partner-customer-v1-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.BetaPartnerCustomerV1GetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.betaPartnerCustomerV1Get(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BetaPartnerCustomerV1GetResponse, ThePlaidApiClient.BetaPartnerCustomerV1GetError&gt;</code>, with `result.value` of type <code>[BetaPartnerCustomerV1GetResponse](src/models/beta-partner-customer-v1-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -2771,19 +4029,63 @@ The `/beta/partner/customer/v1/update` endpoint updates an existing end customer
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.betaPartnerCustomerV1Update({ body });
+  const response = await client.betaPartnerCustomerV1Update({
+    body: {
+      clientId: "7f57eb3d2a9j6480121fx361",
+      secret: "79g03eoofwl8240v776r2h667442119",
+      endCustomerClientId: "634758733ebb4f00134b85ea",
+      bankAddendumAcceptance: {
+        customerAccepted: true,
+        customerIpAddress: "127.0.0.1",
+        customerAgreementTimestamp: new Date(Date.UTC(2025, 0, 1, 1, 0, 0)),
+      },
+      questionnaires: {
+        cra: { purposes: {}, isThirdPartyInvolved: true, isTechnicalServiceProviderInvolved: true },
+      },
+    },
+  });
   // TODO: Handle 'response' of type BetaPartnerCustomerV1UpdateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.BetaPartnerCustomerV1UpdateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.BetaPartnerCustomerV1UpdateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.betaPartnerCustomerV1Update({
+  body: {
+    clientId: "7f57eb3d2a9j6480121fx361",
+    secret: "79g03eoofwl8240v776r2h667442119",
+    endCustomerClientId: "634758733ebb4f00134b85ea",
+    bankAddendumAcceptance: {
+      customerAccepted: true,
+      customerIpAddress: "127.0.0.1",
+      customerAgreementTimestamp: new Date(Date.UTC(2025, 0, 1, 1, 0, 0)),
+    },
+    questionnaires: {
+      cra: { purposes: {}, isThirdPartyInvolved: true, isTechnicalServiceProviderInvolved: true },
+    },
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BetaPartnerCustomerV1UpdateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -2807,9 +4109,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BetaPartnerCustomerV1UpdateResponse](src/models/beta-partner-customer-v1-update-response.ts)</code>
+**Direct**: `await client.betaPartnerCustomerV1Update(request)`
 
-**OnError**: <code>[ThePlaidApiClient.BetaPartnerCustomerV1UpdateError](src/client.ts)</code>
+- **OnSuccess**: <code>[BetaPartnerCustomerV1UpdateResponse](src/models/beta-partner-customer-v1-update-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.BetaPartnerCustomerV1UpdateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.betaPartnerCustomerV1Update(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BetaPartnerCustomerV1UpdateResponse, ThePlaidApiClient.BetaPartnerCustomerV1UpdateError&gt;</code>, with `result.value` of type <code>[BetaPartnerCustomerV1UpdateResponse](src/models/beta-partner-customer-v1-update-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -2820,7 +4130,7 @@ try {
 </details>
 
 <details>
-<summary><code>businessVerificationCreate(request: ThePlaidApiClient.BusinessVerificationCreateRequestParams, options?: RequestOptions): ApiPromise&lt;BusinessVerificationCreateResponse, ResponseError&gt;</code></summary>
+<summary><code>businessVerificationCreate(request: ThePlaidApiClient.BusinessVerificationCreateRequestParams, options?: RequestOptions): ApiPromise&lt;BusinessVerificationCreateResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -2835,17 +4145,37 @@ Create a new business verification to check a business's identity and risk profi
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.businessVerificationCreate({ body });
+  const response = await client.businessVerificationCreate({ body: { clientUserId: "some example string" } });
   // TODO: Handle 'response' of type BusinessVerificationCreateResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.businessVerificationCreate({
+  body: { clientUserId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BusinessVerificationCreateResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -2869,9 +4199,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BusinessVerificationCreateResponse](src/models/business-verification-create-response.ts)</code>
+**Direct**: `await client.businessVerificationCreate(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[BusinessVerificationCreateResponse](src/models/business-verification-create-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.businessVerificationCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BusinessVerificationCreateResponse, ApiError&gt;</code>, with `result.value` of type <code>[BusinessVerificationCreateResponse](src/models/business-verification-create-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -2882,7 +4220,7 @@ try {
 </details>
 
 <details>
-<summary><code>businessVerificationGet(request: ThePlaidApiClient.BusinessVerificationGetRequestParams, options?: RequestOptions): ApiPromise&lt;BusinessVerificationGetResponse, ResponseError&gt;</code></summary>
+<summary><code>businessVerificationGet(request: ThePlaidApiClient.BusinessVerificationGetRequestParams, options?: RequestOptions): ApiPromise&lt;BusinessVerificationGetResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -2897,17 +4235,39 @@ Retrieve the current state of a specific business verification.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.businessVerificationGet({ body });
+  const response = await client.businessVerificationGet({
+    body: { businessVerificationId: "some example string" },
+  });
   // TODO: Handle 'response' of type BusinessVerificationGetResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.businessVerificationGet({
+  body: { businessVerificationId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type BusinessVerificationGetResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -2931,9 +4291,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[BusinessVerificationGetResponse](src/models/business-verification-get-response.ts)</code>
+**Direct**: `await client.businessVerificationGet(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[BusinessVerificationGetResponse](src/models/business-verification-get-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.businessVerificationGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;BusinessVerificationGetResponse, ApiError&gt;</code>, with `result.value` of type <code>[BusinessVerificationGetResponse](src/models/business-verification-get-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -2962,19 +4330,39 @@ Note that data isn't likely to be immediately available to `/cashflow_report/get
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.cashflowReportGet({ body });
+  const response = await client.cashflowReportGet({
+    body: { accessToken: "some example string", daysRequested: 1 },
+  });
   // TODO: Handle 'response' of type CashflowReportGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CashflowReportGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CashflowReportGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.cashflowReportGet({
+  body: { accessToken: "some example string", daysRequested: 1 },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CashflowReportGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -2998,9 +4386,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CashflowReportGetResponse](src/models/cashflow-report-get-response.ts)</code>
+**Direct**: `await client.cashflowReportGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CashflowReportGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CashflowReportGetResponse](src/models/cashflow-report-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CashflowReportGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.cashflowReportGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CashflowReportGetResponse, ThePlaidApiClient.CashflowReportGetError&gt;</code>, with `result.value` of type <code>[CashflowReportGetResponse](src/models/cashflow-report-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -3026,19 +4422,37 @@ The `/cashflow_report/insights/get` endpoint retrieves insights data associated 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.cashflowReportInsightsGet({ body });
+  const response = await client.cashflowReportInsightsGet({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type CashflowReportInsightsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CashflowReportInsightsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CashflowReportInsightsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.cashflowReportInsightsGet({
+  body: { accessToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CashflowReportInsightsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -3062,9 +4476,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CashflowReportInsightsGetResponse](src/models/cashflow-report-insights-get-response.ts)</code>
+**Direct**: `await client.cashflowReportInsightsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CashflowReportInsightsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CashflowReportInsightsGetResponse](src/models/cashflow-report-insights-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CashflowReportInsightsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.cashflowReportInsightsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CashflowReportInsightsGetResponse, ThePlaidApiClient.CashflowReportInsightsGetError&gt;</code>, with `result.value` of type <code>[CashflowReportInsightsGetResponse](src/models/cashflow-report-insights-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -3096,19 +4518,39 @@ As this endpoint triggers a synchronous request for fresh data, latency may be h
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.cashflowReportRefresh({ body });
+  const response = await client.cashflowReportRefresh({
+    body: { accessToken: "some example string", daysRequested: 1 },
+  });
   // TODO: Handle 'response' of type CashflowReportRefreshResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CashflowReportRefreshError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CashflowReportRefreshError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.cashflowReportRefresh({
+  body: { accessToken: "some example string", daysRequested: 1 },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CashflowReportRefreshResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -3132,9 +4574,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CashflowReportRefreshResponse](src/models/cashflow-report-refresh-response.ts)</code>
+**Direct**: `await client.cashflowReportRefresh(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CashflowReportRefreshError](src/client.ts)</code>
+- **OnSuccess**: <code>[CashflowReportRefreshResponse](src/models/cashflow-report-refresh-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CashflowReportRefreshError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.cashflowReportRefresh(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CashflowReportRefreshResponse, ThePlaidApiClient.CashflowReportRefreshError&gt;</code>, with `result.value` of type <code>[CashflowReportRefreshResponse](src/models/cashflow-report-refresh-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -3163,19 +4613,39 @@ Note that data isn't likely to be immediately available to `/cashflow_report/tra
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.cashflowReportTransactionsGet({ body });
+  const response = await client.cashflowReportTransactionsGet({
+    body: { accessToken: "some example string" },
+  });
   // TODO: Handle 'response' of type CashflowReportTransactionsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CashflowReportTransactionsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CashflowReportTransactionsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.cashflowReportTransactionsGet({
+  body: { accessToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CashflowReportTransactionsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -3199,9 +4669,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CashflowReportTransactionsGetResponse](src/models/cashflow-report-transactions-get-response.ts)</code>
+**Direct**: `await client.cashflowReportTransactionsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CashflowReportTransactionsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CashflowReportTransactionsGetResponse](src/models/cashflow-report-transactions-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CashflowReportTransactionsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.cashflowReportTransactionsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CashflowReportTransactionsGetResponse, ThePlaidApiClient.CashflowReportTransactionsGetError&gt;</code>, with `result.value` of type <code>[CashflowReportTransactionsGetResponse](src/models/cashflow-report-transactions-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -3229,19 +4707,35 @@ All implementations are recommended to [use the newer `personal_finance_category
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.categoriesGet({ body });
+  const response = await client.categoriesGet({ body: {} });
   // TODO: Handle 'response' of type CategoriesGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CategoriesGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CategoriesGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.categoriesGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CategoriesGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -3265,9 +4759,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CategoriesGetResponse](src/models/categories-get-response.ts)</code>
+**Direct**: `await client.categoriesGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CategoriesGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CategoriesGetResponse](src/models/categories-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CategoriesGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.categoriesGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CategoriesGetResponse, ThePlaidApiClient.CategoriesGetError&gt;</code>, with `result.value` of type <code>[CategoriesGetResponse](src/models/categories-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -3293,19 +4795,35 @@ List a historical log of Item consent events. Consent logs are only available fo
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.consentEventsGet({ body });
+  const response = await client.consentEventsGet({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type ConsentEventsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ConsentEventsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ConsentEventsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.consentEventsGet({ body: { accessToken: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ConsentEventsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -3329,9 +4847,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ConsentEventsGetResponse](src/models/consent-events-get-response.ts)</code>
+**Direct**: `await client.consentEventsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ConsentEventsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[ConsentEventsGetResponse](src/models/consent-events-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ConsentEventsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.consentEventsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ConsentEventsGetResponse, ThePlaidApiClient.ConsentEventsGetError&gt;</code>, with `result.value` of type <code>[ConsentEventsGetResponse](src/models/consent-events-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -3359,18 +4885,36 @@ Response is PDF binary data. The `request_id` is returned in the `Plaid-Request-
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  await client.consumerReportPdfGet({ body });
+  await client.consumerReportPdfGet({ body: { userToken: "some example string" } });
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ConsumerReportPdfGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ConsumerReportPdfGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.consumerReportPdfGet({
+  body: { userToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: The call succeeded and resolves to no body
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -3394,9 +4938,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>undefined</code>
+**Direct**: `await client.consumerReportPdfGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ConsumerReportPdfGetError](src/client.ts)</code>
+- **OnSuccess**: <code>undefined</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ConsumerReportPdfGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.consumerReportPdfGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;undefined, ThePlaidApiClient.ConsumerReportPdfGetError&gt;</code>, with `result.value` of type <code>undefined</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -3422,19 +4974,35 @@ This endpoint allows you to retrieve the Base Report for your user, allowing you
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craCheckReportBaseReportGet({ body });
+  const response = await client.craCheckReportBaseReportGet({ body: {} });
   // TODO: Handle 'response' of type CraCheckReportBaseReportGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CraCheckReportBaseReportGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraCheckReportBaseReportGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craCheckReportBaseReportGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraCheckReportBaseReportGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -3458,9 +5026,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraCheckReportBaseReportGetResponse](src/models/cra-check-report-base-report-get-response.ts)</code>
+**Direct**: `await client.craCheckReportBaseReportGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraCheckReportBaseReportGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraCheckReportBaseReportGetResponse](src/models/cra-check-report-base-report-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraCheckReportBaseReportGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craCheckReportBaseReportGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraCheckReportBaseReportGetResponse, ThePlaidApiClient.CraCheckReportBaseReportGetError&gt;</code>, with `result.value` of type <code>[CraCheckReportBaseReportGetResponse](src/models/cra-check-report-base-report-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -3486,21 +5062,35 @@ This endpoint allows you to retrieve the Cashflow Insights report for your user.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craCheckReportCashflowInsightsGet({ body });
+  const response = await client.craCheckReportCashflowInsightsGet({ body: {} });
   // TODO: Handle 'response' of type CraCheckReportCashflowInsightsGetResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.CraCheckReportCashflowInsightsGetError && err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraCheckReportCashflowInsightsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craCheckReportCashflowInsightsGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraCheckReportCashflowInsightsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -3524,9 +5114,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraCheckReportCashflowInsightsGetResponse](src/models/cra-check-report-cashflow-insights-get-response.ts)</code>
+**Direct**: `await client.craCheckReportCashflowInsightsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraCheckReportCashflowInsightsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraCheckReportCashflowInsightsGetResponse](src/models/cra-check-report-cashflow-insights-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraCheckReportCashflowInsightsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craCheckReportCashflowInsightsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraCheckReportCashflowInsightsGetResponse, ThePlaidApiClient.CraCheckReportCashflowInsightsGetError&gt;</code>, with `result.value` of type <code>[CraCheckReportCashflowInsightsGetResponse](src/models/cra-check-report-cashflow-insights-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -3552,19 +5150,47 @@ Use `/cra/check_report/create` to refresh data in an existing report. A Consumer
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craCheckReportCreate({ body });
+  const response = await client.craCheckReportCreate({
+    body: {
+      webhook: "some example string",
+      daysRequested: 1,
+      consumerReportPermissiblePurpose: ConsumerReportPermissiblePurpose.AccountReviewCredit,
+    },
+  });
   // TODO: Handle 'response' of type CraCheckReportCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CraCheckReportCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraCheckReportCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craCheckReportCreate({
+  body: {
+    webhook: "some example string",
+    daysRequested: 1,
+    consumerReportPermissiblePurpose: ConsumerReportPermissiblePurpose.AccountReviewCredit,
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraCheckReportCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -3588,9 +5214,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraCheckReportCreateResponse](src/models/cra-check-report-create-response.ts)</code>
+**Direct**: `await client.craCheckReportCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraCheckReportCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraCheckReportCreateResponse](src/models/cra-check-report-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraCheckReportCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craCheckReportCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraCheckReportCreateResponse, ThePlaidApiClient.CraCheckReportCreateError&gt;</code>, with `result.value` of type <code>[CraCheckReportCreateResponse](src/models/cra-check-report-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -3618,19 +5252,35 @@ NOTE: The following schema was updated in April 2026 to reflect the response whe
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craCheckReportIncomeInsightsGet({ body });
+  const response = await client.craCheckReportIncomeInsightsGet({ body: {} });
   // TODO: Handle 'response' of type CraCheckReportIncomeInsightsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CraCheckReportIncomeInsightsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraCheckReportIncomeInsightsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craCheckReportIncomeInsightsGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraCheckReportIncomeInsightsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -3654,9 +5304,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraCheckReportIncomeInsightsGetResponse](src/models/cra-check-report-income-insights-get-response.ts)</code>
+**Direct**: `await client.craCheckReportIncomeInsightsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraCheckReportIncomeInsightsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraCheckReportIncomeInsightsGetResponse](src/models/cra-check-report-income-insights-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraCheckReportIncomeInsightsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craCheckReportIncomeInsightsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraCheckReportIncomeInsightsGetResponse, ThePlaidApiClient.CraCheckReportIncomeInsightsGetError&gt;</code>, with `result.value` of type <code>[CraCheckReportIncomeInsightsGetResponse](src/models/cra-check-report-income-insights-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -3682,19 +5340,35 @@ This endpoint allows you to retrieve the LendScore report for your user. You sho
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craCheckReportLendScoreGet({ body });
+  const response = await client.craCheckReportLendScoreGet({ body: {} });
   // TODO: Handle 'response' of type CraCheckReportLendScoreGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CraCheckReportLendScoreGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraCheckReportLendScoreGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craCheckReportLendScoreGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraCheckReportLendScoreGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -3718,9 +5392,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraCheckReportLendScoreGetResponse](src/models/cra-check-report-lend-score-get-response.ts)</code>
+**Direct**: `await client.craCheckReportLendScoreGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraCheckReportLendScoreGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraCheckReportLendScoreGetResponse](src/models/cra-check-report-lend-score-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraCheckReportLendScoreGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craCheckReportLendScoreGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraCheckReportLendScoreGetResponse, ThePlaidApiClient.CraCheckReportLendScoreGetError&gt;</code>, with `result.value` of type <code>[CraCheckReportLendScoreGetResponse](src/models/cra-check-report-lend-score-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -3746,21 +5428,35 @@ This endpoint allows you to retrieve the Network Insights report for your user. 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craCheckReportNetworkInsightsGet({ body });
+  const response = await client.craCheckReportNetworkInsightsGet({ body: {} });
   // TODO: Handle 'response' of type CraCheckReportNetworkInsightsGetResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.CraCheckReportNetworkInsightsGetError && err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraCheckReportNetworkInsightsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craCheckReportNetworkInsightsGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraCheckReportNetworkInsightsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -3784,9 +5480,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraCheckReportNetworkInsightsGetResponse](src/models/cra-check-report-network-insights-get-response.ts)</code>
+**Direct**: `await client.craCheckReportNetworkInsightsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraCheckReportNetworkInsightsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraCheckReportNetworkInsightsGetResponse](src/models/cra-check-report-network-insights-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraCheckReportNetworkInsightsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craCheckReportNetworkInsightsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraCheckReportNetworkInsightsGetResponse, ThePlaidApiClient.CraCheckReportNetworkInsightsGetError&gt;</code>, with `result.value` of type <code>[CraCheckReportNetworkInsightsGetResponse](src/models/cra-check-report-network-insights-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -3812,21 +5516,35 @@ This endpoint allows you to retrieve the Partner Insights report for your user. 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craCheckReportPartnerInsightsGet({ body });
+  const response = await client.craCheckReportPartnerInsightsGet({ body: {} });
   // TODO: Handle 'response' of type CraCheckReportPartnerInsightsGetResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.CraCheckReportPartnerInsightsGetError && err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraCheckReportPartnerInsightsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craCheckReportPartnerInsightsGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraCheckReportPartnerInsightsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -3850,9 +5568,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraCheckReportPartnerInsightsGetResponse](src/models/cra-check-report-partner-insights-get-response.ts)</code>
+**Direct**: `await client.craCheckReportPartnerInsightsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraCheckReportPartnerInsightsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraCheckReportPartnerInsightsGetResponse](src/models/cra-check-report-partner-insights-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraCheckReportPartnerInsightsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craCheckReportPartnerInsightsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraCheckReportPartnerInsightsGetResponse, ThePlaidApiClient.CraCheckReportPartnerInsightsGetError&gt;</code>, with `result.value` of type <code>[CraCheckReportPartnerInsightsGetResponse](src/models/cra-check-report-partner-insights-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -3878,18 +5604,34 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  await client.craCheckReportPdfGet({ body });
+  await client.craCheckReportPdfGet({ body: {} });
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CraCheckReportPdfGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraCheckReportPdfGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craCheckReportPdfGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: The call succeeded and resolves to no body
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -3913,9 +5655,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>undefined</code>
+**Direct**: `await client.craCheckReportPdfGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraCheckReportPdfGetError](src/client.ts)</code>
+- **OnSuccess**: <code>undefined</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraCheckReportPdfGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craCheckReportPdfGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;undefined, ThePlaidApiClient.CraCheckReportPdfGetError&gt;</code>, with `result.value` of type <code>undefined</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -3945,19 +5695,39 @@ If the most recent consumer report for the user doesn't have sufficient data to 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craCheckReportVerificationGet({ body });
+  const response = await client.craCheckReportVerificationGet({
+    body: { reportsRequested: [CraCheckReportVerificationGetReportType.Voa] },
+  });
   // TODO: Handle 'response' of type CraCheckReportVerificationGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CraCheckReportVerificationGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraCheckReportVerificationGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craCheckReportVerificationGet({
+  body: { reportsRequested: [CraCheckReportVerificationGetReportType.Voa] },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraCheckReportVerificationGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -3981,9 +5751,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraCheckReportVerificationGetResponse](src/models/cra-check-report-verification-get-response.ts)</code>
+**Direct**: `await client.craCheckReportVerificationGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraCheckReportVerificationGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraCheckReportVerificationGetResponse](src/models/cra-check-report-verification-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraCheckReportVerificationGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craCheckReportVerificationGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraCheckReportVerificationGetResponse, ThePlaidApiClient.CraCheckReportVerificationGetError&gt;</code>, with `result.value` of type <code>[CraCheckReportVerificationGetResponse](src/models/cra-check-report-verification-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -4011,20 +5789,34 @@ The response to `/cra/check_report/verification/pdf/get` is the PDF binary data.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  await client.craCheckReportVerificationPdfGet({ body });
+  await client.craCheckReportVerificationPdfGet({ body: {} });
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.CraCheckReportVerificationPdfGetError && err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraCheckReportVerificationPdfGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craCheckReportVerificationPdfGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: The call succeeded and resolves to no body
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -4048,9 +5840,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>undefined</code>
+**Direct**: `await client.craCheckReportVerificationPdfGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraCheckReportVerificationPdfGetError](src/client.ts)</code>
+- **OnSuccess**: <code>undefined</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraCheckReportVerificationPdfGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craCheckReportVerificationPdfGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;undefined, ThePlaidApiClient.CraCheckReportVerificationPdfGetError&gt;</code>, with `result.value` of type <code>undefined</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -4076,19 +5876,53 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craCreditProfileReportGet({ body });
+  const response = await client.craCreditProfileReportGet({
+    body: {
+      userId: "some example string",
+      consumerReportPermissiblePurpose: ConsumerReportPermissiblePurpose.AccountReviewCredit,
+      clientReportId: "some example string",
+      reportType: CraCreditProfileReportType.Qualify,
+      inquiryType: CraCreditProfileInquiryType.SoftInquiry,
+      version: CraCreditProfileReportVersion.V1,
+    },
+  });
   // TODO: Handle 'response' of type CraCreditProfileReportGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CraCreditProfileReportGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraCreditProfileReportGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craCreditProfileReportGet({
+  body: {
+    userId: "some example string",
+    consumerReportPermissiblePurpose: ConsumerReportPermissiblePurpose.AccountReviewCredit,
+    clientReportId: "some example string",
+    reportType: CraCreditProfileReportType.Qualify,
+    inquiryType: CraCreditProfileInquiryType.SoftInquiry,
+    version: CraCreditProfileReportVersion.V1,
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraCreditProfileReportGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -4112,9 +5946,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraCreditProfileReportGetResponse](src/models/cra-credit-profile-report-get-response.ts)</code>
+**Direct**: `await client.craCreditProfileReportGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraCreditProfileReportGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraCreditProfileReportGetResponse](src/models/cra-credit-profile-report-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraCreditProfileReportGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craCreditProfileReportGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraCreditProfileReportGetResponse, ThePlaidApiClient.CraCreditProfileReportGetError&gt;</code>, with `result.value` of type <code>[CraCreditProfileReportGetResponse](src/models/cra-credit-profile-report-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -4140,19 +5982,57 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craLoansApplicationsRegister({ body });
+  const response = await client.craLoansApplicationsRegister({
+    body: {
+      applications: [
+        {
+          userToken: "some example string",
+          applicationId: "some example string",
+          type: CraLoanType.Personal,
+          decision: CraLoanApplicationDecision.Approved,
+        },
+      ],
+    },
+  });
   // TODO: Handle 'response' of type CraLoansApplicationsRegisterResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CraLoansApplicationsRegisterError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraLoansApplicationsRegisterError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craLoansApplicationsRegister({
+  body: {
+    applications: [
+      {
+        userToken: "some example string",
+        applicationId: "some example string",
+        type: CraLoanType.Personal,
+        decision: CraLoanApplicationDecision.Approved,
+      },
+    ],
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraLoansApplicationsRegisterResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -4176,9 +6056,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraLoansApplicationsRegisterResponse](src/models/cra-loans-applications-register-response.ts)</code>
+**Direct**: `await client.craLoansApplicationsRegister(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraLoansApplicationsRegisterError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraLoansApplicationsRegisterResponse](src/models/cra-loans-applications-register-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraLoansApplicationsRegisterError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craLoansApplicationsRegister(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraLoansApplicationsRegisterResponse, ThePlaidApiClient.CraLoansApplicationsRegisterError&gt;</code>, with `result.value` of type <code>[CraLoansApplicationsRegisterResponse](src/models/cra-loans-applications-register-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -4204,19 +6092,61 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craLoansRegister({ body });
+  const response = await client.craLoansRegister({
+    body: {
+      loans: [
+        {
+          userToken: "some example string",
+          loanId: "some example string",
+          type: CraLoanType.Personal,
+          paymentSchedule: CraLoanPaymentSchedule.Daily,
+          openedDate: "2024-01-15",
+          openedWithStatus: { status: CraLoanStatus.Approved, date: "2024-01-15" },
+        },
+      ],
+    },
+  });
   // TODO: Handle 'response' of type CraLoansRegisterResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CraLoansRegisterError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraLoansRegisterError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craLoansRegister({
+  body: {
+    loans: [
+      {
+        userToken: "some example string",
+        loanId: "some example string",
+        type: CraLoanType.Personal,
+        paymentSchedule: CraLoanPaymentSchedule.Daily,
+        openedDate: "2024-01-15",
+        openedWithStatus: { status: CraLoanStatus.Approved, date: "2024-01-15" },
+      },
+    ],
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraLoansRegisterResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -4240,9 +6170,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraLoansRegisterResponse](src/models/cra-loans-register-response.ts)</code>
+**Direct**: `await client.craLoansRegister(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraLoansRegisterError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraLoansRegisterResponse](src/models/cra-loans-register-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraLoansRegisterError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craLoansRegister(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraLoansRegisterResponse, ThePlaidApiClient.CraLoansRegisterError&gt;</code>, with `result.value` of type <code>[CraLoansRegisterResponse](src/models/cra-loans-register-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -4268,19 +6206,53 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craLoansUnregister({ body });
+  const response = await client.craLoansUnregister({
+    body: {
+      loans: [
+        {
+          loanId: "some example string",
+          closedWithStatus: { status: CraLoanStatus.Approved, date: "2024-01-15" },
+        },
+      ],
+    },
+  });
   // TODO: Handle 'response' of type CraLoanUnregisterResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CraLoansUnregisterError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraLoansUnregisterError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craLoansUnregister({
+  body: {
+    loans: [
+      {
+        loanId: "some example string",
+        closedWithStatus: { status: CraLoanStatus.Approved, date: "2024-01-15" },
+      },
+    ],
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraLoanUnregisterResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -4304,9 +6276,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraLoanUnregisterResponse](src/models/cra-loan-unregister-response.ts)</code>
+**Direct**: `await client.craLoansUnregister(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraLoansUnregisterError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraLoanUnregisterResponse](src/models/cra-loan-unregister-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraLoansUnregisterError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craLoansUnregister(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraLoanUnregisterResponse, ThePlaidApiClient.CraLoansUnregisterError&gt;</code>, with `result.value` of type <code>[CraLoanUnregisterResponse](src/models/cra-loan-unregister-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -4332,19 +6312,35 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craLoansUpdate({ body });
+  const response = await client.craLoansUpdate({ body: { loans: [{}] } });
   // TODO: Handle 'response' of type CraLoansUpdateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CraLoansUpdateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraLoansUpdateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craLoansUpdate({ body: { loans: [{}] } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraLoansUpdateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -4368,9 +6364,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraLoansUpdateResponse](src/models/cra-loans-update-response.ts)</code>
+**Direct**: `await client.craLoansUpdate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraLoansUpdateError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraLoansUpdateResponse](src/models/cra-loans-update-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraLoansUpdateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craLoansUpdate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraLoansUpdateResponse, ThePlaidApiClient.CraLoansUpdateError&gt;</code>, with `result.value` of type <code>[CraLoansUpdateResponse](src/models/cra-loans-update-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -4396,19 +6400,41 @@ This endpoint allows you to retrieve a Cash Flow Updates report by passing in th
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craMonitoringInsightsGet({ body });
+  const response = await client.craMonitoringInsightsGet({
+    body: {
+      consumerReportPermissiblePurpose: MonitoringConsumerReportPermissiblePurpose.AccountReviewCredit,
+    },
+  });
   // TODO: Handle 'response' of type CraMonitoringInsightsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CraMonitoringInsightsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraMonitoringInsightsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craMonitoringInsightsGet({
+  body: { consumerReportPermissiblePurpose: MonitoringConsumerReportPermissiblePurpose.AccountReviewCredit },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraMonitoringInsightsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -4432,9 +6458,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraMonitoringInsightsGetResponse](src/models/cra-monitoring-insights-get-response.ts)</code>
+**Direct**: `await client.craMonitoringInsightsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraMonitoringInsightsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraMonitoringInsightsGetResponse](src/models/cra-monitoring-insights-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraMonitoringInsightsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craMonitoringInsightsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraMonitoringInsightsGetResponse, ThePlaidApiClient.CraMonitoringInsightsGetError&gt;</code>, with `result.value` of type <code>[CraMonitoringInsightsGetResponse](src/models/cra-monitoring-insights-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -4460,19 +6494,37 @@ This endpoint allows you to subscribe to insights for a user's linked CRA Item, 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craMonitoringInsightsSubscribe({ body });
+  const response = await client.craMonitoringInsightsSubscribe({ body: { webhook: "some example string" } });
   // TODO: Handle 'response' of type CraMonitoringInsightsSubscribeResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CraMonitoringInsightsSubscribeError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraMonitoringInsightsSubscribeError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craMonitoringInsightsSubscribe({
+  body: { webhook: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraMonitoringInsightsSubscribeResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -4496,9 +6548,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraMonitoringInsightsSubscribeResponse](src/models/cra-monitoring-insights-subscribe-response.ts)</code>
+**Direct**: `await client.craMonitoringInsightsSubscribe(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraMonitoringInsightsSubscribeError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraMonitoringInsightsSubscribeResponse](src/models/cra-monitoring-insights-subscribe-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraMonitoringInsightsSubscribeError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craMonitoringInsightsSubscribe(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraMonitoringInsightsSubscribeResponse, ThePlaidApiClient.CraMonitoringInsightsSubscribeError&gt;</code>, with `result.value` of type <code>[CraMonitoringInsightsSubscribeResponse](src/models/cra-monitoring-insights-subscribe-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -4524,21 +6584,39 @@ This endpoint allows you to unsubscribe from previously subscribed Monitoring In
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craMonitoringInsightsUnsubscribe({ body });
+  const response = await client.craMonitoringInsightsUnsubscribe({
+    body: { subscriptionId: "some example string" },
+  });
   // TODO: Handle 'response' of type CraMonitoringInsightsUnsubscribeResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.CraMonitoringInsightsUnsubscribeError && err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraMonitoringInsightsUnsubscribeError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craMonitoringInsightsUnsubscribe({
+  body: { subscriptionId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraMonitoringInsightsUnsubscribeResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -4562,9 +6640,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraMonitoringInsightsUnsubscribeResponse](src/models/cra-monitoring-insights-unsubscribe-response.ts)</code>
+**Direct**: `await client.craMonitoringInsightsUnsubscribe(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraMonitoringInsightsUnsubscribeError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraMonitoringInsightsUnsubscribeResponse](src/models/cra-monitoring-insights-unsubscribe-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraMonitoringInsightsUnsubscribeError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craMonitoringInsightsUnsubscribe(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraMonitoringInsightsUnsubscribeResponse, ThePlaidApiClient.CraMonitoringInsightsUnsubscribeError&gt;</code>, with `result.value` of type <code>[CraMonitoringInsightsUnsubscribeResponse](src/models/cra-monitoring-insights-unsubscribe-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -4590,19 +6676,37 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craPartnerInsightsGet({ body });
+  const response = await client.craPartnerInsightsGet({ body: { userToken: "some example string" } });
   // TODO: Handle 'response' of type CraPartnerInsightsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CraPartnerInsightsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraPartnerInsightsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craPartnerInsightsGet({
+  body: { userToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraPartnerInsightsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -4626,9 +6730,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraPartnerInsightsGetResponse](src/models/cra-partner-insights-get-response.ts)</code>
+**Direct**: `await client.craPartnerInsightsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraPartnerInsightsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraPartnerInsightsGetResponse](src/models/cra-partner-insights-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraPartnerInsightsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craPartnerInsightsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraPartnerInsightsGetResponse, ThePlaidApiClient.CraPartnerInsightsGetError&gt;</code>, with `result.value` of type <code>[CraPartnerInsightsGetResponse](src/models/cra-partner-insights-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -4654,19 +6766,49 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.craReportGet({ body });
+  const response = await client.craReportGet({
+    body: {
+      userId: "some example string",
+      products: [{ product: Products.Assets, version: "some example string" }],
+      decisionStage: CraReportDecisionStage.Prequalification,
+      consumerReportPermissiblePurpose: ConsumerReportPermissiblePurpose.AccountReviewCredit,
+    },
+  });
   // TODO: Handle 'response' of type CraReportGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CraReportGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CraReportGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.craReportGet({
+  body: {
+    userId: "some example string",
+    products: [{ product: Products.Assets, version: "some example string" }],
+    decisionStage: CraReportDecisionStage.Prequalification,
+    consumerReportPermissiblePurpose: ConsumerReportPermissiblePurpose.AccountReviewCredit,
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CraReportGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -4690,9 +6832,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CraReportGetResponse](src/models/cra-report-get-response.ts)</code>
+**Direct**: `await client.craReportGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CraReportGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CraReportGetResponse](src/models/cra-report-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CraReportGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.craReportGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CraReportGetResponse, ThePlaidApiClient.CraReportGetError&gt;</code>, with `result.value` of type <code>[CraReportGetResponse](src/models/cra-report-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -4720,19 +6870,35 @@ The `/payment_initiation/payment/token/create` endpoint is used to create a `pay
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.createPaymentToken({ body });
+  const response = await client.createPaymentToken({ body: { paymentId: "some example string" } });
   // TODO: Handle 'response' of type PaymentInitiationPaymentTokenCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreatePaymentTokenError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreatePaymentTokenError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.createPaymentToken({ body: { paymentId: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PaymentInitiationPaymentTokenCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -4756,9 +6922,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PaymentInitiationPaymentTokenCreateResponse](src/models/payment-initiation-payment-token-create-response.ts)</code>
+**Direct**: `await client.createPaymentToken(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreatePaymentTokenError](src/client.ts)</code>
+- **OnSuccess**: <code>[PaymentInitiationPaymentTokenCreateResponse](src/models/payment-initiation-payment-token-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreatePaymentTokenError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.createPaymentToken(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PaymentInitiationPaymentTokenCreateResponse, ThePlaidApiClient.CreatePaymentTokenError&gt;</code>, with `result.value` of type <code>[PaymentInitiationPaymentTokenCreateResponse](src/models/payment-initiation-payment-token-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -4784,19 +6958,39 @@ The `/credit/asset_report/freddie_mac/get` endpoint retrieves the Asset Report i
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditAssetReportFreddieMacGet({ body });
+  const response = await client.creditAssetReportFreddieMacGet({
+    body: { auditCopyToken: "some example string" },
+  });
   // TODO: Handle 'response' of type AssetReportFreddieGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditAssetReportFreddieMacGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditAssetReportFreddieMacGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditAssetReportFreddieMacGet({
+  body: { auditCopyToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type AssetReportFreddieGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -4820,9 +7014,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[AssetReportFreddieGetResponse](src/models/asset-report-freddie-get-response.ts)</code>
+**Direct**: `await client.creditAssetReportFreddieMacGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditAssetReportFreddieMacGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[AssetReportFreddieGetResponse](src/models/asset-report-freddie-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditAssetReportFreddieMacGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditAssetReportFreddieMacGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;AssetReportFreddieGetResponse, ThePlaidApiClient.CreditAssetReportFreddieMacGetError&gt;</code>, with `result.value` of type <code>[AssetReportFreddieGetResponse](src/models/asset-report-freddie-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -4850,19 +7052,39 @@ Use the `/credit/audit_copy_token/create` endpoint to create an `audit_copy_toke
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditAuditCopyTokenCreate({ body });
+  const response = await client.creditAuditCopyTokenCreate({
+    body: { reportTokens: ["some example string"] },
+  });
   // TODO: Handle 'response' of type CreditAuditCopyTokenCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditAuditCopyTokenCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditAuditCopyTokenCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditAuditCopyTokenCreate({
+  body: { reportTokens: ["some example string"] },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditAuditCopyTokenCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -4886,9 +7108,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditAuditCopyTokenCreateResponse](src/models/credit-audit-copy-token-create-response.ts)</code>
+**Direct**: `await client.creditAuditCopyTokenCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditAuditCopyTokenCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditAuditCopyTokenCreateResponse](src/models/credit-audit-copy-token-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditAuditCopyTokenCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditAuditCopyTokenCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditAuditCopyTokenCreateResponse, ThePlaidApiClient.CreditAuditCopyTokenCreateError&gt;</code>, with `result.value` of type <code>[CreditAuditCopyTokenCreateResponse](src/models/credit-audit-copy-token-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -4914,19 +7144,39 @@ The `/credit/audit_copy_token/update` endpoint updates an existing Audit Copy To
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditAuditCopyTokenUpdate({ body });
+  const response = await client.creditAuditCopyTokenUpdate({
+    body: { auditCopyToken: "some example string", reportTokens: ["some example string"] },
+  });
   // TODO: Handle 'response' of type CreditAuditCopyTokenUpdateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditAuditCopyTokenUpdateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditAuditCopyTokenUpdateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditAuditCopyTokenUpdate({
+  body: { auditCopyToken: "some example string", reportTokens: ["some example string"] },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditAuditCopyTokenUpdateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -4950,9 +7200,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditAuditCopyTokenUpdateResponse](src/models/credit-audit-copy-token-update-response.ts)</code>
+**Direct**: `await client.creditAuditCopyTokenUpdate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditAuditCopyTokenUpdateError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditAuditCopyTokenUpdateResponse](src/models/credit-audit-copy-token-update-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditAuditCopyTokenUpdateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditAuditCopyTokenUpdate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditAuditCopyTokenUpdateResponse, ThePlaidApiClient.CreditAuditCopyTokenUpdateError&gt;</code>, with `result.value` of type <code>[CreditAuditCopyTokenUpdateResponse](src/models/credit-audit-copy-token-update-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -4978,19 +7236,37 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditBankEmploymentGet({ body });
+  const response = await client.creditBankEmploymentGet({ body: { userToken: "some example string" } });
   // TODO: Handle 'response' of type CreditBankEmploymentGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditBankEmploymentGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditBankEmploymentGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditBankEmploymentGet({
+  body: { userToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditBankEmploymentGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -5014,9 +7290,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditBankEmploymentGetResponse](src/models/credit-bank-employment-get-response.ts)</code>
+**Direct**: `await client.creditBankEmploymentGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditBankEmploymentGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditBankEmploymentGetResponse](src/models/credit-bank-employment-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditBankEmploymentGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditBankEmploymentGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditBankEmploymentGetResponse, ThePlaidApiClient.CreditBankEmploymentGetError&gt;</code>, with `result.value` of type <code>[CreditBankEmploymentGetResponse](src/models/credit-bank-employment-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -5042,19 +7326,35 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditBankIncomeGet({ body });
+  const response = await client.creditBankIncomeGet({ body: {} });
   // TODO: Handle 'response' of type CreditBankIncomeGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditBankIncomeGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditBankIncomeGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditBankIncomeGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditBankIncomeGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -5078,9 +7378,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditBankIncomeGetResponse](src/models/credit-bank-income-get-response.ts)</code>
+**Direct**: `await client.creditBankIncomeGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditBankIncomeGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditBankIncomeGetResponse](src/models/credit-bank-income-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditBankIncomeGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditBankIncomeGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditBankIncomeGetResponse, ThePlaidApiClient.CreditBankIncomeGetError&gt;</code>, with `result.value` of type <code>[CreditBankIncomeGetResponse](src/models/credit-bank-income-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -5106,18 +7414,36 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  await client.creditBankIncomePdfGet({ body });
+  await client.creditBankIncomePdfGet({ body: { userToken: "some example string" } });
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditBankIncomePdfGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditBankIncomePdfGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditBankIncomePdfGet({
+  body: { userToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: The call succeeded and resolves to no body
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -5141,9 +7467,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>undefined</code>
+**Direct**: `await client.creditBankIncomePdfGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditBankIncomePdfGetError](src/client.ts)</code>
+- **OnSuccess**: <code>undefined</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditBankIncomePdfGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditBankIncomePdfGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;undefined, ThePlaidApiClient.CreditBankIncomePdfGetError&gt;</code>, with `result.value` of type <code>undefined</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -5169,19 +7503,37 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditBankIncomeRefresh({ body });
+  const response = await client.creditBankIncomeRefresh({ body: { userToken: "some example string" } });
   // TODO: Handle 'response' of type CreditBankIncomeRefreshResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditBankIncomeRefreshError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditBankIncomeRefreshError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditBankIncomeRefresh({
+  body: { userToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditBankIncomeRefreshResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -5205,9 +7557,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditBankIncomeRefreshResponse](src/models/credit-bank-income-refresh-response.ts)</code>
+**Direct**: `await client.creditBankIncomeRefresh(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditBankIncomeRefreshError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditBankIncomeRefreshResponse](src/models/credit-bank-income-refresh-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditBankIncomeRefreshError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditBankIncomeRefresh(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditBankIncomeRefreshResponse, ThePlaidApiClient.CreditBankIncomeRefreshError&gt;</code>, with `result.value` of type <code>[CreditBankIncomeRefreshResponse](src/models/credit-bank-income-refresh-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -5235,19 +7595,39 @@ If a user is subscribed, on significant changes to the user's income profile, yo
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditBankIncomeWebhookUpdate({ body });
+  const response = await client.creditBankIncomeWebhookUpdate({
+    body: { userToken: "some example string", enableWebhooks: true },
+  });
   // TODO: Handle 'response' of type CreditBankIncomeWebhookUpdateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditBankIncomeWebhookUpdateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditBankIncomeWebhookUpdateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditBankIncomeWebhookUpdate({
+  body: { userToken: "some example string", enableWebhooks: true },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditBankIncomeWebhookUpdateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -5271,9 +7651,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditBankIncomeWebhookUpdateResponse](src/models/credit-bank-income-webhook-update-response.ts)</code>
+**Direct**: `await client.creditBankIncomeWebhookUpdate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditBankIncomeWebhookUpdateError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditBankIncomeWebhookUpdateResponse](src/models/credit-bank-income-webhook-update-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditBankIncomeWebhookUpdateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditBankIncomeWebhookUpdate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditBankIncomeWebhookUpdateResponse, ThePlaidApiClient.CreditBankIncomeWebhookUpdateError&gt;</code>, with `result.value` of type <code>[CreditBankIncomeWebhookUpdateResponse](src/models/credit-bank-income-webhook-update-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -5299,19 +7687,39 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditBankStatementsUploadsGet({ body });
+  const response = await client.creditBankStatementsUploadsGet({
+    body: { userToken: "some example string" },
+  });
   // TODO: Handle 'response' of type CreditBankStatementsUploadsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditBankStatementsUploadsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditBankStatementsUploadsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditBankStatementsUploadsGet({
+  body: { userToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditBankStatementsUploadsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -5335,9 +7743,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditBankStatementsUploadsGetResponse](src/models/credit-bank-statements-uploads-get-response.ts)</code>
+**Direct**: `await client.creditBankStatementsUploadsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditBankStatementsUploadsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditBankStatementsUploadsGetResponse](src/models/credit-bank-statements-uploads-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditBankStatementsUploadsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditBankStatementsUploadsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditBankStatementsUploadsGetResponse, ThePlaidApiClient.CreditBankStatementsUploadsGetError&gt;</code>, with `result.value` of type <code>[CreditBankStatementsUploadsGetResponse](src/models/credit-bank-statements-uploads-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -5363,19 +7779,35 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditEmploymentGet({ body });
+  const response = await client.creditEmploymentGet({ body: { userToken: "some example string" } });
   // TODO: Handle 'response' of type CreditEmploymentGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditEmploymentGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditEmploymentGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditEmploymentGet({ body: { userToken: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditEmploymentGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -5399,9 +7831,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditEmploymentGetResponse](src/models/credit-employment-get-response.ts)</code>
+**Direct**: `await client.creditEmploymentGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditEmploymentGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditEmploymentGetResponse](src/models/credit-employment-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditEmploymentGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditEmploymentGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditEmploymentGetResponse, ThePlaidApiClient.CreditEmploymentGetError&gt;</code>, with `result.value` of type <code>[CreditEmploymentGetResponse](src/models/credit-employment-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -5427,19 +7867,39 @@ The `/credit/freddie_mac/reports/get` endpoint retrieves the Verification of Ass
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditFreddieMacReportsGet({ body });
+  const response = await client.creditFreddieMacReportsGet({
+    body: { auditCopyToken: "some example string" },
+  });
   // TODO: Handle 'response' of type CreditFreddieMacReportsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditFreddieMacReportsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditFreddieMacReportsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditFreddieMacReportsGet({
+  body: { auditCopyToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditFreddieMacReportsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -5463,9 +7923,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditFreddieMacReportsGetResponse](src/models/credit-freddie-mac-reports-get-response.ts)</code>
+**Direct**: `await client.creditFreddieMacReportsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditFreddieMacReportsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditFreddieMacReportsGetResponse](src/models/credit-freddie-mac-reports-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditFreddieMacReportsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditFreddieMacReportsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditFreddieMacReportsGetResponse, ThePlaidApiClient.CreditFreddieMacReportsGetError&gt;</code>, with `result.value` of type <code>[CreditFreddieMacReportsGetResponse](src/models/credit-freddie-mac-reports-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -5491,19 +7959,35 @@ This endpoint gets payroll income information for a specific user, either as a r
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditPayrollIncomeGet({ body });
+  const response = await client.creditPayrollIncomeGet({ body: {} });
   // TODO: Handle 'response' of type CreditPayrollIncomeGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditPayrollIncomeGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditPayrollIncomeGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditPayrollIncomeGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditPayrollIncomeGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -5527,9 +8011,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditPayrollIncomeGetResponse](src/models/credit-payroll-income-get-response.ts)</code>
+**Direct**: `await client.creditPayrollIncomeGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditPayrollIncomeGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditPayrollIncomeGetResponse](src/models/credit-payroll-income-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditPayrollIncomeGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditPayrollIncomeGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditPayrollIncomeGetResponse, ThePlaidApiClient.CreditPayrollIncomeGetError&gt;</code>, with `result.value` of type <code>[CreditPayrollIncomeGetResponse](src/models/credit-payroll-income-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -5555,22 +8047,39 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditPayrollIncomeParsingConfigUpdate({ body });
+  const response = await client.creditPayrollIncomeParsingConfigUpdate({
+    body: { userToken: "some example string", parsingConfig: [IncomeVerificationDocParsingConfig.Ocr] },
+  });
   // TODO: Handle 'response' of type CreditPayrollIncomeParsingConfigUpdateResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.CreditPayrollIncomeParsingConfigUpdateError &&
-      err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditPayrollIncomeParsingConfigUpdateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditPayrollIncomeParsingConfigUpdate({
+  body: { userToken: "some example string", parsingConfig: [IncomeVerificationDocParsingConfig.Ocr] },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditPayrollIncomeParsingConfigUpdateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -5594,9 +8103,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditPayrollIncomeParsingConfigUpdateResponse](src/models/credit-payroll-income-parsing-config-update-response.ts)</code>
+**Direct**: `await client.creditPayrollIncomeParsingConfigUpdate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditPayrollIncomeParsingConfigUpdateError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditPayrollIncomeParsingConfigUpdateResponse](src/models/credit-payroll-income-parsing-config-update-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditPayrollIncomeParsingConfigUpdateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditPayrollIncomeParsingConfigUpdate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditPayrollIncomeParsingConfigUpdateResponse, ThePlaidApiClient.CreditPayrollIncomeParsingConfigUpdateError&gt;</code>, with `result.value` of type <code>[CreditPayrollIncomeParsingConfigUpdateResponse](src/models/credit-payroll-income-parsing-config-update-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -5626,19 +8143,35 @@ When testing in Sandbox, you can control the results by providing special test v
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditPayrollIncomePrecheck({ body });
+  const response = await client.creditPayrollIncomePrecheck({ body: {} });
   // TODO: Handle 'response' of type CreditPayrollIncomePrecheckResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditPayrollIncomePrecheckError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditPayrollIncomePrecheckError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditPayrollIncomePrecheck({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditPayrollIncomePrecheckResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -5662,9 +8195,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditPayrollIncomePrecheckResponse](src/models/credit-payroll-income-precheck-response.ts)</code>
+**Direct**: `await client.creditPayrollIncomePrecheck(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditPayrollIncomePrecheckError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditPayrollIncomePrecheckResponse](src/models/credit-payroll-income-precheck-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditPayrollIncomePrecheckError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditPayrollIncomePrecheck(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditPayrollIncomePrecheckResponse, ThePlaidApiClient.CreditPayrollIncomePrecheckError&gt;</code>, with `result.value` of type <code>[CreditPayrollIncomePrecheckResponse](src/models/credit-payroll-income-precheck-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -5690,19 +8231,37 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditPayrollIncomeRefresh({ body });
+  const response = await client.creditPayrollIncomeRefresh({ body: { userToken: "some example string" } });
   // TODO: Handle 'response' of type CreditPayrollIncomeRefreshResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditPayrollIncomeRefreshError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditPayrollIncomeRefreshError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditPayrollIncomeRefresh({
+  body: { userToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditPayrollIncomeRefreshResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -5726,9 +8285,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditPayrollIncomeRefreshResponse](src/models/credit-payroll-income-refresh-response.ts)</code>
+**Direct**: `await client.creditPayrollIncomeRefresh(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditPayrollIncomeRefreshError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditPayrollIncomeRefreshResponse](src/models/credit-payroll-income-refresh-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditPayrollIncomeRefreshError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditPayrollIncomeRefresh(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditPayrollIncomeRefreshResponse, ThePlaidApiClient.CreditPayrollIncomeRefreshError&gt;</code>, with `result.value` of type <code>[CreditPayrollIncomeRefreshResponse](src/models/credit-payroll-income-refresh-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -5758,21 +8325,35 @@ To trigger risk signal generation for an Item, call `/link/token/create` with `p
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditPayrollIncomeRiskSignalsGet({ body });
+  const response = await client.creditPayrollIncomeRiskSignalsGet({ body: {} });
   // TODO: Handle 'response' of type CreditPayrollIncomeRiskSignalsGetResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.CreditPayrollIncomeRiskSignalsGetError && err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditPayrollIncomeRiskSignalsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditPayrollIncomeRiskSignalsGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditPayrollIncomeRiskSignalsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -5796,9 +8377,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditPayrollIncomeRiskSignalsGetResponse](src/models/credit-payroll-income-risk-signals-get-response.ts)</code>
+**Direct**: `await client.creditPayrollIncomeRiskSignalsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditPayrollIncomeRiskSignalsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditPayrollIncomeRiskSignalsGetResponse](src/models/credit-payroll-income-risk-signals-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditPayrollIncomeRiskSignalsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditPayrollIncomeRiskSignalsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditPayrollIncomeRiskSignalsGetResponse, ThePlaidApiClient.CreditPayrollIncomeRiskSignalsGetError&gt;</code>, with `result.value` of type <code>[CreditPayrollIncomeRiskSignalsGetResponse](src/models/credit-payroll-income-risk-signals-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -5826,19 +8415,39 @@ To grant a third party access to an Asset Report, use the `/credit/relay/create`
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditRelayCreate({ body });
+  const response = await client.creditRelayCreate({
+    body: { reportTokens: ["some example string"], secondaryClientId: "some example string" },
+  });
   // TODO: Handle 'response' of type CreditRelayCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditRelayCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditRelayCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditRelayCreate({
+  body: { reportTokens: ["some example string"], secondaryClientId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditRelayCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -5862,9 +8471,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditRelayCreateResponse](src/models/credit-relay-create-response.ts)</code>
+**Direct**: `await client.creditRelayCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditRelayCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditRelayCreateResponse](src/models/credit-relay-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditRelayCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditRelayCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditRelayCreateResponse, ThePlaidApiClient.CreditRelayCreateError&gt;</code>, with `result.value` of type <code>[CreditRelayCreateResponse](src/models/credit-relay-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -5890,19 +8507,39 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditRelayGet({ body });
+  const response = await client.creditRelayGet({
+    body: { relayToken: "some example string", reportType: ReportType.Asset },
+  });
   // TODO: Handle 'response' of type AssetReportGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditRelayGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditRelayGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditRelayGet({
+  body: { relayToken: "some example string", reportType: ReportType.Asset },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type AssetReportGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -5926,9 +8563,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[AssetReportGetResponse](src/models/asset-report-get-response.ts)</code>
+**Direct**: `await client.creditRelayGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditRelayGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[AssetReportGetResponse](src/models/asset-report-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditRelayGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditRelayGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;AssetReportGetResponse, ThePlaidApiClient.CreditRelayGetError&gt;</code>, with `result.value` of type <code>[AssetReportGetResponse](src/models/asset-report-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -5960,18 +8605,38 @@ The response to `/credit/relay/pdf/get` is the PDF binary data. The `request_id`
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  await client.creditRelayPdfGet({ body });
+  await client.creditRelayPdfGet({
+    body: { relayToken: "some example string", reportType: ReportType.Asset },
+  });
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditRelayPdfGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditRelayPdfGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditRelayPdfGet({
+  body: { relayToken: "some example string", reportType: ReportType.Asset },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: The call succeeded and resolves to no body
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -5995,9 +8660,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>undefined</code>
+**Direct**: `await client.creditRelayPdfGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditRelayPdfGetError](src/client.ts)</code>
+- **OnSuccess**: <code>undefined</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditRelayPdfGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditRelayPdfGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;undefined, ThePlaidApiClient.CreditRelayPdfGetError&gt;</code>, with `result.value` of type <code>undefined</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -6023,19 +8696,39 @@ The `/credit/relay/refresh` endpoint allows third parties to refresh a report th
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditRelayRefresh({ body });
+  const response = await client.creditRelayRefresh({
+    body: { relayToken: "some example string", reportType: ReportType.Asset },
+  });
   // TODO: Handle 'response' of type CreditRelayRefreshResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditRelayRefreshError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditRelayRefreshError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditRelayRefresh({
+  body: { relayToken: "some example string", reportType: ReportType.Asset },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditRelayRefreshResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -6059,9 +8752,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditRelayRefreshResponse](src/models/credit-relay-refresh-response.ts)</code>
+**Direct**: `await client.creditRelayRefresh(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditRelayRefreshError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditRelayRefreshResponse](src/models/credit-relay-refresh-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditRelayRefreshError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditRelayRefresh(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditRelayRefreshResponse, ThePlaidApiClient.CreditRelayRefreshError&gt;</code>, with `result.value` of type <code>[CreditRelayRefreshResponse](src/models/credit-relay-refresh-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -6087,19 +8788,35 @@ The `/credit/relay/remove` endpoint allows you to invalidate a `relay_token`. Th
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditRelayRemove({ body });
+  const response = await client.creditRelayRemove({ body: { relayToken: "some example string" } });
   // TODO: Handle 'response' of type CreditRelayRemoveResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditRelayRemoveError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditRelayRemoveError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditRelayRemove({ body: { relayToken: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditRelayRemoveResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -6123,9 +8840,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditRelayRemoveResponse](src/models/credit-relay-remove-response.ts)</code>
+**Direct**: `await client.creditRelayRemove(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditRelayRemoveError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditRelayRemoveResponse](src/models/credit-relay-remove-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditRelayRemoveError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditRelayRemove(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditRelayRemoveResponse, ThePlaidApiClient.CreditRelayRemoveError&gt;</code>, with `result.value` of type <code>[CreditRelayRemoveResponse](src/models/credit-relay-remove-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -6151,19 +8876,39 @@ The `/credit/audit_copy_token/remove` endpoint allows you to remove an Audit Cop
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditReportAuditCopyRemove({ body });
+  const response = await client.creditReportAuditCopyRemove({
+    body: { auditCopyToken: "some example string" },
+  });
   // TODO: Handle 'response' of type CreditAuditCopyTokenRemoveResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditReportAuditCopyRemoveError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditReportAuditCopyRemoveError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditReportAuditCopyRemove({
+  body: { auditCopyToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditAuditCopyTokenRemoveResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -6187,9 +8932,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditAuditCopyTokenRemoveResponse](src/models/credit-audit-copy-token-remove-response.ts)</code>
+**Direct**: `await client.creditReportAuditCopyRemove(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditReportAuditCopyRemoveError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditAuditCopyTokenRemoveResponse](src/models/credit-audit-copy-token-remove-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditReportAuditCopyRemoveError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditReportAuditCopyRemove(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditAuditCopyTokenRemoveResponse, ThePlaidApiClient.CreditReportAuditCopyRemoveError&gt;</code>, with `result.value` of type <code>[CreditAuditCopyTokenRemoveResponse](src/models/credit-audit-copy-token-remove-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -6217,19 +8970,35 @@ These results include details about the Item that was created and some product r
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.creditSessionsGet({ body });
+  const response = await client.creditSessionsGet({ body: { userToken: "some example string" } });
   // TODO: Handle 'response' of type CreditSessionsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.CreditSessionsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.CreditSessionsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.creditSessionsGet({ body: { userToken: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type CreditSessionsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -6253,9 +9022,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[CreditSessionsGetResponse](src/models/credit-sessions-get-response.ts)</code>
+**Direct**: `await client.creditSessionsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.CreditSessionsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[CreditSessionsGetResponse](src/models/credit-sessions-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.CreditSessionsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.creditSessionsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;CreditSessionsGetResponse, ThePlaidApiClient.CreditSessionsGetError&gt;</code>, with `result.value` of type <code>[CreditSessionsGetResponse](src/models/credit-sessions-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -6266,7 +9043,7 @@ try {
 </details>
 
 <details>
-<summary><code>dashboardUserGet(request: ThePlaidApiClient.DashboardUserGetRequestParams, options?: RequestOptions): ApiPromise&lt;DashboardUserGetResponse, ResponseError&gt;</code></summary>
+<summary><code>dashboardUserGet(request: ThePlaidApiClient.DashboardUserGetRequestParams, options?: RequestOptions): ApiPromise&lt;DashboardUserGetResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -6281,17 +9058,37 @@ The `/dashboard_user/get` endpoint provides details (such as email address) abou
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.dashboardUserGet({ body });
+  const response = await client.dashboardUserGet({ body: { dashboardUserId: "some example string" } });
   // TODO: Handle 'response' of type DashboardUserGetResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.dashboardUserGet({
+  body: { dashboardUserId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type DashboardUserGetResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -6315,9 +9112,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[DashboardUserGetResponse](src/models/dashboard-user-get-response.ts)</code>
+**Direct**: `await client.dashboardUserGet(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[DashboardUserGetResponse](src/models/dashboard-user-get-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.dashboardUserGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;DashboardUserGetResponse, ApiError&gt;</code>, with `result.value` of type <code>[DashboardUserGetResponse](src/models/dashboard-user-get-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -6328,7 +9133,7 @@ try {
 </details>
 
 <details>
-<summary><code>dashboardUserList(request: ThePlaidApiClient.DashboardUserListRequestParams, options?: RequestOptions): ApiPromise&lt;DashboardUserListResponse, ResponseError&gt;</code></summary>
+<summary><code>dashboardUserList(request: ThePlaidApiClient.DashboardUserListRequestParams, options?: RequestOptions): ApiPromise&lt;DashboardUserListResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -6343,17 +9148,35 @@ The `/dashboard_user/list` endpoint provides details (such as email address) abo
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.dashboardUserList({ body });
+  const response = await client.dashboardUserList({ body: {} });
   // TODO: Handle 'response' of type DashboardUserListResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.dashboardUserList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type DashboardUserListResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -6377,9 +9200,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[DashboardUserListResponse](src/models/dashboard-user-list-response.ts)</code>
+**Direct**: `await client.dashboardUserList(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[DashboardUserListResponse](src/models/dashboard-user-list-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.dashboardUserList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;DashboardUserListResponse, ApiError&gt;</code>, with `result.value` of type <code>[DashboardUserListResponse](src/models/dashboard-user-list-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -6407,19 +9238,39 @@ The data in the employer database is currently limited. As the Deposit Switch an
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.employersSearch({ body });
+  const response = await client.employersSearch({
+    body: { query: "some example string", products: ["some example string"] },
+  });
   // TODO: Handle 'response' of type EmployersSearchResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.EmployersSearchError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.EmployersSearchError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.employersSearch({
+  body: { query: "some example string", products: ["some example string"] },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type EmployersSearchResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -6443,9 +9294,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[EmployersSearchResponse](src/models/employers-search-response.ts)</code>
+**Direct**: `await client.employersSearch(request)`
 
-**OnError**: <code>[ThePlaidApiClient.EmployersSearchError](src/client.ts)</code>
+- **OnSuccess**: <code>[EmployersSearchResponse](src/models/employers-search-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.EmployersSearchError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.employersSearch(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;EmployersSearchResponse, ThePlaidApiClient.EmployersSearchError&gt;</code>, with `result.value` of type <code>[EmployersSearchResponse](src/models/employers-search-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -6473,19 +9332,37 @@ This endpoint has been deprecated; new integrations should use `/credit/employme
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.employmentVerificationGet({ body });
+  const response = await client.employmentVerificationGet({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type EmploymentVerificationGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.EmploymentVerificationGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.EmploymentVerificationGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.employmentVerificationGet({
+  body: { accessToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type EmploymentVerificationGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -6509,9 +9386,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[EmploymentVerificationGetResponse](src/models/employment-verification-get-response.ts)</code>
+**Direct**: `await client.employmentVerificationGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.EmploymentVerificationGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[EmploymentVerificationGetResponse](src/models/employment-verification-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.EmploymentVerificationGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.employmentVerificationGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;EmploymentVerificationGetResponse, ThePlaidApiClient.EmploymentVerificationGetError&gt;</code>, with `result.value` of type <code>[EmploymentVerificationGetResponse](src/models/employment-verification-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -6537,19 +9422,35 @@ Returns a consent grant by its identifier
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.fdxConsentsGet({ consentId });
+  const response = await client.fdxConsentsGet({ consentId: "some example string" });
   // TODO: Handle 'response' of type FdxConsentGrant
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.FdxConsentsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.FdxConsentsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.fdxConsentsGet({ consentId: "some example string" }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type FdxConsentGrant
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -6573,9 +9474,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[FdxConsentGrant](src/models/fdx-consent-grant.ts)</code>
+**Direct**: `await client.fdxConsentsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.FdxConsentsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[FdxConsentGrant](src/models/fdx-consent-grant.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.FdxConsentsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.fdxConsentsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;FdxConsentGrant, ThePlaidApiClient.FdxConsentsGetError&gt;</code>, with `result.value` of type <code>[FdxConsentGrant](src/models/fdx-consent-grant.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -6601,19 +9510,35 @@ Returns zero or more consent grants associated with the given data provider cust
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.fdxConsentsList({ customerId });
+  const response = await client.fdxConsentsList({ customerId: "some example string" });
   // TODO: Handle 'response' of type GetConsentsResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.FdxConsentsListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.FdxConsentsListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.fdxConsentsList({ customerId: "some example string" }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type GetConsentsResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -6638,9 +9563,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[GetConsentsResponse](src/models/get-consents-response.ts)</code>
+**Direct**: `await client.fdxConsentsList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.FdxConsentsListError](src/client.ts)</code>
+- **OnSuccess**: <code>[GetConsentsResponse](src/models/get-consents-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.FdxConsentsListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.fdxConsentsList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;GetConsentsResponse, ThePlaidApiClient.FdxConsentsListError&gt;</code>, with `result.value` of type <code>[GetConsentsResponse](src/models/get-consents-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -6666,19 +9599,35 @@ Returns the revocation history of a consent grant
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.fdxConsentsRevocationGet({ consentId });
+  const response = await client.fdxConsentsRevocationGet({ consentId: "some example string" });
   // TODO: Handle 'response' of type FdxConsentRevocations
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.FdxConsentsRevocationGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.FdxConsentsRevocationGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.fdxConsentsRevocationGet({ consentId: "some example string" }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type FdxConsentRevocations
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -6702,9 +9651,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[FdxConsentRevocations](src/models/fdx-consent-revocations.ts)</code>
+**Direct**: `await client.fdxConsentsRevocationGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.FdxConsentsRevocationGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[FdxConsentRevocations](src/models/fdx-consent-revocations.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.FdxConsentsRevocationGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.fdxConsentsRevocationGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;FdxConsentRevocations, ThePlaidApiClient.FdxConsentsRevocationGetError&gt;</code>, with `result.value` of type <code>[FdxConsentRevocations](src/models/fdx-consent-revocations.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -6730,18 +9687,40 @@ Appends a REVOKED status record to the named consent grant
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  await client.fdxConsentsRevoke({ consentId, body });
+  await client.fdxConsentsRevoke({
+    consentId: "some example string",
+    body: { initiator: PartyType.DataAccessPlatform, reason: FdxUpdateReason.BusinessRule },
+  });
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.FdxConsentsRevokeError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.FdxConsentsRevokeError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.fdxConsentsRevoke({
+  consentId: "some example string",
+  body: { initiator: PartyType.DataAccessPlatform, reason: FdxUpdateReason.BusinessRule },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: The call succeeded and resolves to no body
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -6766,9 +9745,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>undefined</code>
+**Direct**: `await client.fdxConsentsRevoke(request)`
 
-**OnError**: <code>[ThePlaidApiClient.FdxConsentsRevokeError](src/client.ts)</code>
+- **OnSuccess**: <code>undefined</code>
+- **OnError**: throws <code>[ThePlaidApiClient.FdxConsentsRevokeError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.fdxConsentsRevoke(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;undefined, ThePlaidApiClient.FdxConsentsRevokeError&gt;</code>, with `result.value` of type <code>undefined</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -6794,18 +9781,50 @@ A generic webhook receiver endpoint for FDX Event Notifications
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  await client.fdxNotifications({ body });
+  await client.fdxNotifications({
+    body: {
+      notificationId: "some example string",
+      type: NotificationType.AccountTakeover,
+      sentOn: new Date(Date.UTC(2024, 0, 15, 9, 30, 0)),
+      category: NotificationCategory.Security,
+      notificationPayload: {},
+    },
+  });
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.FdxNotificationsError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.FdxNotificationsError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.fdxNotifications({
+  body: {
+    notificationId: "some example string",
+    type: NotificationType.AccountTakeover,
+    sentOn: new Date(Date.UTC(2024, 0, 15, 9, 30, 0)),
+    category: NotificationCategory.Security,
+    notificationPayload: {},
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: The call succeeded and resolves to no body
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -6829,9 +9848,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>undefined</code>
+**Direct**: `await client.fdxNotifications(request)`
 
-**OnError**: <code>[ThePlaidApiClient.FdxNotificationsError](src/client.ts)</code>
+- **OnSuccess**: <code>undefined</code>
+- **OnError**: throws <code>[ThePlaidApiClient.FdxNotificationsError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.fdxNotifications(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;undefined, ThePlaidApiClient.FdxNotificationsError&gt;</code>, with `result.value` of type <code>undefined</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -6857,19 +9884,35 @@ Get a specific recipient
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.getRecipient({ recipientId });
+  const response = await client.getRecipient({ recipientId: "some example string" });
   // TODO: Handle 'response' of type FdxRecipientMetadata
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.GetRecipientError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.GetRecipientError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.getRecipient({ recipientId: "some example string" }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type FdxRecipientMetadata
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -6894,9 +9937,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[FdxRecipientMetadata](src/models/fdx-recipient-metadata.ts)</code>
+**Direct**: `await client.getRecipient(request)`
 
-**OnError**: <code>[ThePlaidApiClient.GetRecipientError](src/client.ts)</code>
+- **OnSuccess**: <code>[FdxRecipientMetadata](src/models/fdx-recipient-metadata.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.GetRecipientError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.getRecipient(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;FdxRecipientMetadata, ThePlaidApiClient.GetRecipientError&gt;</code>, with `result.value` of type <code>[FdxRecipientMetadata](src/models/fdx-recipient-metadata.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -6922,7 +9973,7 @@ Returns a list of Recipients
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
@@ -6932,9 +9983,25 @@ try {
   const response = await client.getRecipients();
   // TODO: Handle 'response' of type GetRecipientsResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.GetRecipientsError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.GetRecipientsError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.getRecipients().asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type GetRecipientsResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -6946,9 +10013,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[GetRecipientsResponse](src/models/get-recipients-response.ts)</code>
+**Direct**: `await client.getRecipients()`
 
-**OnError**: <code>[ThePlaidApiClient.GetRecipientsError](src/client.ts)</code>
+- **OnSuccess**: <code>[GetRecipientsResponse](src/models/get-recipients-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.GetRecipientsError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.getRecipients().asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;GetRecipientsResponse, ThePlaidApiClient.GetRecipientsError&gt;</code>, with `result.value` of type <code>[GetRecipientsResponse](src/models/get-recipients-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -6974,19 +10049,37 @@ Use `/identity/documents/uploads/get` to retrieve identity details when using [I
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.identityDocumentsUploadsGet({ body });
+  const response = await client.identityDocumentsUploadsGet({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type IdentityDocumentsUploadsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.IdentityDocumentsUploadsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.IdentityDocumentsUploadsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.identityDocumentsUploadsGet({
+  body: { accessToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type IdentityDocumentsUploadsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -7010,9 +10103,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[IdentityDocumentsUploadsGetResponse](src/models/identity-documents-uploads-get-response.ts)</code>
+**Direct**: `await client.identityDocumentsUploadsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.IdentityDocumentsUploadsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[IdentityDocumentsUploadsGetResponse](src/models/identity-documents-uploads-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.IdentityDocumentsUploadsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.identityDocumentsUploadsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;IdentityDocumentsUploadsGetResponse, ThePlaidApiClient.IdentityDocumentsUploadsGetError&gt;</code>, with `result.value` of type <code>[IdentityDocumentsUploadsGetResponse](src/models/identity-documents-uploads-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -7040,19 +10141,35 @@ Note: In API versions 2018-05-22 and earlier, the `owners` object is not returne
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.identityGet({ body });
+  const response = await client.identityGet({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type IdentityGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.IdentityGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.IdentityGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.identityGet({ body: { accessToken: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type IdentityGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -7076,9 +10193,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[IdentityGetResponse](src/models/identity-get-response.ts)</code>
+**Direct**: `await client.identityGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.IdentityGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[IdentityGetResponse](src/models/identity-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.IdentityGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.identityGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;IdentityGetResponse, ThePlaidApiClient.IdentityGetError&gt;</code>, with `result.value` of type <code>[IdentityGetResponse](src/models/identity-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -7106,19 +10231,35 @@ Fields within the `balances` object will always be null when retrieved by `/iden
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.identityMatch({ body });
+  const response = await client.identityMatch({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type IdentityMatchResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.IdentityMatchError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.IdentityMatchError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.identityMatch({ body: { accessToken: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type IdentityMatchResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -7142,9 +10283,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[IdentityMatchResponse](src/models/identity-match-response.ts)</code>
+**Direct**: `await client.identityMatch(request)`
 
-**OnError**: <code>[ThePlaidApiClient.IdentityMatchError](src/client.ts)</code>
+- **OnSuccess**: <code>[IdentityMatchResponse](src/models/identity-match-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.IdentityMatchError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.identityMatch(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;IdentityMatchResponse, ThePlaidApiClient.IdentityMatchError&gt;</code>, with `result.value` of type <code>[IdentityMatchResponse](src/models/identity-match-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -7174,19 +10323,35 @@ As this endpoint triggers a synchronous request for fresh data, latency may be h
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.identityRefresh({ body });
+  const response = await client.identityRefresh({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type IdentityRefreshResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.IdentityRefreshError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.IdentityRefreshError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.identityRefresh({ body: { accessToken: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type IdentityRefreshResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -7210,9 +10375,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[IdentityRefreshResponse](src/models/identity-refresh-response.ts)</code>
+**Direct**: `await client.identityRefresh(request)`
 
-**OnError**: <code>[ThePlaidApiClient.IdentityRefreshError](src/client.ts)</code>
+- **OnSuccess**: <code>[IdentityRefreshResponse](src/models/identity-refresh-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.IdentityRefreshError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.identityRefresh(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;IdentityRefreshResponse, ThePlaidApiClient.IdentityRefreshError&gt;</code>, with `result.value` of type <code>[IdentityRefreshResponse](src/models/identity-refresh-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -7223,7 +10396,7 @@ try {
 </details>
 
 <details>
-<summary><code>identityVerificationAutofillCreate(request: ThePlaidApiClient.IdentityVerificationAutofillCreateRequestParams, options?: RequestOptions): ApiPromise&lt;IdentityVerificationAutofillCreateResponse, ResponseError&gt;</code></summary>
+<summary><code>identityVerificationAutofillCreate(request: ThePlaidApiClient.IdentityVerificationAutofillCreateRequestParams, options?: RequestOptions): ApiPromise&lt;IdentityVerificationAutofillCreateResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -7238,17 +10411,39 @@ Try to autofill an Identity Verification based on the provided phone number, dat
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.identityVerificationAutofillCreate({ body });
+  const response = await client.identityVerificationAutofillCreate({
+    body: { identityVerificationId: "flwses_42cF1MNo42r9Xj" },
+  });
   // TODO: Handle 'response' of type IdentityVerificationAutofillCreateResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.identityVerificationAutofillCreate({
+  body: { identityVerificationId: "flwses_42cF1MNo42r9Xj" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type IdentityVerificationAutofillCreateResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -7272,9 +10467,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[IdentityVerificationAutofillCreateResponse](src/models/identity-verification-autofill-create-response.ts)</code>
+**Direct**: `await client.identityVerificationAutofillCreate(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[IdentityVerificationAutofillCreateResponse](src/models/identity-verification-autofill-create-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.identityVerificationAutofillCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;IdentityVerificationAutofillCreateResponse, ApiError&gt;</code>, with `result.value` of type <code>[IdentityVerificationAutofillCreateResponse](src/models/identity-verification-autofill-create-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -7285,7 +10488,7 @@ try {
 </details>
 
 <details>
-<summary><code>identityVerificationCreate(request: ThePlaidApiClient.IdentityVerificationCreateRequestParams, options?: RequestOptions): ApiPromise&lt;IdentityVerificationCreateResponse, ResponseError&gt;</code></summary>
+<summary><code>identityVerificationCreate(request: ThePlaidApiClient.IdentityVerificationCreateRequestParams, options?: RequestOptions): ApiPromise&lt;IdentityVerificationCreateResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -7307,17 +10510,39 @@ If `user_id` is not provided, you can also use this endpoint to supply informati
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.identityVerificationCreate({ body });
+  const response = await client.identityVerificationCreate({
+    body: { isShareable: true, templateId: "some example string", gaveConsent: true },
+  });
   // TODO: Handle 'response' of type IdentityVerificationCreateResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.identityVerificationCreate({
+  body: { isShareable: true, templateId: "some example string", gaveConsent: true },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type IdentityVerificationCreateResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -7341,9 +10566,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[IdentityVerificationCreateResponse](src/models/identity-verification-create-response.ts)</code>
+**Direct**: `await client.identityVerificationCreate(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[IdentityVerificationCreateResponse](src/models/identity-verification-create-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.identityVerificationCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;IdentityVerificationCreateResponse, ApiError&gt;</code>, with `result.value` of type <code>[IdentityVerificationCreateResponse](src/models/identity-verification-create-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -7354,7 +10587,7 @@ try {
 </details>
 
 <details>
-<summary><code>identityVerificationGet(request: ThePlaidApiClient.IdentityVerificationGetRequestParams, options?: RequestOptions): ApiPromise&lt;IdentityVerificationGetResponse, ResponseError&gt;</code></summary>
+<summary><code>identityVerificationGet(request: ThePlaidApiClient.IdentityVerificationGetRequestParams, options?: RequestOptions): ApiPromise&lt;IdentityVerificationGetResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -7369,17 +10602,39 @@ Retrieve a previously created Identity Verification.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.identityVerificationGet({ body });
+  const response = await client.identityVerificationGet({
+    body: { identityVerificationId: "some example string" },
+  });
   // TODO: Handle 'response' of type IdentityVerificationGetResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.identityVerificationGet({
+  body: { identityVerificationId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type IdentityVerificationGetResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -7403,9 +10658,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[IdentityVerificationGetResponse](src/models/identity-verification-get-response.ts)</code>
+**Direct**: `await client.identityVerificationGet(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[IdentityVerificationGetResponse](src/models/identity-verification-get-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.identityVerificationGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;IdentityVerificationGetResponse, ApiError&gt;</code>, with `result.value` of type <code>[IdentityVerificationGetResponse](src/models/identity-verification-get-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -7416,7 +10679,7 @@ try {
 </details>
 
 <details>
-<summary><code>identityVerificationList(request: ThePlaidApiClient.IdentityVerificationListRequestParams, options?: RequestOptions): ApiPromise&lt;IdentityVerificationListResponse, ResponseError&gt;</code></summary>
+<summary><code>identityVerificationList(request: ThePlaidApiClient.IdentityVerificationListRequestParams, options?: RequestOptions): ApiPromise&lt;IdentityVerificationListResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -7431,17 +10694,37 @@ Filter and list Identity Verifications created by your account
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.identityVerificationList({ body });
+  const response = await client.identityVerificationList({ body: { templateId: "some example string" } });
   // TODO: Handle 'response' of type IdentityVerificationListResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.identityVerificationList({
+  body: { templateId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type IdentityVerificationListResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -7465,9 +10748,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[IdentityVerificationListResponse](src/models/identity-verification-list-response.ts)</code>
+**Direct**: `await client.identityVerificationList(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[IdentityVerificationListResponse](src/models/identity-verification-list-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.identityVerificationList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;IdentityVerificationListResponse, ApiError&gt;</code>, with `result.value` of type <code>[IdentityVerificationListResponse](src/models/identity-verification-list-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -7478,7 +10769,7 @@ try {
 </details>
 
 <details>
-<summary><code>identityVerificationRetry(request: ThePlaidApiClient.IdentityVerificationRetryRequestParams, options?: RequestOptions): ApiPromise&lt;IdentityVerificationRetryResponse, ResponseError&gt;</code></summary>
+<summary><code>identityVerificationRetry(request: ThePlaidApiClient.IdentityVerificationRetryRequestParams, options?: RequestOptions): ApiPromise&lt;IdentityVerificationRetryResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -7493,17 +10784,43 @@ Allow a customer to retry their Identity Verification
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.identityVerificationRetry({ body });
+  const response = await client.identityVerificationRetry({
+    body: {
+      clientUserId: "some example string",
+      templateId: "some example string",
+      strategy: Strategy.Reset,
+    },
+  });
   // TODO: Handle 'response' of type IdentityVerificationRetryResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.identityVerificationRetry({
+  body: { clientUserId: "some example string", templateId: "some example string", strategy: Strategy.Reset },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type IdentityVerificationRetryResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -7527,9 +10844,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[IdentityVerificationRetryResponse](src/models/identity-verification-retry-response.ts)</code>
+**Direct**: `await client.identityVerificationRetry(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[IdentityVerificationRetryResponse](src/models/identity-verification-retry-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.identityVerificationRetry(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;IdentityVerificationRetryResponse, ApiError&gt;</code>, with `result.value` of type <code>[IdentityVerificationRetryResponse](src/models/identity-verification-retry-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -7555,19 +10880,37 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.incomeVerificationCreate({ body });
+  const response = await client.incomeVerificationCreate({ body: { webhook: "some example string" } });
   // TODO: Handle 'response' of type IncomeVerificationCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.IncomeVerificationCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.IncomeVerificationCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.incomeVerificationCreate({
+  body: { webhook: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type IncomeVerificationCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -7591,9 +10934,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[IncomeVerificationCreateResponse](src/models/income-verification-create-response.ts)</code>
+**Direct**: `await client.incomeVerificationCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.IncomeVerificationCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[IncomeVerificationCreateResponse](src/models/income-verification-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.IncomeVerificationCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.incomeVerificationCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;IncomeVerificationCreateResponse, ThePlaidApiClient.IncomeVerificationCreateError&gt;</code>, with `result.value` of type <code>[IncomeVerificationCreateResponse](src/models/income-verification-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -7626,20 +10977,34 @@ The `request_id` is returned in the `Plaid-Request-ID` header.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  await client.incomeVerificationDocumentsDownload({ body });
+  await client.incomeVerificationDocumentsDownload({ body: {} });
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.IncomeVerificationDocumentsDownloadError && err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.IncomeVerificationDocumentsDownloadError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.incomeVerificationDocumentsDownload({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: The call succeeded and resolves to no body
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -7663,9 +11028,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>undefined</code>
+**Direct**: `await client.incomeVerificationDocumentsDownload(request)`
 
-**OnError**: <code>[ThePlaidApiClient.IncomeVerificationDocumentsDownloadError](src/client.ts)</code>
+- **OnSuccess**: <code>undefined</code>
+- **OnError**: throws <code>[ThePlaidApiClient.IncomeVerificationDocumentsDownloadError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.incomeVerificationDocumentsDownload(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;undefined, ThePlaidApiClient.IncomeVerificationDocumentsDownloadError&gt;</code>, with `result.value` of type <code>undefined</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -7693,19 +11066,35 @@ This endpoint has been deprecated; new integrations should use `/credit/payroll_
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.incomeVerificationPaystubsGet({ body });
+  const response = await client.incomeVerificationPaystubsGet({ body: {} });
   // TODO: Handle 'response' of type IncomeVerificationPaystubsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.IncomeVerificationPaystubsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.IncomeVerificationPaystubsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.incomeVerificationPaystubsGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type IncomeVerificationPaystubsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -7729,9 +11118,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[IncomeVerificationPaystubsGetResponse](src/models/income-verification-paystubs-get-response.ts)</code>
+**Direct**: `await client.incomeVerificationPaystubsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.IncomeVerificationPaystubsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[IncomeVerificationPaystubsGetResponse](src/models/income-verification-paystubs-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.IncomeVerificationPaystubsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.incomeVerificationPaystubsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;IncomeVerificationPaystubsGetResponse, ThePlaidApiClient.IncomeVerificationPaystubsGetError&gt;</code>, with `result.value` of type <code>[IncomeVerificationPaystubsGetResponse](src/models/income-verification-paystubs-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -7761,19 +11158,35 @@ This endpoint has been deprecated; new integrations should use `/credit/payroll_
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.incomeVerificationPrecheck({ body });
+  const response = await client.incomeVerificationPrecheck({ body: {} });
   // TODO: Handle 'response' of type IncomeVerificationPrecheckResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.IncomeVerificationPrecheckError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.IncomeVerificationPrecheckError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.incomeVerificationPrecheck({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type IncomeVerificationPrecheckResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -7797,9 +11210,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[IncomeVerificationPrecheckResponse](src/models/income-verification-precheck-response.ts)</code>
+**Direct**: `await client.incomeVerificationPrecheck(request)`
 
-**OnError**: <code>[ThePlaidApiClient.IncomeVerificationPrecheckError](src/client.ts)</code>
+- **OnSuccess**: <code>[IncomeVerificationPrecheckResponse](src/models/income-verification-precheck-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.IncomeVerificationPrecheckError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.incomeVerificationPrecheck(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;IncomeVerificationPrecheckResponse, ThePlaidApiClient.IncomeVerificationPrecheckError&gt;</code>, with `result.value` of type <code>[IncomeVerificationPrecheckResponse](src/models/income-verification-precheck-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -7827,19 +11248,35 @@ This endpoint has been deprecated; new integrations should use `/credit/payroll_
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.incomeVerificationTaxformsGet({ body });
+  const response = await client.incomeVerificationTaxformsGet({ body: {} });
   // TODO: Handle 'response' of type IncomeVerificationTaxformsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.IncomeVerificationTaxformsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.IncomeVerificationTaxformsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.incomeVerificationTaxformsGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type IncomeVerificationTaxformsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -7863,9 +11300,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[IncomeVerificationTaxformsGetResponse](src/models/income-verification-taxforms-get-response.ts)</code>
+**Direct**: `await client.incomeVerificationTaxformsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.IncomeVerificationTaxformsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[IncomeVerificationTaxformsGetResponse](src/models/income-verification-taxforms-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.IncomeVerificationTaxformsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.incomeVerificationTaxformsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;IncomeVerificationTaxformsGetResponse, ThePlaidApiClient.IncomeVerificationTaxformsGetError&gt;</code>, with `result.value` of type <code>[IncomeVerificationTaxformsGetResponse](src/models/income-verification-taxforms-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -7893,19 +11338,39 @@ If there is no overlap between an institution's enabled products and a client's 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.institutionsGet({ body });
+  const response = await client.institutionsGet({
+    body: { count: 1, offset: 1, countryCodes: [CountryCode.Us] },
+  });
   // TODO: Handle 'response' of type InstitutionsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.InstitutionsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.InstitutionsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.institutionsGet({
+  body: { count: 1, offset: 1, countryCodes: [CountryCode.Us] },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type InstitutionsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -7929,9 +11394,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[InstitutionsGetResponse](src/models/institutions-get-response.ts)</code>
+**Direct**: `await client.institutionsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.InstitutionsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[InstitutionsGetResponse](src/models/institutions-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.InstitutionsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.institutionsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;InstitutionsGetResponse, ThePlaidApiClient.InstitutionsGetError&gt;</code>, with `result.value` of type <code>[InstitutionsGetResponse](src/models/institutions-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -7960,19 +11433,39 @@ Versioning note: API versions 2019-05-29 and earlier allow use of the `public_ke
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.institutionsGetById({ body });
+  const response = await client.institutionsGetById({
+    body: { institutionId: "some example string", countryCodes: [CountryCode.Us] },
+  });
   // TODO: Handle 'response' of type InstitutionsGetByIdResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.InstitutionsGetByIdError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.InstitutionsGetByIdError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.institutionsGetById({
+  body: { institutionId: "some example string", countryCodes: [CountryCode.Us] },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type InstitutionsGetByIdResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -7996,9 +11489,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[InstitutionsGetByIdResponse](src/models/institutions-get-by-id-response.ts)</code>
+**Direct**: `await client.institutionsGetById(request)`
 
-**OnError**: <code>[ThePlaidApiClient.InstitutionsGetByIdError](src/client.ts)</code>
+- **OnSuccess**: <code>[InstitutionsGetByIdResponse](src/models/institutions-get-by-id-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.InstitutionsGetByIdError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.institutionsGetById(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;InstitutionsGetByIdResponse, ThePlaidApiClient.InstitutionsGetByIdError&gt;</code>, with `result.value` of type <code>[InstitutionsGetByIdResponse](src/models/institutions-get-by-id-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -8027,19 +11528,39 @@ Versioning note: API versions 2019-05-29 and earlier allow use of the `public_ke
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.institutionsSearch({ body });
+  const response = await client.institutionsSearch({
+    body: { query: "some example string", countryCodes: [CountryCode.Us] },
+  });
   // TODO: Handle 'response' of type InstitutionsSearchResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.InstitutionsSearchError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.InstitutionsSearchError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.institutionsSearch({
+  body: { query: "some example string", countryCodes: [CountryCode.Us] },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type InstitutionsSearchResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -8063,9 +11584,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[InstitutionsSearchResponse](src/models/institutions-search-response.ts)</code>
+**Direct**: `await client.institutionsSearch(request)`
 
-**OnError**: <code>[ThePlaidApiClient.InstitutionsSearchError](src/client.ts)</code>
+- **OnSuccess**: <code>[InstitutionsSearchResponse](src/models/institutions-search-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.InstitutionsSearchError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.institutionsSearch(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;InstitutionsSearchResponse, ThePlaidApiClient.InstitutionsSearchError&gt;</code>, with `result.value` of type <code>[InstitutionsSearchResponse](src/models/institutions-search-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -8091,19 +11620,37 @@ The `/investments/auth/get` endpoint allows developers to receive user-authorize
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.investmentsAuthGet({ body });
+  const response = await client.investmentsAuthGet({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type InvestmentsAuthGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.InvestmentsAuthGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.InvestmentsAuthGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.investmentsAuthGet({
+  body: { accessToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type InvestmentsAuthGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -8127,9 +11674,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[InvestmentsAuthGetResponse](src/models/investments-auth-get-response.ts)</code>
+**Direct**: `await client.investmentsAuthGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.InvestmentsAuthGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[InvestmentsAuthGetResponse](src/models/investments-auth-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.InvestmentsAuthGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.investmentsAuthGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;InvestmentsAuthGetResponse, ThePlaidApiClient.InvestmentsAuthGetError&gt;</code>, with `result.value` of type <code>[InvestmentsAuthGetResponse](src/models/investments-auth-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -8155,19 +11710,37 @@ The `/investments/holdings/get` endpoint allows developers to receive user-autho
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.investmentsHoldingsGet({ body });
+  const response = await client.investmentsHoldingsGet({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type InvestmentsHoldingsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.InvestmentsHoldingsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.InvestmentsHoldingsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.investmentsHoldingsGet({
+  body: { accessToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type InvestmentsHoldingsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -8191,9 +11764,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[InvestmentsHoldingsGetResponse](src/models/investments-holdings-get-response.ts)</code>
+**Direct**: `await client.investmentsHoldingsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.InvestmentsHoldingsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[InvestmentsHoldingsGetResponse](src/models/investments-holdings-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.InvestmentsHoldingsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.investmentsHoldingsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;InvestmentsHoldingsGetResponse, ThePlaidApiClient.InvestmentsHoldingsGetError&gt;</code>, with `result.value` of type <code>[InvestmentsHoldingsGetResponse](src/models/investments-holdings-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -8223,19 +11804,37 @@ As this endpoint triggers a synchronous request for fresh data, latency may be h
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.investmentsRefresh({ body });
+  const response = await client.investmentsRefresh({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type InvestmentsRefreshResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.InvestmentsRefreshError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.InvestmentsRefreshError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.investmentsRefresh({
+  body: { accessToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type InvestmentsRefreshResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -8259,9 +11858,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[InvestmentsRefreshResponse](src/models/investments-refresh-response.ts)</code>
+**Direct**: `await client.investmentsRefresh(request)`
 
-**OnError**: <code>[ThePlaidApiClient.InvestmentsRefreshError](src/client.ts)</code>
+- **OnSuccess**: <code>[InvestmentsRefreshResponse](src/models/investments-refresh-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.InvestmentsRefreshError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.investmentsRefresh(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;InvestmentsRefreshResponse, ThePlaidApiClient.InvestmentsRefreshError&gt;</code>, with `result.value` of type <code>[InvestmentsRefreshResponse](src/models/investments-refresh-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -8295,19 +11902,39 @@ Data returned by the asynchronous investments extraction flow (when `async_updat
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.investmentsTransactionsGet({ body });
+  const response = await client.investmentsTransactionsGet({
+    body: { accessToken: "some example string", startDate: "2024-01-15", endDate: "2024-01-15" },
+  });
   // TODO: Handle 'response' of type InvestmentsTransactionsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.InvestmentsTransactionsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.InvestmentsTransactionsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.investmentsTransactionsGet({
+  body: { accessToken: "some example string", startDate: "2024-01-15", endDate: "2024-01-15" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type InvestmentsTransactionsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -8331,9 +11958,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[InvestmentsTransactionsGetResponse](src/models/investments-transactions-get-response.ts)</code>
+**Direct**: `await client.investmentsTransactionsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.InvestmentsTransactionsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[InvestmentsTransactionsGetResponse](src/models/investments-transactions-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.InvestmentsTransactionsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.investmentsTransactionsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;InvestmentsTransactionsGetResponse, ThePlaidApiClient.InvestmentsTransactionsGetError&gt;</code>, with `result.value` of type <code>[InvestmentsTransactionsGetResponse](src/models/investments-transactions-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -8359,19 +11994,35 @@ Retrieve detailed information about a specific `Issue`. This endpoint returns a 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.issuesGet({ body });
+  const response = await client.issuesGet({ body: { issueId: "some example string" } });
   // TODO: Handle 'response' of type IssuesGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.IssuesGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.IssuesGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.issuesGet({ body: { issueId: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type IssuesGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -8395,9 +12046,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[IssuesGetResponse](src/models/issues-get-response.ts)</code>
+**Direct**: `await client.issuesGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.IssuesGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[IssuesGetResponse](src/models/issues-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.IssuesGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.issuesGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;IssuesGetResponse, ThePlaidApiClient.IssuesGetError&gt;</code>, with `result.value` of type <code>[IssuesGetResponse](src/models/issues-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -8423,19 +12082,35 @@ Search for an issue associated with one of the following identifiers:  `item_id`
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.issuesSearch({ body });
+  const response = await client.issuesSearch({ body: {} });
   // TODO: Handle 'response' of type IssuesSearchResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.IssuesSearchError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.IssuesSearchError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.issuesSearch({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type IssuesSearchResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -8459,9 +12134,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[IssuesSearchResponse](src/models/issues-search-response.ts)</code>
+**Direct**: `await client.issuesSearch(request)`
 
-**OnError**: <code>[ThePlaidApiClient.IssuesSearchError](src/client.ts)</code>
+- **OnSuccess**: <code>[IssuesSearchResponse](src/models/issues-search-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.IssuesSearchError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.issuesSearch(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;IssuesSearchResponse, ThePlaidApiClient.IssuesSearchError&gt;</code>, with `result.value` of type <code>[IssuesSearchResponse](src/models/issues-search-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -8487,19 +12170,39 @@ Allows a user to subscribe to updates on a specific `Issue` using a POST method.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.issuesSubscribe({ body });
+  const response = await client.issuesSubscribe({
+    body: { issueId: "some example string", webhook: "some example string" },
+  });
   // TODO: Handle 'response' of type IssuesSubscribeResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.IssuesSubscribeError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.IssuesSubscribeError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.issuesSubscribe({
+  body: { issueId: "some example string", webhook: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type IssuesSubscribeResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -8523,9 +12226,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[IssuesSubscribeResponse](src/models/issues-subscribe-response.ts)</code>
+**Direct**: `await client.issuesSubscribe(request)`
 
-**OnError**: <code>[ThePlaidApiClient.IssuesSubscribeError](src/client.ts)</code>
+- **OnSuccess**: <code>[IssuesSubscribeResponse](src/models/issues-subscribe-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.IssuesSubscribeError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.issuesSubscribe(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;IssuesSubscribeResponse, ThePlaidApiClient.IssuesSubscribeError&gt;</code>, with `result.value` of type <code>[IssuesSubscribeResponse](src/models/issues-subscribe-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -8554,19 +12265,37 @@ You can use the `/item/access_token/invalidate` endpoint to rotate the `access_t
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.itemAccessTokenInvalidate({ body });
+  const response = await client.itemAccessTokenInvalidate({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type ItemAccessTokenInvalidateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ItemAccessTokenInvalidateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ItemAccessTokenInvalidateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.itemAccessTokenInvalidate({
+  body: { accessToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ItemAccessTokenInvalidateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -8590,9 +12319,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ItemAccessTokenInvalidateResponse](src/models/item-access-token-invalidate-response.ts)</code>
+**Direct**: `await client.itemAccessTokenInvalidate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ItemAccessTokenInvalidateError](src/client.ts)</code>
+- **OnSuccess**: <code>[ItemAccessTokenInvalidateResponse](src/models/item-access-token-invalidate-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ItemAccessTokenInvalidateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.itemAccessTokenInvalidate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ItemAccessTokenInvalidateResponse, ThePlaidApiClient.ItemAccessTokenInvalidateError&gt;</code>, with `result.value` of type <code>[ItemAccessTokenInvalidateResponse](src/models/item-access-token-invalidate-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -8618,19 +12355,35 @@ List a historical log of user consent events
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.itemActivityList({ body });
+  const response = await client.itemActivityList({ body: {} });
   // TODO: Handle 'response' of type ItemActivityListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ItemActivityListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ItemActivityListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.itemActivityList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ItemActivityListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -8654,9 +12407,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ItemActivityListResponse](src/models/item-activity-list-response.ts)</code>
+**Direct**: `await client.itemActivityList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ItemActivityListError](src/client.ts)</code>
+- **OnSuccess**: <code>[ItemActivityListResponse](src/models/item-activity-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ItemActivityListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.itemActivityList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ItemActivityListResponse, ThePlaidApiClient.ItemActivityListError&gt;</code>, with `result.value` of type <code>[ItemActivityListResponse](src/models/item-activity-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -8682,19 +12443,35 @@ List a user's connected applications
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.itemApplicationList({ body });
+  const response = await client.itemApplicationList({ body: {} });
   // TODO: Handle 'response' of type ItemApplicationListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ItemApplicationListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ItemApplicationListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.itemApplicationList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ItemApplicationListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -8718,9 +12495,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ItemApplicationListResponse](src/models/item-application-list-response.ts)</code>
+**Direct**: `await client.itemApplicationList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ItemApplicationListError](src/client.ts)</code>
+- **OnSuccess**: <code>[ItemApplicationListResponse](src/models/item-application-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ItemApplicationListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.itemApplicationList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ItemApplicationListResponse, ThePlaidApiClient.ItemApplicationListError&gt;</code>, with `result.value` of type <code>[ItemApplicationListResponse](src/models/item-application-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -8746,19 +12531,49 @@ Enable consumers to update product access on selected accounts for an applicatio
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.itemApplicationScopesUpdate({ body });
+  const response = await client.itemApplicationScopesUpdate({
+    body: {
+      accessToken: "some example string",
+      applicationId: "some example string",
+      scopes: {},
+      context: ScopesContext.Enrollment,
+    },
+  });
   // TODO: Handle 'response' of type ItemApplicationScopesUpdateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ItemApplicationScopesUpdateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ItemApplicationScopesUpdateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.itemApplicationScopesUpdate({
+  body: {
+    accessToken: "some example string",
+    applicationId: "some example string",
+    scopes: {},
+    context: ScopesContext.Enrollment,
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ItemApplicationScopesUpdateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -8782,9 +12597,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ItemApplicationScopesUpdateResponse](src/models/item-application-scopes-update-response.ts)</code>
+**Direct**: `await client.itemApplicationScopesUpdate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ItemApplicationScopesUpdateError](src/client.ts)</code>
+- **OnSuccess**: <code>[ItemApplicationScopesUpdateResponse](src/models/item-application-scopes-update-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ItemApplicationScopesUpdateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.itemApplicationScopesUpdate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ItemApplicationScopesUpdateResponse, ThePlaidApiClient.ItemApplicationScopesUpdateError&gt;</code>, with `result.value` of type <code>[ItemApplicationScopesUpdateResponse](src/models/item-application-scopes-update-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -8814,19 +12637,39 @@ This endpoint should be called in real time as the User is unlinking an Applicat
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.itemApplicationUnlink({ body });
+  const response = await client.itemApplicationUnlink({
+    body: { accessToken: "some example string", applicationId: "some example string" },
+  });
   // TODO: Handle 'response' of type ItemApplicationUnlinkResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ItemApplicationUnlinkError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ItemApplicationUnlinkError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.itemApplicationUnlink({
+  body: { accessToken: "some example string", applicationId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ItemApplicationUnlinkResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -8850,9 +12693,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ItemApplicationUnlinkResponse](src/models/item-application-unlink-response.ts)</code>
+**Direct**: `await client.itemApplicationUnlink(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ItemApplicationUnlinkError](src/client.ts)</code>
+- **OnSuccess**: <code>[ItemApplicationUnlinkResponse](src/models/item-application-unlink-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ItemApplicationUnlinkError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.itemApplicationUnlink(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ItemApplicationUnlinkResponse, ThePlaidApiClient.ItemApplicationUnlinkError&gt;</code>, with `result.value` of type <code>[ItemApplicationUnlinkResponse](src/models/item-application-unlink-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -8884,19 +12735,37 @@ The `/item/public_token/create` endpoint is **not** used to create your initial 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.itemCreatePublicToken({ body });
+  const response = await client.itemCreatePublicToken({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type ItemPublicTokenCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ItemCreatePublicTokenError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ItemCreatePublicTokenError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.itemCreatePublicToken({
+  body: { accessToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ItemPublicTokenCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -8920,9 +12789,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ItemPublicTokenCreateResponse](src/models/item-public-token-create-response.ts)</code>
+**Direct**: `await client.itemCreatePublicToken(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ItemCreatePublicTokenError](src/client.ts)</code>
+- **OnSuccess**: <code>[ItemPublicTokenCreateResponse](src/models/item-public-token-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ItemCreatePublicTokenError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.itemCreatePublicToken(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ItemPublicTokenCreateResponse, ThePlaidApiClient.ItemCreatePublicTokenError&gt;</code>, with `result.value` of type <code>[ItemPublicTokenCreateResponse](src/models/item-public-token-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -8948,19 +12825,35 @@ Returns information about the status of an Item.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.itemGet({ body });
+  const response = await client.itemGet({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type ItemGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ItemGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ItemGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.itemGet({ body: { accessToken: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ItemGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -8984,9 +12877,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ItemGetResponse](src/models/item-get-response.ts)</code>
+**Direct**: `await client.itemGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ItemGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[ItemGetResponse](src/models/item-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ItemGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.itemGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ItemGetResponse, ThePlaidApiClient.ItemGetError&gt;</code>, with `result.value` of type <code>[ItemGetResponse](src/models/item-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -9014,19 +12915,45 @@ Upon creating an Item via `/item/import`, Plaid will automatically begin an extr
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.itemImport({ body });
+  const response = await client.itemImport({
+    body: {
+      products: [Products.Assets],
+      userAuth: { userId: "some example string", authToken: "some example string" },
+    },
+  });
   // TODO: Handle 'response' of type ItemImportResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ItemImportError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ItemImportError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.itemImport({
+  body: {
+    products: [Products.Assets],
+    userAuth: { userId: "some example string", authToken: "some example string" },
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ItemImportResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -9050,9 +12977,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ItemImportResponse](src/models/item-import-response.ts)</code>
+**Direct**: `await client.itemImport(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ItemImportError](src/client.ts)</code>
+- **OnSuccess**: <code>[ItemImportResponse](src/models/item-import-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ItemImportError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.itemImport(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ItemImportResponse, ThePlaidApiClient.ItemImportError&gt;</code>, with `result.value` of type <code>[ItemImportResponse](src/models/item-import-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -9080,19 +13015,39 @@ The `/item/products/terminate` endpoint allows you to terminate an Item. Once te
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.itemProductsTerminate({ body });
+  const response = await client.itemProductsTerminate({
+    body: { accessToken: "some example string", reasonCode: ProductsTerminateReasonCode.FraudFirstParty },
+  });
   // TODO: Handle 'response' of type ItemProductsTerminateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ItemProductsTerminateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ItemProductsTerminateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.itemProductsTerminate({
+  body: { accessToken: "some example string", reasonCode: ProductsTerminateReasonCode.FraudFirstParty },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ItemProductsTerminateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -9116,9 +13071,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ItemProductsTerminateResponse](src/models/item-products-terminate-response.ts)</code>
+**Direct**: `await client.itemProductsTerminate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ItemProductsTerminateError](src/client.ts)</code>
+- **OnSuccess**: <code>[ItemProductsTerminateResponse](src/models/item-products-terminate-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ItemProductsTerminateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.itemProductsTerminate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ItemProductsTerminateResponse, ThePlaidApiClient.ItemProductsTerminateError&gt;</code>, with `result.value` of type <code>[ItemProductsTerminateResponse](src/models/item-products-terminate-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -9146,19 +13109,37 @@ The response also includes an `item_id` that should be stored with the `access_t
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.itemPublicTokenExchange({ body });
+  const response = await client.itemPublicTokenExchange({ body: { publicToken: "some example string" } });
   // TODO: Handle 'response' of type ItemPublicTokenExchangeResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ItemPublicTokenExchangeError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ItemPublicTokenExchangeError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.itemPublicTokenExchange({
+  body: { publicToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ItemPublicTokenExchangeResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -9182,9 +13163,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ItemPublicTokenExchangeResponse](src/models/item-public-token-exchange-response.ts)</code>
+**Direct**: `await client.itemPublicTokenExchange(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ItemPublicTokenExchangeError](src/client.ts)</code>
+- **OnSuccess**: <code>[ItemPublicTokenExchangeResponse](src/models/item-public-token-exchange-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ItemPublicTokenExchangeError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.itemPublicTokenExchange(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ItemPublicTokenExchangeResponse, ThePlaidApiClient.ItemPublicTokenExchangeError&gt;</code>, with `result.value` of type <code>[ItemPublicTokenExchangeResponse](src/models/item-public-token-exchange-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -9220,19 +13209,35 @@ API versions 2019-05-29 and earlier return a `removed` boolean as part of the re
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.itemRemove({ body });
+  const response = await client.itemRemove({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type ItemRemoveResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ItemRemoveError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ItemRemoveError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.itemRemove({ body: { accessToken: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ItemRemoveResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -9256,9 +13261,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ItemRemoveResponse](src/models/item-remove-response.ts)</code>
+**Direct**: `await client.itemRemove(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ItemRemoveError](src/client.ts)</code>
+- **OnSuccess**: <code>[ItemRemoveResponse](src/models/item-remove-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ItemRemoveError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.itemRemove(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ItemRemoveResponse, ThePlaidApiClient.ItemRemoveError&gt;</code>, with `result.value` of type <code>[ItemRemoveResponse](src/models/item-remove-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -9284,19 +13297,35 @@ The POST `/item/webhook/update` allows you to update the webhook URL associated 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.itemWebhookUpdate({ body });
+  const response = await client.itemWebhookUpdate({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type ItemWebhookUpdateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ItemWebhookUpdateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ItemWebhookUpdateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.itemWebhookUpdate({ body: { accessToken: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ItemWebhookUpdateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -9320,9 +13349,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ItemWebhookUpdateResponse](src/models/item-webhook-update-response.ts)</code>
+**Direct**: `await client.itemWebhookUpdate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ItemWebhookUpdateError](src/client.ts)</code>
+- **OnSuccess**: <code>[ItemWebhookUpdateResponse](src/models/item-webhook-update-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ItemWebhookUpdateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.itemWebhookUpdate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ItemWebhookUpdateResponse, ThePlaidApiClient.ItemWebhookUpdateError&gt;</code>, with `result.value` of type <code>[ItemWebhookUpdateResponse](src/models/item-webhook-update-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -9350,19 +13387,35 @@ The types of information returned by Liabilities can include balances and due da
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.liabilitiesGet({ body });
+  const response = await client.liabilitiesGet({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type LiabilitiesGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.LiabilitiesGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.LiabilitiesGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.liabilitiesGet({ body: { accessToken: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type LiabilitiesGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -9386,9 +13439,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[LiabilitiesGetResponse](src/models/liabilities-get-response.ts)</code>
+**Direct**: `await client.liabilitiesGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.LiabilitiesGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[LiabilitiesGetResponse](src/models/liabilities-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.LiabilitiesGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.liabilitiesGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;LiabilitiesGetResponse, ThePlaidApiClient.LiabilitiesGetError&gt;</code>, with `result.value` of type <code>[LiabilitiesGetResponse](src/models/liabilities-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -9414,19 +13475,35 @@ Use the `/link_delivery/create` endpoint to create a Hosted Link session.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.linkDeliveryCreate({ body });
+  const response = await client.linkDeliveryCreate({ body: { linkToken: "some example string" } });
   // TODO: Handle 'response' of type LinkDeliveryCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.LinkDeliveryCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.LinkDeliveryCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.linkDeliveryCreate({ body: { linkToken: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type LinkDeliveryCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -9450,9 +13527,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[LinkDeliveryCreateResponse](src/models/link-delivery-create-response.ts)</code>
+**Direct**: `await client.linkDeliveryCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.LinkDeliveryCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[LinkDeliveryCreateResponse](src/models/link-delivery-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.LinkDeliveryCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.linkDeliveryCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;LinkDeliveryCreateResponse, ThePlaidApiClient.LinkDeliveryCreateError&gt;</code>, with `result.value` of type <code>[LinkDeliveryCreateResponse](src/models/link-delivery-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -9478,19 +13563,37 @@ Use the `/link_delivery/get` endpoint to get the status of a Hosted Link session
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.linkDeliveryGet({ body });
+  const response = await client.linkDeliveryGet({ body: { linkDeliverySessionId: "some example string" } });
   // TODO: Handle 'response' of type LinkDeliveryGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.LinkDeliveryGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.LinkDeliveryGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.linkDeliveryGet({
+  body: { linkDeliverySessionId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type LinkDeliveryGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -9514,9 +13617,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[LinkDeliveryGetResponse](src/models/link-delivery-get-response.ts)</code>
+**Direct**: `await client.linkDeliveryGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.LinkDeliveryGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[LinkDeliveryGetResponse](src/models/link-delivery-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.LinkDeliveryGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.linkDeliveryGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;LinkDeliveryGetResponse, ThePlaidApiClient.LinkDeliveryGetError&gt;</code>, with `result.value` of type <code>[LinkDeliveryGetResponse](src/models/link-delivery-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -9543,19 +13654,39 @@ The `link_correlation_id` is ephemeral and expires in a brief period, after whic
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.linkOauthCorrelationIdExchange({ body });
+  const response = await client.linkOauthCorrelationIdExchange({
+    body: { linkCorrelationId: "some example string" },
+  });
   // TODO: Handle 'response' of type LinkOAuthCorrelationIdExchangeResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.LinkOauthCorrelationIdExchangeError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.LinkOauthCorrelationIdExchangeError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.linkOauthCorrelationIdExchange({
+  body: { linkCorrelationId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type LinkOAuthCorrelationIdExchangeResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -9579,9 +13710,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[LinkOAuthCorrelationIdExchangeResponse](src/models/link-oauth-correlation-id-exchange-response.ts)</code>
+**Direct**: `await client.linkOauthCorrelationIdExchange(request)`
 
-**OnError**: <code>[ThePlaidApiClient.LinkOauthCorrelationIdExchangeError](src/client.ts)</code>
+- **OnSuccess**: <code>[LinkOAuthCorrelationIdExchangeResponse](src/models/link-oauth-correlation-id-exchange-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.LinkOauthCorrelationIdExchangeError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.linkOauthCorrelationIdExchange(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;LinkOAuthCorrelationIdExchangeResponse, ThePlaidApiClient.LinkOauthCorrelationIdExchangeError&gt;</code>, with `result.value` of type <code>[LinkOAuthCorrelationIdExchangeResponse](src/models/link-oauth-correlation-id-exchange-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -9609,19 +13748,47 @@ A `link_token` generated by `/link/token/create` is also used to initialize othe
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.linkTokenCreate({ body });
+  const response = await client.linkTokenCreate({
+    body: {
+      clientName: "some example string",
+      language: "some example string",
+      countryCodes: [CountryCode.Us],
+    },
+  });
   // TODO: Handle 'response' of type LinkTokenCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.LinkTokenCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.LinkTokenCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.linkTokenCreate({
+  body: {
+    clientName: "some example string",
+    language: "some example string",
+    countryCodes: [CountryCode.Us],
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type LinkTokenCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -9645,9 +13812,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[LinkTokenCreateResponse](src/models/link-token-create-response.ts)</code>
+**Direct**: `await client.linkTokenCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.LinkTokenCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[LinkTokenCreateResponse](src/models/link-token-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.LinkTokenCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.linkTokenCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;LinkTokenCreateResponse, ThePlaidApiClient.LinkTokenCreateError&gt;</code>, with `result.value` of type <code>[LinkTokenCreateResponse](src/models/link-token-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -9675,19 +13850,35 @@ By default, this endpoint will only return complete event data for Hosted Link s
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.linkTokenGet({ body });
+  const response = await client.linkTokenGet({ body: { linkToken: "some example string" } });
   // TODO: Handle 'response' of type LinkTokenGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.LinkTokenGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.LinkTokenGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.linkTokenGet({ body: { linkToken: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type LinkTokenGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -9711,9 +13902,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[LinkTokenGetResponse](src/models/link-token-get-response.ts)</code>
+**Direct**: `await client.linkTokenGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.LinkTokenGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[LinkTokenGetResponse](src/models/link-token-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.LinkTokenGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.linkTokenGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;LinkTokenGetResponse, ThePlaidApiClient.LinkTokenGetError&gt;</code>, with `result.value` of type <code>[LinkTokenGetResponse](src/models/link-token-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -9743,19 +13942,37 @@ For instructions on performing a frontend eligibility check, see the [Layer docu
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.networkStatusGet({ body });
+  const response = await client.networkStatusGet({ body: { user: { phoneNumber: "some example string" } } });
   // TODO: Handle 'response' of type NetworkStatusGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.NetworkStatusGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.NetworkStatusGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.networkStatusGet({
+  body: { user: { phoneNumber: "some example string" } },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type NetworkStatusGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -9779,9 +13996,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[NetworkStatusGetResponse](src/models/network-status-get-response.ts)</code>
+**Direct**: `await client.networkStatusGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.NetworkStatusGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[NetworkStatusGetResponse](src/models/network-status-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.NetworkStatusGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.networkStatusGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;NetworkStatusGetResponse, ThePlaidApiClient.NetworkStatusGetError&gt;</code>, with `result.value` of type <code>[NetworkStatusGetResponse](src/models/network-status-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -9809,19 +14034,35 @@ Note: This endpoint supports `Content-Type: application/x-www-form-urlencoded` a
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.oauthIntrospect({ body });
+  const response = await client.oauthIntrospect({ body: { token: "some example string" } });
   // TODO: Handle 'response' of type OAuthIntrospectResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.OauthIntrospectError && err.payload.kind === "oAuthErrorResponse") {
-    // TODO: Handle 'err.payload.body' of type OAuthErrorResponse
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.OauthIntrospectError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.oauthIntrospect({ body: { token: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type OAuthIntrospectResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -9845,9 +14086,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[OAuthIntrospectResponse](src/models/oauth-introspect-response.ts)</code>
+**Direct**: `await client.oauthIntrospect(request)`
 
-**OnError**: <code>[ThePlaidApiClient.OauthIntrospectError](src/client.ts)</code>
+- **OnSuccess**: <code>[OAuthIntrospectResponse](src/models/oauth-introspect-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.OauthIntrospectError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.oauthIntrospect(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;OAuthIntrospectResponse, ThePlaidApiClient.OauthIntrospectError&gt;</code>, with `result.value` of type <code>[OAuthIntrospectResponse](src/models/oauth-introspect-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -9875,19 +14124,35 @@ Note: This endpoint supports `Content-Type: application/x-www-form-urlencoded` a
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.oauthRevoke({ body });
+  const response = await client.oauthRevoke({ body: { token: "some example string" } });
   // TODO: Handle 'response' of type OAuthRevokeResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.OauthRevokeError && err.payload.kind === "oAuthErrorResponse") {
-    // TODO: Handle 'err.payload.body' of type OAuthErrorResponse
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.OauthRevokeError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.oauthRevoke({ body: { token: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type OAuthRevokeResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -9911,9 +14176,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[OAuthRevokeResponse](src/models/oauth-revoke-response.ts)</code>
+**Direct**: `await client.oauthRevoke(request)`
 
-**OnError**: <code>[ThePlaidApiClient.OauthRevokeError](src/client.ts)</code>
+- **OnSuccess**: <code>[OAuthRevokeResponse](src/models/oauth-revoke-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.OauthRevokeError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.oauthRevoke(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;OAuthRevokeResponse, ThePlaidApiClient.OauthRevokeError&gt;</code>, with `result.value` of type <code>[OAuthRevokeResponse](src/models/oauth-revoke-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -9939,19 +14212,35 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.oauthToken({ body });
+  const response = await client.oauthToken({ body: { grantType: OAuthGrantType.RefreshToken } });
   // TODO: Handle 'response' of type OAuthTokenResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.OauthTokenError && err.payload.kind === "oAuthErrorResponse") {
-    // TODO: Handle 'err.payload.body' of type OAuthErrorResponse
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.OauthTokenError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.oauthToken({ body: { grantType: OAuthGrantType.RefreshToken } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type OAuthTokenResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -9975,9 +14264,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[OAuthTokenResponse](src/models/oauth-token-response.ts)</code>
+**Direct**: `await client.oauthToken(request)`
 
-**OnError**: <code>[ThePlaidApiClient.OauthTokenError](src/client.ts)</code>
+- **OnSuccess**: <code>[OAuthTokenResponse](src/models/oauth-token-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.OauthTokenError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.oauthToken(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;OAuthTokenResponse, ThePlaidApiClient.OauthTokenError&gt;</code>, with `result.value` of type <code>[OAuthTokenResponse](src/models/oauth-token-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -10003,19 +14300,93 @@ The `/partner/customer/create` endpoint is used by reseller partners to create e
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.partnerCustomerCreate({ body });
+  const response = await client.partnerCustomerCreate({
+    body: {
+      clientId: "7f57eb3d2a9j6480121fx361",
+      secret: "79g03eoofwl8240v776r2h667442119",
+      companyName: "Plaid",
+      isDiligenceAttested: true,
+      products: [Products.Auth, Products.Identity],
+      createLinkCustomization: true,
+      legalEntityName: "Plaid",
+      website: "plaid.com",
+      applicationName: "Plaid",
+      technicalContact: { givenName: "Alice", familyName: "Smith", email: "alice.smith@example.com" },
+      billingContact: { givenName: "Bob", familyName: "Jones", email: "bob.jones@example.com" },
+      customerSupportInfo: {
+        email: "support@example.com",
+        phoneNumber: "1234567890",
+        contactUrl: "example.com/contact",
+        linkUpdateUrl: "example.com/update",
+      },
+      address: {
+        city: "New York",
+        street: "123 Main St",
+        region: "NY",
+        postalCode: "12345",
+        countryCode: "US",
+      },
+      isBankAddendumCompleted: true,
+      redirectUris: ["http://localhost/oauth.html", "https://www.example.com/oauth.html"],
+    },
+  });
   // TODO: Handle 'response' of type PartnerCustomerCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.PartnerCustomerCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PartnerCustomerCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.partnerCustomerCreate({
+  body: {
+    clientId: "7f57eb3d2a9j6480121fx361",
+    secret: "79g03eoofwl8240v776r2h667442119",
+    companyName: "Plaid",
+    isDiligenceAttested: true,
+    products: [Products.Auth, Products.Identity],
+    createLinkCustomization: true,
+    legalEntityName: "Plaid",
+    website: "plaid.com",
+    applicationName: "Plaid",
+    technicalContact: { givenName: "Alice", familyName: "Smith", email: "alice.smith@example.com" },
+    billingContact: { givenName: "Bob", familyName: "Jones", email: "bob.jones@example.com" },
+    customerSupportInfo: {
+      email: "support@example.com",
+      phoneNumber: "1234567890",
+      contactUrl: "example.com/contact",
+      linkUpdateUrl: "example.com/update",
+    },
+    address: {
+      city: "New York",
+      street: "123 Main St",
+      region: "NY",
+      postalCode: "12345",
+      countryCode: "US",
+    },
+    isBankAddendumCompleted: true,
+    redirectUris: ["http://localhost/oauth.html", "https://www.example.com/oauth.html"],
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PartnerCustomerCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -10039,9 +14410,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PartnerCustomerCreateResponse](src/models/partner-customer-create-response.ts)</code>
+**Direct**: `await client.partnerCustomerCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PartnerCustomerCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[PartnerCustomerCreateResponse](src/models/partner-customer-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PartnerCustomerCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.partnerCustomerCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PartnerCustomerCreateResponse, ThePlaidApiClient.PartnerCustomerCreateError&gt;</code>, with `result.value` of type <code>[PartnerCustomerCreateResponse](src/models/partner-customer-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -10067,19 +14446,47 @@ The `/partner/customer/enable` endpoint is used by reseller partners to enable a
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.partnerCustomerEnable({ body });
+  const response = await client.partnerCustomerEnable({
+    body: {
+      clientId: "7f57eb3d2a9j6480121fx361",
+      secret: "79g03eoofwl8240v776r2h667442119",
+      endCustomerClientId: "7f57eb3d2a9j6480121fx361",
+    },
+  });
   // TODO: Handle 'response' of type PartnerCustomerEnableResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.PartnerCustomerEnableError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PartnerCustomerEnableError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.partnerCustomerEnable({
+  body: {
+    clientId: "7f57eb3d2a9j6480121fx361",
+    secret: "79g03eoofwl8240v776r2h667442119",
+    endCustomerClientId: "7f57eb3d2a9j6480121fx361",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PartnerCustomerEnableResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -10103,9 +14510,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PartnerCustomerEnableResponse](src/models/partner-customer-enable-response.ts)</code>
+**Direct**: `await client.partnerCustomerEnable(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PartnerCustomerEnableError](src/client.ts)</code>
+- **OnSuccess**: <code>[PartnerCustomerEnableResponse](src/models/partner-customer-enable-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PartnerCustomerEnableError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.partnerCustomerEnable(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PartnerCustomerEnableResponse, ThePlaidApiClient.PartnerCustomerEnableError&gt;</code>, with `result.value` of type <code>[PartnerCustomerEnableResponse](src/models/partner-customer-enable-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -10131,19 +14546,47 @@ The `/partner/customer/get` endpoint is used by reseller partners to retrieve da
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.partnerCustomerGet({ body });
+  const response = await client.partnerCustomerGet({
+    body: {
+      clientId: "7f57eb3d2a9j6480121fx361",
+      secret: "79g03eoofwl8240v776r2h667442119",
+      endCustomerClientId: "7f57eb3d2a9j6480121fx361",
+    },
+  });
   // TODO: Handle 'response' of type PartnerCustomerGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.PartnerCustomerGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PartnerCustomerGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.partnerCustomerGet({
+  body: {
+    clientId: "7f57eb3d2a9j6480121fx361",
+    secret: "79g03eoofwl8240v776r2h667442119",
+    endCustomerClientId: "7f57eb3d2a9j6480121fx361",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PartnerCustomerGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -10167,9 +14610,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PartnerCustomerGetResponse](src/models/partner-customer-get-response.ts)</code>
+**Direct**: `await client.partnerCustomerGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PartnerCustomerGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[PartnerCustomerGetResponse](src/models/partner-customer-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PartnerCustomerGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.partnerCustomerGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PartnerCustomerGetResponse, ThePlaidApiClient.PartnerCustomerGetError&gt;</code>, with `result.value` of type <code>[PartnerCustomerGetResponse](src/models/partner-customer-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -10195,21 +14646,47 @@ The `/partner/customer/oauth_institutions/get` endpoint is used by reseller part
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.partnerCustomerOauthInstitutionsGet({ body });
+  const response = await client.partnerCustomerOauthInstitutionsGet({
+    body: {
+      clientId: "7f57eb3d2a9j6480121fx361",
+      secret: "79g03eoofwl8240v776r2h667442119",
+      endCustomerClientId: "7f57eb3d2a9j6480121fx361",
+    },
+  });
   // TODO: Handle 'response' of type PartnerCustomerOAuthInstitutionsGetResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.PartnerCustomerOauthInstitutionsGetError && err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PartnerCustomerOauthInstitutionsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.partnerCustomerOauthInstitutionsGet({
+  body: {
+    clientId: "7f57eb3d2a9j6480121fx361",
+    secret: "79g03eoofwl8240v776r2h667442119",
+    endCustomerClientId: "7f57eb3d2a9j6480121fx361",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PartnerCustomerOAuthInstitutionsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -10233,9 +14710,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PartnerCustomerOAuthInstitutionsGetResponse](src/models/partner-customer-oauth-institutions-get-response.ts)</code>
+**Direct**: `await client.partnerCustomerOauthInstitutionsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PartnerCustomerOauthInstitutionsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[PartnerCustomerOAuthInstitutionsGetResponse](src/models/partner-customer-oauth-institutions-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PartnerCustomerOauthInstitutionsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.partnerCustomerOauthInstitutionsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PartnerCustomerOAuthInstitutionsGetResponse, ThePlaidApiClient.PartnerCustomerOauthInstitutionsGetError&gt;</code>, with `result.value` of type <code>[PartnerCustomerOAuthInstitutionsGetResponse](src/models/partner-customer-oauth-institutions-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -10261,19 +14746,47 @@ The `/partner/customer/remove` endpoint is used by reseller partners to remove a
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.partnerCustomerRemove({ body });
+  const response = await client.partnerCustomerRemove({
+    body: {
+      clientId: "7f57eb3d2a9j6480121fx361",
+      secret: "79g03eoofwl8240v776r2h667442119",
+      endCustomerClientId: "7f57eb3d2a9j6480121fx361",
+    },
+  });
   // TODO: Handle 'response' of type PartnerCustomerRemoveResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.PartnerCustomerRemoveError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PartnerCustomerRemoveError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.partnerCustomerRemove({
+  body: {
+    clientId: "7f57eb3d2a9j6480121fx361",
+    secret: "79g03eoofwl8240v776r2h667442119",
+    endCustomerClientId: "7f57eb3d2a9j6480121fx361",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PartnerCustomerRemoveResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -10297,9 +14810,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PartnerCustomerRemoveResponse](src/models/partner-customer-remove-response.ts)</code>
+**Direct**: `await client.partnerCustomerRemove(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PartnerCustomerRemoveError](src/client.ts)</code>
+- **OnSuccess**: <code>[PartnerCustomerRemoveResponse](src/models/partner-customer-remove-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PartnerCustomerRemoveError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.partnerCustomerRemove(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PartnerCustomerRemoveResponse, ThePlaidApiClient.PartnerCustomerRemoveError&gt;</code>, with `result.value` of type <code>[PartnerCustomerRemoveResponse](src/models/partner-customer-remove-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -10327,19 +14848,65 @@ Consents can be limited in time and scope, and have constraints that describe li
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.paymentInitiationConsentCreate({ body });
+  const response = await client.paymentInitiationConsentCreate({
+    body: {
+      recipientId: "some example string",
+      reference: "some example string",
+      constraints: {
+        maxPaymentAmount: { currency: PaymentAmountCurrency.Gbp, value: 1.5 },
+        periodicAmounts: [
+          {
+            amount: {},
+            interval: PaymentConsentPeriodicInterval.Day,
+            alignment: PaymentConsentPeriodicAlignment.Calendar,
+          },
+        ],
+      },
+    },
+  });
   // TODO: Handle 'response' of type PaymentInitiationConsentCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.PaymentInitiationConsentCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PaymentInitiationConsentCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.paymentInitiationConsentCreate({
+  body: {
+    recipientId: "some example string",
+    reference: "some example string",
+    constraints: {
+      maxPaymentAmount: { currency: PaymentAmountCurrency.Gbp, value: 1.5 },
+      periodicAmounts: [
+        {
+          amount: {},
+          interval: PaymentConsentPeriodicInterval.Day,
+          alignment: PaymentConsentPeriodicAlignment.Calendar,
+        },
+      ],
+    },
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PaymentInitiationConsentCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -10363,9 +14930,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PaymentInitiationConsentCreateResponse](src/models/payment-initiation-consent-create-response.ts)</code>
+**Direct**: `await client.paymentInitiationConsentCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PaymentInitiationConsentCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[PaymentInitiationConsentCreateResponse](src/models/payment-initiation-consent-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PaymentInitiationConsentCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.paymentInitiationConsentCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PaymentInitiationConsentCreateResponse, ThePlaidApiClient.PaymentInitiationConsentCreateError&gt;</code>, with `result.value` of type <code>[PaymentInitiationConsentCreateResponse](src/models/payment-initiation-consent-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -10391,19 +14966,37 @@ The `/payment_initiation/consent/get` endpoint can be used to check the status o
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.paymentInitiationConsentGet({ body });
+  const response = await client.paymentInitiationConsentGet({ body: { consentId: "some example string" } });
   // TODO: Handle 'response' of type PaymentInitiationConsentGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.PaymentInitiationConsentGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PaymentInitiationConsentGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.paymentInitiationConsentGet({
+  body: { consentId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PaymentInitiationConsentGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -10427,9 +15020,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PaymentInitiationConsentGetResponse](src/models/payment-initiation-consent-get-response.ts)</code>
+**Direct**: `await client.paymentInitiationConsentGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PaymentInitiationConsentGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[PaymentInitiationConsentGetResponse](src/models/payment-initiation-consent-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PaymentInitiationConsentGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.paymentInitiationConsentGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PaymentInitiationConsentGetResponse, ThePlaidApiClient.PaymentInitiationConsentGetError&gt;</code>, with `result.value` of type <code>[PaymentInitiationConsentGetResponse](src/models/payment-initiation-consent-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -10455,22 +15056,47 @@ The `/payment_initiation/consent/payment/execute` endpoint can be used to execut
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.paymentInitiationConsentPaymentExecute({ body });
+  const response = await client.paymentInitiationConsentPaymentExecute({
+    body: {
+      consentId: "some example string",
+      amount: { currency: PaymentAmountCurrency.Gbp, value: 1.5 },
+      idempotencyKey: "some example string",
+    },
+  });
   // TODO: Handle 'response' of type PaymentInitiationConsentPaymentExecuteResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.PaymentInitiationConsentPaymentExecuteError &&
-      err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PaymentInitiationConsentPaymentExecuteError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.paymentInitiationConsentPaymentExecute({
+  body: {
+    consentId: "some example string",
+    amount: { currency: PaymentAmountCurrency.Gbp, value: 1.5 },
+    idempotencyKey: "some example string",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PaymentInitiationConsentPaymentExecuteResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -10494,9 +15120,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PaymentInitiationConsentPaymentExecuteResponse](src/models/payment-initiation-consent-payment-execute-response.ts)</code>
+**Direct**: `await client.paymentInitiationConsentPaymentExecute(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PaymentInitiationConsentPaymentExecuteError](src/client.ts)</code>
+- **OnSuccess**: <code>[PaymentInitiationConsentPaymentExecuteResponse](src/models/payment-initiation-consent-payment-execute-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PaymentInitiationConsentPaymentExecuteError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.paymentInitiationConsentPaymentExecute(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PaymentInitiationConsentPaymentExecuteResponse, ThePlaidApiClient.PaymentInitiationConsentPaymentExecuteError&gt;</code>, with `result.value` of type <code>[PaymentInitiationConsentPaymentExecuteResponse](src/models/payment-initiation-consent-payment-execute-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -10522,19 +15156,39 @@ The `/payment_initiation/consent/revoke` endpoint can be used to revoke the paym
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.paymentInitiationConsentRevoke({ body });
+  const response = await client.paymentInitiationConsentRevoke({
+    body: { consentId: "some example string" },
+  });
   // TODO: Handle 'response' of type PaymentInitiationConsentRevokeResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.PaymentInitiationConsentRevokeError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PaymentInitiationConsentRevokeError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.paymentInitiationConsentRevoke({
+  body: { consentId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PaymentInitiationConsentRevokeResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -10558,9 +15212,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PaymentInitiationConsentRevokeResponse](src/models/payment-initiation-consent-revoke-response.ts)</code>
+**Direct**: `await client.paymentInitiationConsentRevoke(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PaymentInitiationConsentRevokeError](src/client.ts)</code>
+- **OnSuccess**: <code>[PaymentInitiationConsentRevokeResponse](src/models/payment-initiation-consent-revoke-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PaymentInitiationConsentRevokeError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.paymentInitiationConsentRevoke(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PaymentInitiationConsentRevokeResponse, ThePlaidApiClient.PaymentInitiationConsentRevokeError&gt;</code>, with `result.value` of type <code>[PaymentInitiationConsentRevokeResponse](src/models/payment-initiation-consent-revoke-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -10588,19 +15250,47 @@ Standing orders (recurring payments) must be denominated in GBP and can only be 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.paymentInitiationPaymentCreate({ body });
+  const response = await client.paymentInitiationPaymentCreate({
+    body: {
+      recipientId: "some example string",
+      reference: "some example string",
+      amount: { currency: PaymentAmountCurrency.Gbp, value: 1.5 },
+    },
+  });
   // TODO: Handle 'response' of type PaymentInitiationPaymentCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.PaymentInitiationPaymentCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PaymentInitiationPaymentCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.paymentInitiationPaymentCreate({
+  body: {
+    recipientId: "some example string",
+    reference: "some example string",
+    amount: { currency: PaymentAmountCurrency.Gbp, value: 1.5 },
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PaymentInitiationPaymentCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -10624,9 +15314,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PaymentInitiationPaymentCreateResponse](src/models/payment-initiation-payment-create-response.ts)</code>
+**Direct**: `await client.paymentInitiationPaymentCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PaymentInitiationPaymentCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[PaymentInitiationPaymentCreateResponse](src/models/payment-initiation-payment-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PaymentInitiationPaymentCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.paymentInitiationPaymentCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PaymentInitiationPaymentCreateResponse, ThePlaidApiClient.PaymentInitiationPaymentCreateError&gt;</code>, with `result.value` of type <code>[PaymentInitiationPaymentCreateResponse](src/models/payment-initiation-payment-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -10654,19 +15352,37 @@ Polling for status updates in Production is highly discouraged. Repeatedly calli
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.paymentInitiationPaymentGet({ body });
+  const response = await client.paymentInitiationPaymentGet({ body: { paymentId: "some example string" } });
   // TODO: Handle 'response' of type PaymentInitiationPaymentGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.PaymentInitiationPaymentGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PaymentInitiationPaymentGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.paymentInitiationPaymentGet({
+  body: { paymentId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PaymentInitiationPaymentGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -10690,9 +15406,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PaymentInitiationPaymentGetResponse](src/models/payment-initiation-payment-get-response.ts)</code>
+**Direct**: `await client.paymentInitiationPaymentGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PaymentInitiationPaymentGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[PaymentInitiationPaymentGetResponse](src/models/payment-initiation-payment-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PaymentInitiationPaymentGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.paymentInitiationPaymentGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PaymentInitiationPaymentGetResponse, ThePlaidApiClient.PaymentInitiationPaymentGetError&gt;</code>, with `result.value` of type <code>[PaymentInitiationPaymentGetResponse](src/models/payment-initiation-payment-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -10718,19 +15442,35 @@ The `/payment_initiation/payment/list` endpoint can be used to retrieve all crea
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.paymentInitiationPaymentList({ body });
+  const response = await client.paymentInitiationPaymentList({ body: {} });
   // TODO: Handle 'response' of type PaymentInitiationPaymentListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.PaymentInitiationPaymentListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PaymentInitiationPaymentListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.paymentInitiationPaymentList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PaymentInitiationPaymentListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -10754,9 +15494,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PaymentInitiationPaymentListResponse](src/models/payment-initiation-payment-list-response.ts)</code>
+**Direct**: `await client.paymentInitiationPaymentList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PaymentInitiationPaymentListError](src/client.ts)</code>
+- **OnSuccess**: <code>[PaymentInitiationPaymentListResponse](src/models/payment-initiation-payment-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PaymentInitiationPaymentListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.paymentInitiationPaymentList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PaymentInitiationPaymentListResponse, ThePlaidApiClient.PaymentInitiationPaymentListError&gt;</code>, with `result.value` of type <code>[PaymentInitiationPaymentListResponse](src/models/payment-initiation-payment-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -10795,19 +15543,47 @@ the likelihood of refund being successful without human intervention.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.paymentInitiationPaymentReverse({ body });
+  const response = await client.paymentInitiationPaymentReverse({
+    body: {
+      paymentId: "some example string",
+      idempotencyKey: "some example string",
+      reference: "some example string",
+    },
+  });
   // TODO: Handle 'response' of type PaymentInitiationPaymentReverseResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.PaymentInitiationPaymentReverseError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PaymentInitiationPaymentReverseError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.paymentInitiationPaymentReverse({
+  body: {
+    paymentId: "some example string",
+    idempotencyKey: "some example string",
+    reference: "some example string",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PaymentInitiationPaymentReverseResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -10831,9 +15607,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PaymentInitiationPaymentReverseResponse](src/models/payment-initiation-payment-reverse-response.ts)</code>
+**Direct**: `await client.paymentInitiationPaymentReverse(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PaymentInitiationPaymentReverseError](src/client.ts)</code>
+- **OnSuccess**: <code>[PaymentInitiationPaymentReverseResponse](src/models/payment-initiation-payment-reverse-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PaymentInitiationPaymentReverseError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.paymentInitiationPaymentReverse(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PaymentInitiationPaymentReverseResponse, ThePlaidApiClient.PaymentInitiationPaymentReverseError&gt;</code>, with `result.value` of type <code>[PaymentInitiationPaymentReverseResponse](src/models/payment-initiation-payment-reverse-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -10864,21 +15648,37 @@ The endpoint is idempotent: if a developer has already made a request with the s
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.paymentInitiationRecipientCreate({ body });
+  const response = await client.paymentInitiationRecipientCreate({ body: { name: "some example string" } });
   // TODO: Handle 'response' of type PaymentInitiationRecipientCreateResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.PaymentInitiationRecipientCreateError && err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PaymentInitiationRecipientCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.paymentInitiationRecipientCreate({
+  body: { name: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PaymentInitiationRecipientCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -10902,9 +15702,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PaymentInitiationRecipientCreateResponse](src/models/payment-initiation-recipient-create-response.ts)</code>
+**Direct**: `await client.paymentInitiationRecipientCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PaymentInitiationRecipientCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[PaymentInitiationRecipientCreateResponse](src/models/payment-initiation-recipient-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PaymentInitiationRecipientCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.paymentInitiationRecipientCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PaymentInitiationRecipientCreateResponse, ThePlaidApiClient.PaymentInitiationRecipientCreateError&gt;</code>, with `result.value` of type <code>[PaymentInitiationRecipientCreateResponse](src/models/payment-initiation-recipient-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -10930,19 +15738,39 @@ Get details about a payment recipient you have previously created.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.paymentInitiationRecipientGet({ body });
+  const response = await client.paymentInitiationRecipientGet({
+    body: { recipientId: "some example string" },
+  });
   // TODO: Handle 'response' of type PaymentInitiationRecipientGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.PaymentInitiationRecipientGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PaymentInitiationRecipientGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.paymentInitiationRecipientGet({
+  body: { recipientId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PaymentInitiationRecipientGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -10966,9 +15794,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PaymentInitiationRecipientGetResponse](src/models/payment-initiation-recipient-get-response.ts)</code>
+**Direct**: `await client.paymentInitiationRecipientGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PaymentInitiationRecipientGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[PaymentInitiationRecipientGetResponse](src/models/payment-initiation-recipient-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PaymentInitiationRecipientGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.paymentInitiationRecipientGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PaymentInitiationRecipientGetResponse, ThePlaidApiClient.PaymentInitiationRecipientGetError&gt;</code>, with `result.value` of type <code>[PaymentInitiationRecipientGetResponse](src/models/payment-initiation-recipient-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -10994,19 +15830,35 @@ The `/payment_initiation/recipient/list` endpoint lists the payment recipients t
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.paymentInitiationRecipientList({ body });
+  const response = await client.paymentInitiationRecipientList({ body: {} });
   // TODO: Handle 'response' of type PaymentInitiationRecipientListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.PaymentInitiationRecipientListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PaymentInitiationRecipientListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.paymentInitiationRecipientList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PaymentInitiationRecipientListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -11030,9 +15882,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PaymentInitiationRecipientListResponse](src/models/payment-initiation-recipient-list-response.ts)</code>
+**Direct**: `await client.paymentInitiationRecipientList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PaymentInitiationRecipientListError](src/client.ts)</code>
+- **OnSuccess**: <code>[PaymentInitiationRecipientListResponse](src/models/payment-initiation-recipient-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PaymentInitiationRecipientListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.paymentInitiationRecipientList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PaymentInitiationRecipientListResponse, ThePlaidApiClient.PaymentInitiationRecipientListError&gt;</code>, with `result.value` of type <code>[PaymentInitiationRecipientListResponse](src/models/payment-initiation-recipient-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -11060,19 +15920,35 @@ You can then use the `payment_profile_token` when creating transfers using `/tra
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.paymentProfileCreate({ body });
+  const response = await client.paymentProfileCreate({ body: {} });
   // TODO: Handle 'response' of type PaymentProfileCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.PaymentProfileCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PaymentProfileCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.paymentProfileCreate({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PaymentProfileCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -11096,9 +15972,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PaymentProfileCreateResponse](src/models/payment-profile-create-response.ts)</code>
+**Direct**: `await client.paymentProfileCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PaymentProfileCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[PaymentProfileCreateResponse](src/models/payment-profile-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PaymentProfileCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.paymentProfileCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PaymentProfileCreateResponse, ThePlaidApiClient.PaymentProfileCreateError&gt;</code>, with `result.value` of type <code>[PaymentProfileCreateResponse](src/models/payment-profile-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -11124,19 +16008,37 @@ Use `/payment_profile/get` endpoint to get the status of a given Payment Profile
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.paymentProfileGet({ body });
+  const response = await client.paymentProfileGet({ body: { paymentProfileToken: "some example string" } });
   // TODO: Handle 'response' of type PaymentProfileGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.PaymentProfileGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PaymentProfileGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.paymentProfileGet({
+  body: { paymentProfileToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PaymentProfileGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -11160,9 +16062,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PaymentProfileGetResponse](src/models/payment-profile-get-response.ts)</code>
+**Direct**: `await client.paymentProfileGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PaymentProfileGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[PaymentProfileGetResponse](src/models/payment-profile-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PaymentProfileGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.paymentProfileGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PaymentProfileGetResponse, ThePlaidApiClient.PaymentProfileGetError&gt;</code>, with `result.value` of type <code>[PaymentProfileGetResponse](src/models/payment-profile-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -11188,19 +16098,39 @@ Use the `/payment_profile/remove` endpoint to remove a given Payment Profile. On
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.paymentProfileRemove({ body });
+  const response = await client.paymentProfileRemove({
+    body: { paymentProfileToken: "some example string" },
+  });
   // TODO: Handle 'response' of type PaymentProfileRemoveResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.PaymentProfileRemoveError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.PaymentProfileRemoveError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.paymentProfileRemove({
+  body: { paymentProfileToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type PaymentProfileRemoveResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -11224,9 +16154,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[PaymentProfileRemoveResponse](src/models/payment-profile-remove-response.ts)</code>
+**Direct**: `await client.paymentProfileRemove(request)`
 
-**OnError**: <code>[ThePlaidApiClient.PaymentProfileRemoveError](src/client.ts)</code>
+- **OnSuccess**: <code>[PaymentProfileRemoveResponse](src/models/payment-profile-remove-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.PaymentProfileRemoveError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.paymentProfileRemove(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;PaymentProfileRemoveResponse, ThePlaidApiClient.PaymentProfileRemoveError&gt;</code>, with `result.value` of type <code>[PaymentProfileRemoveResponse](src/models/payment-profile-remove-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -11255,19 +16193,37 @@ This endpoint retrieves cached information, rather than extracting fresh informa
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorAccountGet({ body });
+  const response = await client.processorAccountGet({ body: { processorToken: "some example string" } });
   // TODO: Handle 'response' of type ProcessorAccountGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorAccountGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorAccountGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorAccountGet({
+  body: { processorToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorAccountGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -11291,9 +16247,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorAccountGetResponse](src/models/processor-account-get-response.ts)</code>
+**Direct**: `await client.processorAccountGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorAccountGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorAccountGetResponse](src/models/processor-account-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorAccountGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorAccountGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorAccountGetResponse, ThePlaidApiClient.ProcessorAccountGetError&gt;</code>, with `result.value` of type <code>[ProcessorAccountGetResponse](src/models/processor-account-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -11319,21 +16283,39 @@ Used to create a token suitable for sending to Apex to enable Plaid-Apex integra
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorApexProcessorTokenCreate({ body });
+  const response = await client.processorApexProcessorTokenCreate({
+    body: { accessToken: "some example string", accountId: "some example string" },
+  });
   // TODO: Handle 'response' of type ProcessorTokenCreateResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.ProcessorApexProcessorTokenCreateError && err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorApexProcessorTokenCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorApexProcessorTokenCreate({
+  body: { accessToken: "some example string", accountId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorTokenCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -11357,9 +16339,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorTokenCreateResponse](src/models/processor-token-create-response.ts)</code>
+**Direct**: `await client.processorApexProcessorTokenCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorApexProcessorTokenCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorTokenCreateResponse](src/models/processor-token-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorApexProcessorTokenCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorApexProcessorTokenCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorTokenCreateResponse, ThePlaidApiClient.ProcessorApexProcessorTokenCreateError&gt;</code>, with `result.value` of type <code>[ProcessorTokenCreateResponse](src/models/processor-token-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -11388,19 +16378,37 @@ Versioning note: API versions 2019-05-29 and earlier use a different schema for 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorAuthGet({ body });
+  const response = await client.processorAuthGet({ body: { processorToken: "some example string" } });
   // TODO: Handle 'response' of type ProcessorAuthGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorAuthGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorAuthGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorAuthGet({
+  body: { processorToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorAuthGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -11424,9 +16432,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorAuthGetResponse](src/models/processor-auth-get-response.ts)</code>
+**Direct**: `await client.processorAuthGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorAuthGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorAuthGetResponse](src/models/processor-auth-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorAuthGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorAuthGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorAuthGetResponse, ThePlaidApiClient.ProcessorAuthGetError&gt;</code>, with `result.value` of type <code>[ProcessorAuthGetResponse](src/models/processor-auth-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -11452,19 +16468,37 @@ The `/processor/balance/get` endpoint returns the real-time balance for each of 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorBalanceGet({ body });
+  const response = await client.processorBalanceGet({ body: { processorToken: "some example string" } });
   // TODO: Handle 'response' of type ProcessorBalanceGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorBalanceGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorBalanceGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorBalanceGet({
+  body: { processorToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorBalanceGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -11488,9 +16522,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorBalanceGetResponse](src/models/processor-balance-get-response.ts)</code>
+**Direct**: `await client.processorBalanceGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorBalanceGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorBalanceGetResponse](src/models/processor-balance-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorBalanceGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorBalanceGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorBalanceGetResponse, ThePlaidApiClient.ProcessorBalanceGetError&gt;</code>, with `result.value` of type <code>[ProcessorBalanceGetResponse](src/models/processor-balance-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -11516,19 +16558,57 @@ Use the `/processor/bank_transfer/create` endpoint to initiate a new bank transf
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorBankTransferCreate({ body });
+  const response = await client.processorBankTransferCreate({
+    body: {
+      idempotencyKey: "some example string",
+      processorToken: "some example string",
+      type: BankTransferType.Debit,
+      network: BankTransferNetwork.Ach,
+      amount: "some example string",
+      isoCurrencyCode: "some example string",
+      description: "some example string",
+      user: { legalName: "some example string" },
+    },
+  });
   // TODO: Handle 'response' of type ProcessorBankTransferCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorBankTransferCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorBankTransferCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorBankTransferCreate({
+  body: {
+    idempotencyKey: "some example string",
+    processorToken: "some example string",
+    type: BankTransferType.Debit,
+    network: BankTransferNetwork.Ach,
+    amount: "some example string",
+    isoCurrencyCode: "some example string",
+    description: "some example string",
+    user: { legalName: "some example string" },
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorBankTransferCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -11552,9 +16632,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorBankTransferCreateResponse](src/models/processor-bank-transfer-create-response.ts)</code>
+**Direct**: `await client.processorBankTransferCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorBankTransferCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorBankTransferCreateResponse](src/models/processor-bank-transfer-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorBankTransferCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorBankTransferCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorBankTransferCreateResponse, ThePlaidApiClient.ProcessorBankTransferCreateError&gt;</code>, with `result.value` of type <code>[ProcessorBankTransferCreateResponse](src/models/processor-bank-transfer-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -11580,19 +16668,37 @@ The `/processor/identity/get` endpoint allows you to retrieve various account ho
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorIdentityGet({ body });
+  const response = await client.processorIdentityGet({ body: { processorToken: "some example string" } });
   // TODO: Handle 'response' of type ProcessorIdentityGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorIdentityGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorIdentityGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorIdentityGet({
+  body: { processorToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorIdentityGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -11616,9 +16722,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorIdentityGetResponse](src/models/processor-identity-get-response.ts)</code>
+**Direct**: `await client.processorIdentityGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorIdentityGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorIdentityGetResponse](src/models/processor-identity-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorIdentityGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorIdentityGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorIdentityGetResponse, ThePlaidApiClient.ProcessorIdentityGetError&gt;</code>, with `result.value` of type <code>[ProcessorIdentityGetResponse](src/models/processor-identity-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -11646,19 +16760,37 @@ Fields within the `balances` object will always be null when retrieved by `/proc
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorIdentityMatch({ body });
+  const response = await client.processorIdentityMatch({ body: { processorToken: "some example string" } });
   // TODO: Handle 'response' of type ProcessorIdentityMatchResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorIdentityMatchError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorIdentityMatchError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorIdentityMatch({
+  body: { processorToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorIdentityMatchResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -11682,9 +16814,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorIdentityMatchResponse](src/models/processor-identity-match-response.ts)</code>
+**Direct**: `await client.processorIdentityMatch(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorIdentityMatchError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorIdentityMatchResponse](src/models/processor-identity-match-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorIdentityMatchError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorIdentityMatch(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorIdentityMatchResponse, ThePlaidApiClient.ProcessorIdentityMatchError&gt;</code>, with `result.value` of type <code>[ProcessorIdentityMatchResponse](src/models/processor-identity-match-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -11714,19 +16854,39 @@ To receive Investments Auth webhooks for a processor token, set its webhook URL 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorInvestmentsAuthGet({ body });
+  const response = await client.processorInvestmentsAuthGet({
+    body: { processorToken: "some example string" },
+  });
   // TODO: Handle 'response' of type ProcessorInvestmentsAuthGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorInvestmentsAuthGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorInvestmentsAuthGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorInvestmentsAuthGet({
+  body: { processorToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorInvestmentsAuthGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -11750,9 +16910,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorInvestmentsAuthGetResponse](src/models/processor-investments-auth-get-response.ts)</code>
+**Direct**: `await client.processorInvestmentsAuthGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorInvestmentsAuthGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorInvestmentsAuthGetResponse](src/models/processor-investments-auth-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorInvestmentsAuthGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorInvestmentsAuthGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorInvestmentsAuthGetResponse, ThePlaidApiClient.ProcessorInvestmentsAuthGetError&gt;</code>, with `result.value` of type <code>[ProcessorInvestmentsAuthGetResponse](src/models/processor-investments-auth-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -11779,19 +16947,39 @@ This endpoint returns the stock position data of the account associated with a g
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorInvestmentsHoldingsGet({ body });
+  const response = await client.processorInvestmentsHoldingsGet({
+    body: { processorToken: "some example string" },
+  });
   // TODO: Handle 'response' of type ProcessorInvestmentsHoldingsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorInvestmentsHoldingsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorInvestmentsHoldingsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorInvestmentsHoldingsGet({
+  body: { processorToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorInvestmentsHoldingsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -11815,9 +17003,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorInvestmentsHoldingsGetResponse](src/models/processor-investments-holdings-get-response.ts)</code>
+**Direct**: `await client.processorInvestmentsHoldingsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorInvestmentsHoldingsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorInvestmentsHoldingsGetResponse](src/models/processor-investments-holdings-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorInvestmentsHoldingsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorInvestmentsHoldingsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorInvestmentsHoldingsGetResponse, ThePlaidApiClient.ProcessorInvestmentsHoldingsGetError&gt;</code>, with `result.value` of type <code>[ProcessorInvestmentsHoldingsGetResponse](src/models/processor-investments-holdings-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -11853,21 +17049,39 @@ To receive Investments Transactions webhooks for a processor token, set its webh
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorInvestmentsTransactionsGet({ body });
+  const response = await client.processorInvestmentsTransactionsGet({
+    body: { processorToken: "some example string", startDate: "2024-01-15", endDate: "2024-01-15" },
+  });
   // TODO: Handle 'response' of type ProcessorInvestmentsTransactionsGetResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.ProcessorInvestmentsTransactionsGetError && err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorInvestmentsTransactionsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorInvestmentsTransactionsGet({
+  body: { processorToken: "some example string", startDate: "2024-01-15", endDate: "2024-01-15" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorInvestmentsTransactionsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -11891,9 +17105,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorInvestmentsTransactionsGetResponse](src/models/processor-investments-transactions-get-response.ts)</code>
+**Direct**: `await client.processorInvestmentsTransactionsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorInvestmentsTransactionsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorInvestmentsTransactionsGetResponse](src/models/processor-investments-transactions-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorInvestmentsTransactionsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorInvestmentsTransactionsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorInvestmentsTransactionsGetResponse, ThePlaidApiClient.ProcessorInvestmentsTransactionsGetError&gt;</code>, with `result.value` of type <code>[ProcessorInvestmentsTransactionsGetResponse](src/models/processor-investments-transactions-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -11923,19 +17145,37 @@ Note: This request may take some time to complete if `liabilities` was not speci
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorLiabilitiesGet({ body });
+  const response = await client.processorLiabilitiesGet({ body: { processorToken: "some example string" } });
   // TODO: Handle 'response' of type ProcessorLiabilitiesGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorLiabilitiesGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorLiabilitiesGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorLiabilitiesGet({
+  body: { processorToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorLiabilitiesGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -11959,9 +17199,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorLiabilitiesGetResponse](src/models/processor-liabilities-get-response.ts)</code>
+**Direct**: `await client.processorLiabilitiesGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorLiabilitiesGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorLiabilitiesGetResponse](src/models/processor-liabilities-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorLiabilitiesGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorLiabilitiesGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorLiabilitiesGetResponse, ThePlaidApiClient.ProcessorLiabilitiesGetError&gt;</code>, with `result.value` of type <code>[ProcessorLiabilitiesGetResponse](src/models/processor-liabilities-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -11991,19 +17239,47 @@ If using a Balance-only ruleset, this endpoint will not impact scores (Balance d
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorSignalDecisionReport({ body });
+  const response = await client.processorSignalDecisionReport({
+    body: {
+      processorToken: "some example string",
+      clientTransactionId: "some example string",
+      initiated: true,
+    },
+  });
   // TODO: Handle 'response' of type ProcessorSignalDecisionReportResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorSignalDecisionReportError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorSignalDecisionReportError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorSignalDecisionReport({
+  body: {
+    processorToken: "some example string",
+    clientTransactionId: "some example string",
+    initiated: true,
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorSignalDecisionReportResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -12027,9 +17303,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorSignalDecisionReportResponse](src/models/processor-signal-decision-report-response.ts)</code>
+**Direct**: `await client.processorSignalDecisionReport(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorSignalDecisionReportError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorSignalDecisionReportResponse](src/models/processor-signal-decision-report-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorSignalDecisionReportError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorSignalDecisionReport(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorSignalDecisionReportResponse, ThePlaidApiClient.ProcessorSignalDecisionReportError&gt;</code>, with `result.value` of type <code>[ProcessorSignalDecisionReportResponse](src/models/processor-signal-decision-report-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -12059,19 +17343,39 @@ Note: This request may have higher latency if Signal Transaction Scores is being
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorSignalEvaluate({ body });
+  const response = await client.processorSignalEvaluate({
+    body: { processorToken: "some example string", clientTransactionId: "some example string", amount: 1.5 },
+  });
   // TODO: Handle 'response' of type ProcessorSignalEvaluateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorSignalEvaluateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorSignalEvaluateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorSignalEvaluate({
+  body: { processorToken: "some example string", clientTransactionId: "some example string", amount: 1.5 },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorSignalEvaluateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -12095,9 +17399,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorSignalEvaluateResponse](src/models/processor-signal-evaluate-response.ts)</code>
+**Direct**: `await client.processorSignalEvaluate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorSignalEvaluateError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorSignalEvaluateResponse](src/models/processor-signal-evaluate-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorSignalEvaluateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorSignalEvaluate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorSignalEvaluateResponse, ThePlaidApiClient.ProcessorSignalEvaluateError&gt;</code>, with `result.value` of type <code>[ProcessorSignalEvaluateResponse](src/models/processor-signal-evaluate-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -12125,19 +17437,37 @@ If this endpoint is called with a processor token that is already initialized wi
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorSignalPrepare({ body });
+  const response = await client.processorSignalPrepare({ body: { processorToken: "some example string" } });
   // TODO: Handle 'response' of type ProcessorSignalPrepareResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorSignalPrepareError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorSignalPrepareError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorSignalPrepare({
+  body: { processorToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorSignalPrepareResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -12161,9 +17491,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorSignalPrepareResponse](src/models/processor-signal-prepare-response.ts)</code>
+**Direct**: `await client.processorSignalPrepare(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorSignalPrepareError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorSignalPrepareResponse](src/models/processor-signal-prepare-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorSignalPrepareError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorSignalPrepare(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorSignalPrepareResponse, ThePlaidApiClient.ProcessorSignalPrepareError&gt;</code>, with `result.value` of type <code>[ProcessorSignalPrepareResponse](src/models/processor-signal-prepare-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -12191,19 +17529,47 @@ If you are using the [Plaid Transfer product](https://plaid.com/docs/transfer) t
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorSignalReturnReport({ body });
+  const response = await client.processorSignalReturnReport({
+    body: {
+      processorToken: "some example string",
+      clientTransactionId: "some example string",
+      returnCode: "some example string",
+    },
+  });
   // TODO: Handle 'response' of type ProcessorSignalReturnReportResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorSignalReturnReportError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorSignalReturnReportError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorSignalReturnReport({
+  body: {
+    processorToken: "some example string",
+    clientTransactionId: "some example string",
+    returnCode: "some example string",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorSignalReturnReportResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -12227,9 +17593,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorSignalReturnReportResponse](src/models/processor-signal-return-report-response.ts)</code>
+**Direct**: `await client.processorSignalReturnReport(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorSignalReturnReportError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorSignalReturnReportResponse](src/models/processor-signal-return-report-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorSignalReturnReportError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorSignalReturnReport(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorSignalReturnReportResponse, ThePlaidApiClient.ProcessorSignalReturnReportError&gt;</code>, with `result.value` of type <code>[ProcessorSignalReturnReportResponse](src/models/processor-signal-return-report-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -12260,22 +17634,39 @@ To revoke a bank account token, the entire underlying access token must be revok
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorStripeBankAccountTokenCreate({ body });
+  const response = await client.processorStripeBankAccountTokenCreate({
+    body: { accessToken: "some example string", accountId: "some example string" },
+  });
   // TODO: Handle 'response' of type ProcessorStripeBankAccountTokenCreateResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.ProcessorStripeBankAccountTokenCreateError &&
-      err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorStripeBankAccountTokenCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorStripeBankAccountTokenCreate({
+  body: { accessToken: "some example string", accountId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorStripeBankAccountTokenCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -12299,9 +17690,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorStripeBankAccountTokenCreateResponse](src/models/processor-stripe-bank-account-token-create-response.ts)</code>
+**Direct**: `await client.processorStripeBankAccountTokenCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorStripeBankAccountTokenCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorStripeBankAccountTokenCreateResponse](src/models/processor-stripe-bank-account-token-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorStripeBankAccountTokenCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorStripeBankAccountTokenCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorStripeBankAccountTokenCreateResponse, ThePlaidApiClient.ProcessorStripeBankAccountTokenCreateError&gt;</code>, with `result.value` of type <code>[ProcessorStripeBankAccountTokenCreateResponse](src/models/processor-stripe-bank-account-token-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -12327,19 +17726,43 @@ Used to create a token suitable for sending to one of Plaid's partners to enable
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorTokenCreate({ body });
+  const response = await client.processorTokenCreate({
+    body: {
+      accessToken: "some example string",
+      accountId: "some example string",
+      processor: Processor.Dwolla,
+    },
+  });
   // TODO: Handle 'response' of type ProcessorTokenCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorTokenCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorTokenCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorTokenCreate({
+  body: { accessToken: "some example string", accountId: "some example string", processor: Processor.Dwolla },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorTokenCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -12363,9 +17786,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorTokenCreateResponse](src/models/processor-token-create-response.ts)</code>
+**Direct**: `await client.processorTokenCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorTokenCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorTokenCreateResponse](src/models/processor-token-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorTokenCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorTokenCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorTokenCreateResponse, ThePlaidApiClient.ProcessorTokenCreateError&gt;</code>, with `result.value` of type <code>[ProcessorTokenCreateResponse](src/models/processor-token-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -12391,19 +17822,39 @@ Used to get a processor token's product permissions. The `products` field will b
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorTokenPermissionsGet({ body });
+  const response = await client.processorTokenPermissionsGet({
+    body: { processorToken: "some example string" },
+  });
   // TODO: Handle 'response' of type ProcessorTokenPermissionsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorTokenPermissionsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorTokenPermissionsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorTokenPermissionsGet({
+  body: { processorToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorTokenPermissionsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -12427,9 +17878,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorTokenPermissionsGetResponse](src/models/processor-token-permissions-get-response.ts)</code>
+**Direct**: `await client.processorTokenPermissionsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorTokenPermissionsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorTokenPermissionsGetResponse](src/models/processor-token-permissions-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorTokenPermissionsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorTokenPermissionsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorTokenPermissionsGetResponse, ThePlaidApiClient.ProcessorTokenPermissionsGetError&gt;</code>, with `result.value` of type <code>[ProcessorTokenPermissionsGetResponse](src/models/processor-token-permissions-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -12455,19 +17914,39 @@ Used to control a processor's access to products on the given processor token. B
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorTokenPermissionsSet({ body });
+  const response = await client.processorTokenPermissionsSet({
+    body: { processorToken: "some example string", products: [Products.Assets] },
+  });
   // TODO: Handle 'response' of type ProcessorTokenPermissionsSetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorTokenPermissionsSetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorTokenPermissionsSetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorTokenPermissionsSet({
+  body: { processorToken: "some example string", products: [Products.Assets] },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorTokenPermissionsSetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -12491,9 +17970,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorTokenPermissionsSetResponse](src/models/processor-token-permissions-set-response.ts)</code>
+**Direct**: `await client.processorTokenPermissionsSet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorTokenPermissionsSetError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorTokenPermissionsSetResponse](src/models/processor-token-permissions-set-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorTokenPermissionsSetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorTokenPermissionsSet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorTokenPermissionsSetResponse, ThePlaidApiClient.ProcessorTokenPermissionsSetError&gt;</code>, with `result.value` of type <code>[ProcessorTokenPermissionsSetResponse](src/models/processor-token-permissions-set-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -12519,19 +18006,39 @@ This endpoint allows you, the processor, to update the webhook URL associated wi
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorTokenWebhookUpdate({ body });
+  const response = await client.processorTokenWebhookUpdate({
+    body: { processorToken: "some example string", webhook: "some example string" },
+  });
   // TODO: Handle 'response' of type ProcessorTokenWebhookUpdateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorTokenWebhookUpdateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorTokenWebhookUpdateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorTokenWebhookUpdate({
+  body: { processorToken: "some example string", webhook: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorTokenWebhookUpdateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -12555,9 +18062,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorTokenWebhookUpdateResponse](src/models/processor-token-webhook-update-response.ts)</code>
+**Direct**: `await client.processorTokenWebhookUpdate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorTokenWebhookUpdateError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorTokenWebhookUpdateResponse](src/models/processor-token-webhook-update-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorTokenWebhookUpdateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorTokenWebhookUpdate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorTokenWebhookUpdateResponse, ThePlaidApiClient.ProcessorTokenWebhookUpdateError&gt;</code>, with `result.value` of type <code>[ProcessorTokenWebhookUpdateResponse](src/models/processor-token-webhook-update-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -12593,19 +18108,39 @@ To receive Transactions webhooks for a processor token, set its webhook URL via 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorTransactionsGet({ body });
+  const response = await client.processorTransactionsGet({
+    body: { processorToken: "some example string", startDate: "2024-01-15", endDate: "2024-01-15" },
+  });
   // TODO: Handle 'response' of type ProcessorTransactionsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorTransactionsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorTransactionsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorTransactionsGet({
+  body: { processorToken: "some example string", startDate: "2024-01-15", endDate: "2024-01-15" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorTransactionsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -12629,9 +18164,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorTransactionsGetResponse](src/models/processor-transactions-get-response.ts)</code>
+**Direct**: `await client.processorTransactionsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorTransactionsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorTransactionsGetResponse](src/models/processor-transactions-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorTransactionsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorTransactionsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorTransactionsGetResponse, ThePlaidApiClient.ProcessorTransactionsGetError&gt;</code>, with `result.value` of type <code>[ProcessorTransactionsGetResponse](src/models/processor-transactions-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -12665,21 +18208,39 @@ To receive Transactions webhooks for a processor token, set its webhook URL via 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorTransactionsRecurringGet({ body });
+  const response = await client.processorTransactionsRecurringGet({
+    body: { processorToken: "some example string" },
+  });
   // TODO: Handle 'response' of type ProcessorTransactionsRecurringGetResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.ProcessorTransactionsRecurringGetError && err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorTransactionsRecurringGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorTransactionsRecurringGet({
+  body: { processorToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorTransactionsRecurringGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -12703,9 +18264,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorTransactionsRecurringGetResponse](src/models/processor-transactions-recurring-get-response.ts)</code>
+**Direct**: `await client.processorTransactionsRecurringGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorTransactionsRecurringGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorTransactionsRecurringGetResponse](src/models/processor-transactions-recurring-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorTransactionsRecurringGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorTransactionsRecurringGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorTransactionsRecurringGetResponse, ThePlaidApiClient.ProcessorTransactionsRecurringGetError&gt;</code>, with `result.value` of type <code>[ProcessorTransactionsRecurringGetResponse](src/models/processor-transactions-recurring-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -12735,19 +18304,39 @@ As this endpoint triggers a synchronous request for fresh data, latency may be h
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorTransactionsRefresh({ body });
+  const response = await client.processorTransactionsRefresh({
+    body: { processorToken: "some example string" },
+  });
   // TODO: Handle 'response' of type ProcessorTransactionsRefreshResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorTransactionsRefreshError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorTransactionsRefreshError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorTransactionsRefresh({
+  body: { processorToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorTransactionsRefreshResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -12771,9 +18360,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorTransactionsRefreshResponse](src/models/processor-transactions-refresh-response.ts)</code>
+**Direct**: `await client.processorTransactionsRefresh(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorTransactionsRefreshError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorTransactionsRefreshResponse](src/models/processor-transactions-refresh-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorTransactionsRefreshError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorTransactionsRefresh(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorTransactionsRefreshResponse, ThePlaidApiClient.ProcessorTransactionsRefreshError&gt;</code>, with `result.value` of type <code>[ProcessorTransactionsRefreshResponse](src/models/processor-transactions-refresh-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -12814,19 +18411,39 @@ To receive Transactions webhooks for a processor token, set its webhook URL via 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.processorTransactionsSync({ body });
+  const response = await client.processorTransactionsSync({
+    body: { processorToken: "some example string" },
+  });
   // TODO: Handle 'response' of type ProcessorTransactionsSyncResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProcessorTransactionsSyncError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProcessorTransactionsSyncError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.processorTransactionsSync({
+  body: { processorToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProcessorTransactionsSyncResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -12850,9 +18467,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProcessorTransactionsSyncResponse](src/models/processor-transactions-sync-response.ts)</code>
+**Direct**: `await client.processorTransactionsSync(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProcessorTransactionsSyncError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProcessorTransactionsSyncResponse](src/models/processor-transactions-sync-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProcessorTransactionsSyncError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.processorTransactionsSync(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProcessorTransactionsSyncResponse, ThePlaidApiClient.ProcessorTransactionsSyncError&gt;</code>, with `result.value` of type <code>[ProcessorTransactionsSyncResponse](src/models/processor-transactions-sync-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -12878,19 +18503,39 @@ The `/profile/network_status/get` endpoint can be used to check whether Plaid ha
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.profileNetworkStatusGet({ body });
+  const response = await client.profileNetworkStatusGet({
+    body: { user: { phoneNumber: "some example string" } },
+  });
   // TODO: Handle 'response' of type ProfileNetworkStatusGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.ProfileNetworkStatusGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.ProfileNetworkStatusGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.profileNetworkStatusGet({
+  body: { user: { phoneNumber: "some example string" } },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProfileNetworkStatusGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -12914,9 +18559,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProfileNetworkStatusGetResponse](src/models/profile-network-status-get-response.ts)</code>
+**Direct**: `await client.profileNetworkStatusGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.ProfileNetworkStatusGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[ProfileNetworkStatusGetResponse](src/models/profile-network-status-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.ProfileNetworkStatusGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.profileNetworkStatusGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProfileNetworkStatusGetResponse, ThePlaidApiClient.ProfileNetworkStatusGetError&gt;</code>, with `result.value` of type <code>[ProfileNetworkStatusGetResponse](src/models/profile-network-status-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -12927,7 +18580,7 @@ try {
 </details>
 
 <details>
-<summary><code>protectCompute(request: ThePlaidApiClient.ProtectComputeRequestParams, options?: RequestOptions): ApiPromise&lt;ProtectComputeResponse, ResponseError&gt;</code></summary>
+<summary><code>protectCompute(request: ThePlaidApiClient.ProtectComputeRequestParams, options?: RequestOptions): ApiPromise&lt;ProtectComputeResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -12944,17 +18597,37 @@ The endpoint returns HTTP 400 with `error_type` = `INVALID_REQUEST` and `error_c
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.protectCompute({ body });
+  const response = await client.protectCompute({ body: { model: "some example string", user: {} } });
   // TODO: Handle 'response' of type ProtectComputeResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.protectCompute({
+  body: { model: "some example string", user: {} },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProtectComputeResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -12978,9 +18651,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProtectComputeResponse](src/models/protect-compute-response.ts)</code>
+**Direct**: `await client.protectCompute(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[ProtectComputeResponse](src/models/protect-compute-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.protectCompute(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProtectComputeResponse, ApiError&gt;</code>, with `result.value` of type <code>[ProtectComputeResponse](src/models/protect-compute-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -12991,7 +18672,7 @@ try {
 </details>
 
 <details>
-<summary><code>protectEventGet(request: ThePlaidApiClient.ProtectEventGetRequestParams, options?: RequestOptions): ApiPromise&lt;ProtectEventGetResponse, ResponseError&gt;</code></summary>
+<summary><code>protectEventGet(request: ThePlaidApiClient.ProtectEventGetRequestParams, options?: RequestOptions): ApiPromise&lt;ProtectEventGetResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -13006,17 +18687,35 @@ Get information about a user event including Trust Index score and fraud attribu
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.protectEventGet({ body });
+  const response = await client.protectEventGet({ body: { eventId: "some example string" } });
   // TODO: Handle 'response' of type ProtectEventGetResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.protectEventGet({ body: { eventId: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProtectEventGetResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -13040,9 +18739,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProtectEventGetResponse](src/models/protect-event-get-response.ts)</code>
+**Direct**: `await client.protectEventGet(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[ProtectEventGetResponse](src/models/protect-event-get-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.protectEventGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProtectEventGetResponse, ApiError&gt;</code>, with `result.value` of type <code>[ProtectEventGetResponse](src/models/protect-event-get-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -13053,7 +18760,7 @@ try {
 </details>
 
 <details>
-<summary><code>protectEventSend(request: ThePlaidApiClient.ProtectEventSendRequestParams, options?: RequestOptions): ApiPromise&lt;ProtectEventSendResponse, ResponseError&gt;</code></summary>
+<summary><code>protectEventSend(request: ThePlaidApiClient.ProtectEventSendRequestParams, options?: RequestOptions): ApiPromise&lt;ProtectEventSendResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -13068,17 +18775,39 @@ Send a new event to enrich user data and optionally get a Trust Index score for 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.protectEventSend({ body });
+  const response = await client.protectEventSend({
+    body: { event: { timestamp: new Date(Date.UTC(2024, 0, 15, 9, 30, 0)) } },
+  });
   // TODO: Handle 'response' of type ProtectEventSendResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.protectEventSend({
+  body: { event: { timestamp: new Date(Date.UTC(2024, 0, 15, 9, 30, 0)) } },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProtectEventSendResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -13102,9 +18831,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProtectEventSendResponse](src/models/protect-event-send-response.ts)</code>
+**Direct**: `await client.protectEventSend(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[ProtectEventSendResponse](src/models/protect-event-send-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.protectEventSend(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProtectEventSendResponse, ApiError&gt;</code>, with `result.value` of type <code>[ProtectEventSendResponse](src/models/protect-event-send-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -13115,7 +18852,7 @@ try {
 </details>
 
 <details>
-<summary><code>protectReportCreate(request: ThePlaidApiClient.ProtectReportCreateRequestParams, options?: RequestOptions): ApiPromise&lt;ProtectReportCreateResponse, ResponseError&gt;</code></summary>
+<summary><code>protectReportCreate(request: ThePlaidApiClient.ProtectReportCreateRequestParams, options?: RequestOptions): ApiPromise&lt;ProtectReportCreateResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -13135,17 +18872,47 @@ Each report must include `user_id`, or an `incident_event` with at least one sup
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.protectReportCreate({ body });
+  const response = await client.protectReportCreate({
+    body: {
+      reportConfidence: ProtectReportConfidence.Confirmed,
+      reportType: ProtectReportType.UserAccountTakeover,
+      reportSource: ProtectReportSource.InternalReview,
+    },
+  });
   // TODO: Handle 'response' of type ProtectReportCreateResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.protectReportCreate({
+  body: {
+    reportConfidence: ProtectReportConfidence.Confirmed,
+    reportType: ProtectReportType.UserAccountTakeover,
+    reportSource: ProtectReportSource.InternalReview,
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProtectReportCreateResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -13169,9 +18936,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProtectReportCreateResponse](src/models/protect-report-create-response.ts)</code>
+**Direct**: `await client.protectReportCreate(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[ProtectReportCreateResponse](src/models/protect-report-create-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.protectReportCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProtectReportCreateResponse, ApiError&gt;</code>, with `result.value` of type <code>[ProtectReportCreateResponse](src/models/protect-report-create-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -13182,7 +18957,7 @@ try {
 </details>
 
 <details>
-<summary><code>protectUserInsightsGet(request: ThePlaidApiClient.ProtectUserInsightsGetRequestParams, options?: RequestOptions): ApiPromise&lt;ProtectUserInsightsGetResponse, ResponseError&gt;</code></summary>
+<summary><code>protectUserInsightsGet(request: ThePlaidApiClient.ProtectUserInsightsGetRequestParams, options?: RequestOptions): ApiPromise&lt;ProtectUserInsightsGetResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -13197,17 +18972,35 @@ Use this endpoint to get basic information about a user as it relates to their f
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.protectUserInsightsGet({ body });
+  const response = await client.protectUserInsightsGet({ body: {} });
   // TODO: Handle 'response' of type ProtectUserInsightsGetResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.protectUserInsightsGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type ProtectUserInsightsGetResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -13231,9 +19024,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[ProtectUserInsightsGetResponse](src/models/protect-user-insights-get-response.ts)</code>
+**Direct**: `await client.protectUserInsightsGet(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[ProtectUserInsightsGetResponse](src/models/protect-user-insights-get-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.protectUserInsightsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;ProtectUserInsightsGetResponse, ApiError&gt;</code>, with `result.value` of type <code>[ProtectUserInsightsGetResponse](src/models/protect-user-insights-get-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -13259,19 +19060,45 @@ Use the `/sandbox/bank_income/fire_webhook` endpoint to manually trigger a Bank 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxBankIncomeFireWebhook({ body });
+  const response = await client.sandboxBankIncomeFireWebhook({
+    body: {
+      webhookCode: SandboxBankIncomeWebhookFireRequestWebhookCode.BankIncomeRefreshUpdate,
+      webhookFields: { userId: "some example string" },
+    },
+  });
   // TODO: Handle 'response' of type SandboxBankIncomeFireWebhookResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxBankIncomeFireWebhookError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxBankIncomeFireWebhookError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxBankIncomeFireWebhook({
+  body: {
+    webhookCode: SandboxBankIncomeWebhookFireRequestWebhookCode.BankIncomeRefreshUpdate,
+    webhookFields: { userId: "some example string" },
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxBankIncomeFireWebhookResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -13295,9 +19122,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxBankIncomeFireWebhookResponse](src/models/sandbox-bank-income-fire-webhook-response.ts)</code>
+**Direct**: `await client.sandboxBankIncomeFireWebhook(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxBankIncomeFireWebhookError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxBankIncomeFireWebhookResponse](src/models/sandbox-bank-income-fire-webhook-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxBankIncomeFireWebhookError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxBankIncomeFireWebhook(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxBankIncomeFireWebhookResponse, ThePlaidApiClient.SandboxBankIncomeFireWebhookError&gt;</code>, with `result.value` of type <code>[SandboxBankIncomeFireWebhookResponse](src/models/sandbox-bank-income-fire-webhook-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -13323,19 +19158,37 @@ Use the `/sandbox/bank_transfer/fire_webhook` endpoint to manually trigger a Ban
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxBankTransferFireWebhook({ body });
+  const response = await client.sandboxBankTransferFireWebhook({ body: { webhook: "some example string" } });
   // TODO: Handle 'response' of type SandboxBankTransferFireWebhookResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxBankTransferFireWebhookError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxBankTransferFireWebhookError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxBankTransferFireWebhook({
+  body: { webhook: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxBankTransferFireWebhookResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -13359,9 +19212,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxBankTransferFireWebhookResponse](src/models/sandbox-bank-transfer-fire-webhook-response.ts)</code>
+**Direct**: `await client.sandboxBankTransferFireWebhook(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxBankTransferFireWebhookError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxBankTransferFireWebhookResponse](src/models/sandbox-bank-transfer-fire-webhook-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxBankTransferFireWebhookError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxBankTransferFireWebhook(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxBankTransferFireWebhookResponse, ThePlaidApiClient.SandboxBankTransferFireWebhookError&gt;</code>, with `result.value` of type <code>[SandboxBankTransferFireWebhookResponse](src/models/sandbox-bank-transfer-fire-webhook-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -13387,19 +19248,39 @@ Use the `/sandbox/bank_transfer/simulate` endpoint to simulate a bank transfer e
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxBankTransferSimulate({ body });
+  const response = await client.sandboxBankTransferSimulate({
+    body: { bankTransferId: "some example string", eventType: "some example string" },
+  });
   // TODO: Handle 'response' of type SandboxBankTransferSimulateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxBankTransferSimulateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxBankTransferSimulateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxBankTransferSimulate({
+  body: { bankTransferId: "some example string", eventType: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxBankTransferSimulateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -13423,9 +19304,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxBankTransferSimulateResponse](src/models/sandbox-bank-transfer-simulate-response.ts)</code>
+**Direct**: `await client.sandboxBankTransferSimulate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxBankTransferSimulateError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxBankTransferSimulateResponse](src/models/sandbox-bank-transfer-simulate-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxBankTransferSimulateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxBankTransferSimulate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxBankTransferSimulateResponse, ThePlaidApiClient.SandboxBankTransferSimulateError&gt;</code>, with `result.value` of type <code>[SandboxBankTransferSimulateResponse](src/models/sandbox-bank-transfer-simulate-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -13451,19 +19340,35 @@ Use the `/sandbox/cra/cashflow_updates/update` endpoint to manually trigger an u
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxCraCashflowUpdatesUpdate({ body });
+  const response = await client.sandboxCraCashflowUpdatesUpdate({ body: {} });
   // TODO: Handle 'response' of type SandboxCraCashflowUpdatesUpdateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxCraCashflowUpdatesUpdateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxCraCashflowUpdatesUpdateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxCraCashflowUpdatesUpdate({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxCraCashflowUpdatesUpdateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -13487,9 +19392,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxCraCashflowUpdatesUpdateResponse](src/models/sandbox-cra-cashflow-updates-update-response.ts)</code>
+**Direct**: `await client.sandboxCraCashflowUpdatesUpdate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxCraCashflowUpdatesUpdateError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxCraCashflowUpdatesUpdateResponse](src/models/sandbox-cra-cashflow-updates-update-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxCraCashflowUpdatesUpdateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxCraCashflowUpdatesUpdate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxCraCashflowUpdatesUpdateResponse, ThePlaidApiClient.SandboxCraCashflowUpdatesUpdateError&gt;</code>, with `result.value` of type <code>[SandboxCraCashflowUpdatesUpdateResponse](src/models/sandbox-cra-cashflow-updates-update-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -13517,19 +19430,39 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxFdxConsentSeed({ body });
+  const response = await client.sandboxFdxConsentSeed({
+    body: { customerId: "some example string", applicationId: "some example string" },
+  });
   // TODO: Handle 'response' of type SandboxFdxConsentSeedResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxFdxConsentSeedError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxFdxConsentSeedError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxFdxConsentSeed({
+  body: { customerId: "some example string", applicationId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxFdxConsentSeedResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -13553,9 +19486,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxFdxConsentSeedResponse](src/models/sandbox-fdx-consent-seed-response.ts)</code>
+**Direct**: `await client.sandboxFdxConsentSeed(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxFdxConsentSeedError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxFdxConsentSeedResponse](src/models/sandbox-fdx-consent-seed-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxFdxConsentSeedError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxFdxConsentSeed(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxFdxConsentSeedResponse, ThePlaidApiClient.SandboxFdxConsentSeedError&gt;</code>, with `result.value` of type <code>[SandboxFdxConsentSeedResponse](src/models/sandbox-fdx-consent-seed-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -13581,19 +19522,47 @@ Use the `/sandbox/income/fire_webhook` endpoint to manually trigger a Payroll or
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxIncomeFireWebhook({ body });
+  const response = await client.sandboxIncomeFireWebhook({
+    body: {
+      itemId: "some example string",
+      webhook: "some example string",
+      webhookCode: SandboxIncomeWebhookFireRequestWebhookCode.IncomeVerification,
+    },
+  });
   // TODO: Handle 'response' of type SandboxIncomeFireWebhookResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxIncomeFireWebhookError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxIncomeFireWebhookError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxIncomeFireWebhook({
+  body: {
+    itemId: "some example string",
+    webhook: "some example string",
+    webhookCode: SandboxIncomeWebhookFireRequestWebhookCode.IncomeVerification,
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxIncomeFireWebhookResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -13617,9 +19586,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxIncomeFireWebhookResponse](src/models/sandbox-income-fire-webhook-response.ts)</code>
+**Direct**: `await client.sandboxIncomeFireWebhook(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxIncomeFireWebhookError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxIncomeFireWebhookResponse](src/models/sandbox-income-fire-webhook-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxIncomeFireWebhookError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxIncomeFireWebhook(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxIncomeFireWebhookResponse, ThePlaidApiClient.SandboxIncomeFireWebhookError&gt;</code>, with `result.value` of type <code>[SandboxIncomeFireWebhookResponse](src/models/sandbox-income-fire-webhook-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -13647,19 +19624,39 @@ The `access_token` must belong to a Permissions Manager Item created via `/item/
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxItemApplicationSeed({ body });
+  const response = await client.sandboxItemApplicationSeed({
+    body: { accessToken: "some example string", applicationId: "some example string" },
+  });
   // TODO: Handle 'response' of type SandboxItemApplicationSeedResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxItemApplicationSeedError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxItemApplicationSeedError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxItemApplicationSeed({
+  body: { accessToken: "some example string", applicationId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxItemApplicationSeedResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -13683,9 +19680,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxItemApplicationSeedResponse](src/models/sandbox-item-application-seed-response.ts)</code>
+**Direct**: `await client.sandboxItemApplicationSeed(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxItemApplicationSeedError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxItemApplicationSeedResponse](src/models/sandbox-item-application-seed-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxItemApplicationSeedError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxItemApplicationSeed(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxItemApplicationSeedResponse, ThePlaidApiClient.SandboxItemApplicationSeedError&gt;</code>, with `result.value` of type <code>[SandboxItemApplicationSeedResponse](src/models/sandbox-item-application-seed-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -13735,19 +19740,39 @@ Note that this endpoint is provided for developer ease-of-use and is not require
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxItemFireWebhook({ body });
+  const response = await client.sandboxItemFireWebhook({
+    body: { accessToken: "some example string", webhookCode: WebhookCode.DefaultUpdate },
+  });
   // TODO: Handle 'response' of type SandboxItemFireWebhookResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxItemFireWebhookError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxItemFireWebhookError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxItemFireWebhook({
+  body: { accessToken: "some example string", webhookCode: WebhookCode.DefaultUpdate },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxItemFireWebhookResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -13771,9 +19796,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxItemFireWebhookResponse](src/models/sandbox-item-fire-webhook-response.ts)</code>
+**Direct**: `await client.sandboxItemFireWebhook(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxItemFireWebhookError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxItemFireWebhookResponse](src/models/sandbox-item-fire-webhook-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxItemFireWebhookError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxItemFireWebhook(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxItemFireWebhookResponse, ThePlaidApiClient.SandboxItemFireWebhookError&gt;</code>, with `result.value` of type <code>[SandboxItemFireWebhookResponse](src/models/sandbox-item-fire-webhook-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -13800,19 +19833,37 @@ In the Sandbox, Items will transition to an `ITEM_LOGIN_REQUIRED` error state au
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxItemResetLogin({ body });
+  const response = await client.sandboxItemResetLogin({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type SandboxItemResetLoginResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxItemResetLoginError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxItemResetLoginError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxItemResetLogin({
+  body: { accessToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxItemResetLoginResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -13836,9 +19887,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxItemResetLoginResponse](src/models/sandbox-item-reset-login-response.ts)</code>
+**Direct**: `await client.sandboxItemResetLogin(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxItemResetLoginError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxItemResetLoginResponse](src/models/sandbox-item-reset-login-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxItemResetLoginError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxItemResetLogin(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxItemResetLoginResponse, ThePlaidApiClient.SandboxItemResetLoginError&gt;</code>, with `result.value` of type <code>[SandboxItemResetLoginResponse](src/models/sandbox-item-reset-login-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -13866,21 +19925,47 @@ For more information on testing Automated Micro-deposits in Sandbox, see [Auth f
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxItemSetVerificationStatus({ body });
+  const response = await client.sandboxItemSetVerificationStatus({
+    body: {
+      accessToken: "some example string",
+      accountId: "some example string",
+      verificationStatus: VerificationStatus1.AutomaticallyVerified,
+    },
+  });
   // TODO: Handle 'response' of type SandboxItemSetVerificationStatusResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.SandboxItemSetVerificationStatusError && err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxItemSetVerificationStatusError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxItemSetVerificationStatus({
+  body: {
+    accessToken: "some example string",
+    accountId: "some example string",
+    verificationStatus: VerificationStatus1.AutomaticallyVerified,
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxItemSetVerificationStatusResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -13904,9 +19989,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxItemSetVerificationStatusResponse](src/models/sandbox-item-set-verification-status-response.ts)</code>
+**Direct**: `await client.sandboxItemSetVerificationStatus(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxItemSetVerificationStatusError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxItemSetVerificationStatusResponse](src/models/sandbox-item-set-verification-status-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxItemSetVerificationStatusError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxItemSetVerificationStatus(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxItemSetVerificationStatusResponse, ThePlaidApiClient.SandboxItemSetVerificationStatusError&gt;</code>, with `result.value` of type <code>[SandboxItemSetVerificationStatusResponse](src/models/sandbox-item-set-verification-status-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -13932,19 +20025,39 @@ Save the selected accounts when connecting to the Platypus OAuth institution
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxOauthSelectAccounts({ body });
+  const response = await client.sandboxOauthSelectAccounts({
+    body: { oauthStateId: "some example string", accounts: ["some example string"] },
+  });
   // TODO: Handle 'response' of type Record<string, unknown>
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxOauthSelectAccountsError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxOauthSelectAccountsError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxOauthSelectAccounts({
+  body: { oauthStateId: "some example string", accounts: ["some example string"] },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type Record<string, unknown>
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -13968,9 +20081,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>Record&lt;string, unknown&gt;</code>
+**Direct**: `await client.sandboxOauthSelectAccounts(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxOauthSelectAccountsError](src/client.ts)</code>
+- **OnSuccess**: <code>Record&lt;string, unknown&gt;</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxOauthSelectAccountsError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxOauthSelectAccounts(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;Record&lt;string, unknown&gt;, ThePlaidApiClient.SandboxOauthSelectAccountsError&gt;</code>, with `result.value` of type <code>Record&lt;string, unknown&gt;</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -14000,19 +20121,39 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxPaymentProfileResetLogin({ body });
+  const response = await client.sandboxPaymentProfileResetLogin({
+    body: { paymentProfileToken: "some example string" },
+  });
   // TODO: Handle 'response' of type SandboxPaymentProfileResetLoginResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxPaymentProfileResetLoginError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxPaymentProfileResetLoginError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxPaymentProfileResetLogin({
+  body: { paymentProfileToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxPaymentProfileResetLoginResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -14036,9 +20177,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxPaymentProfileResetLoginResponse](src/models/sandbox-payment-profile-reset-login-response.ts)</code>
+**Direct**: `await client.sandboxPaymentProfileResetLogin(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxPaymentProfileResetLoginError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxPaymentProfileResetLoginResponse](src/models/sandbox-payment-profile-reset-login-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxPaymentProfileResetLoginError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxPaymentProfileResetLogin(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxPaymentProfileResetLoginResponse, ThePlaidApiClient.SandboxPaymentProfileResetLoginError&gt;</code>, with `result.value` of type <code>[SandboxPaymentProfileResetLoginResponse](src/models/sandbox-payment-profile-reset-login-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -14064,19 +20213,39 @@ Use the `/sandbox/payment/simulate` endpoint to simulate various payment events 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxPaymentSimulate({ body });
+  const response = await client.sandboxPaymentSimulate({
+    body: { paymentId: "some example string", webhook: "some example string", status: "some example string" },
+  });
   // TODO: Handle 'response' of type SandboxPaymentSimulateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxPaymentSimulateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxPaymentSimulateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxPaymentSimulate({
+  body: { paymentId: "some example string", webhook: "some example string", status: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxPaymentSimulateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -14100,9 +20269,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxPaymentSimulateResponse](src/models/sandbox-payment-simulate-response.ts)</code>
+**Direct**: `await client.sandboxPaymentSimulate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxPaymentSimulateError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxPaymentSimulateResponse](src/models/sandbox-payment-simulate-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxPaymentSimulateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxPaymentSimulate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxPaymentSimulateResponse, ThePlaidApiClient.SandboxPaymentSimulateError&gt;</code>, with `result.value` of type <code>[SandboxPaymentSimulateResponse](src/models/sandbox-payment-simulate-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -14128,19 +20305,39 @@ Use the `/sandbox/processor_token/create` endpoint to create a valid `processor_
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxProcessorTokenCreate({ body });
+  const response = await client.sandboxProcessorTokenCreate({
+    body: { institutionId: "some example string" },
+  });
   // TODO: Handle 'response' of type SandboxProcessorTokenCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxProcessorTokenCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxProcessorTokenCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxProcessorTokenCreate({
+  body: { institutionId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxProcessorTokenCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -14164,9 +20361,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxProcessorTokenCreateResponse](src/models/sandbox-processor-token-create-response.ts)</code>
+**Direct**: `await client.sandboxProcessorTokenCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxProcessorTokenCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxProcessorTokenCreateResponse](src/models/sandbox-processor-token-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxProcessorTokenCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxProcessorTokenCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxProcessorTokenCreateResponse, ThePlaidApiClient.SandboxProcessorTokenCreateError&gt;</code>, with `result.value` of type <code>[SandboxProcessorTokenCreateResponse](src/models/sandbox-processor-token-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -14192,19 +20397,39 @@ Use the `/sandbox/public_token/create` endpoint to create a valid `public_token`
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxPublicTokenCreate({ body });
+  const response = await client.sandboxPublicTokenCreate({
+    body: { institutionId: "some example string", initialProducts: [Products.Assets] },
+  });
   // TODO: Handle 'response' of type SandboxPublicTokenCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxPublicTokenCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxPublicTokenCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxPublicTokenCreate({
+  body: { institutionId: "some example string", initialProducts: [Products.Assets] },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxPublicTokenCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -14228,9 +20453,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxPublicTokenCreateResponse](src/models/sandbox-public-token-create-response.ts)</code>
+**Direct**: `await client.sandboxPublicTokenCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxPublicTokenCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxPublicTokenCreateResponse](src/models/sandbox-public-token-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxPublicTokenCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxPublicTokenCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxPublicTokenCreateResponse, ThePlaidApiClient.SandboxPublicTokenCreateError&gt;</code>, with `result.value` of type <code>[SandboxPublicTokenCreateResponse](src/models/sandbox-public-token-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -14260,19 +20493,59 @@ Custom transactions are only applied to the depository account. Support for per-
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxTransactionsCreate({ body });
+  const response = await client.sandboxTransactionsCreate({
+    body: {
+      accessToken: "some example string",
+      transactions: [
+        {
+          dateTransacted: "2024-01-15",
+          datePosted: "2024-01-15",
+          amount: 1.5,
+          description: "some example string",
+        },
+      ],
+    },
+  });
   // TODO: Handle 'response' of type SandboxTransactionsCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxTransactionsCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxTransactionsCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxTransactionsCreate({
+  body: {
+    accessToken: "some example string",
+    transactions: [
+      {
+        dateTransacted: "2024-01-15",
+        datePosted: "2024-01-15",
+        amount: 1.5,
+        description: "some example string",
+      },
+    ],
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxTransactionsCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -14296,9 +20569,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxTransactionsCreateResponse](src/models/sandbox-transactions-create-response.ts)</code>
+**Direct**: `await client.sandboxTransactionsCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxTransactionsCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxTransactionsCreateResponse](src/models/sandbox-transactions-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxTransactionsCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxTransactionsCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxTransactionsCreateResponse, ThePlaidApiClient.SandboxTransactionsCreateError&gt;</code>, with `result.value` of type <code>[SandboxTransactionsCreateResponse](src/models/sandbox-transactions-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -14324,19 +20605,37 @@ Use the `/sandbox/transfer/fire_webhook` endpoint to manually trigger a `TRANSFE
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxTransferFireWebhook({ body });
+  const response = await client.sandboxTransferFireWebhook({ body: { webhook: "some example string" } });
   // TODO: Handle 'response' of type SandboxTransferFireWebhookResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxTransferFireWebhookError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxTransferFireWebhookError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxTransferFireWebhook({
+  body: { webhook: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxTransferFireWebhookResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -14360,9 +20659,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxTransferFireWebhookResponse](src/models/sandbox-transfer-fire-webhook-response.ts)</code>
+**Direct**: `await client.sandboxTransferFireWebhook(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxTransferFireWebhookError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxTransferFireWebhookResponse](src/models/sandbox-transfer-fire-webhook-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxTransferFireWebhookError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxTransferFireWebhook(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxTransferFireWebhookResponse, ThePlaidApiClient.SandboxTransferFireWebhookError&gt;</code>, with `result.value` of type <code>[SandboxTransferFireWebhookResponse](src/models/sandbox-transfer-fire-webhook-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -14388,21 +20695,39 @@ Use the `/sandbox/transfer/ledger/deposit/simulate` endpoint to simulate a ledge
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxTransferLedgerDepositSimulate({ body });
+  const response = await client.sandboxTransferLedgerDepositSimulate({
+    body: { sweepId: "some example string", eventType: TransferLedgerSweepSimulateEventType.SweepPosted },
+  });
   // TODO: Handle 'response' of type SandboxTransferLedgerDepositSimulateResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.SandboxTransferLedgerDepositSimulateError && err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxTransferLedgerDepositSimulateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxTransferLedgerDepositSimulate({
+  body: { sweepId: "some example string", eventType: TransferLedgerSweepSimulateEventType.SweepPosted },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxTransferLedgerDepositSimulateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -14426,9 +20751,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxTransferLedgerDepositSimulateResponse](src/models/sandbox-transfer-ledger-deposit-simulate-response.ts)</code>
+**Direct**: `await client.sandboxTransferLedgerDepositSimulate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxTransferLedgerDepositSimulateError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxTransferLedgerDepositSimulateResponse](src/models/sandbox-transfer-ledger-deposit-simulate-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxTransferLedgerDepositSimulateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxTransferLedgerDepositSimulate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxTransferLedgerDepositSimulateResponse, ThePlaidApiClient.SandboxTransferLedgerDepositSimulateError&gt;</code>, with `result.value` of type <code>[SandboxTransferLedgerDepositSimulateResponse](src/models/sandbox-transfer-ledger-deposit-simulate-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -14454,22 +20787,35 @@ Use the `/sandbox/transfer/ledger/simulate_available` endpoint to simulate conve
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxTransferLedgerSimulateAvailable({ body });
+  const response = await client.sandboxTransferLedgerSimulateAvailable({ body: {} });
   // TODO: Handle 'response' of type SandboxTransferLedgerSimulateAvailableResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.SandboxTransferLedgerSimulateAvailableError &&
-      err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxTransferLedgerSimulateAvailableError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxTransferLedgerSimulateAvailable({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxTransferLedgerSimulateAvailableResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -14493,9 +20839,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxTransferLedgerSimulateAvailableResponse](src/models/sandbox-transfer-ledger-simulate-available-response.ts)</code>
+**Direct**: `await client.sandboxTransferLedgerSimulateAvailable(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxTransferLedgerSimulateAvailableError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxTransferLedgerSimulateAvailableResponse](src/models/sandbox-transfer-ledger-simulate-available-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxTransferLedgerSimulateAvailableError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxTransferLedgerSimulateAvailable(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxTransferLedgerSimulateAvailableResponse, ThePlaidApiClient.SandboxTransferLedgerSimulateAvailableError&gt;</code>, with `result.value` of type <code>[SandboxTransferLedgerSimulateAvailableResponse](src/models/sandbox-transfer-ledger-simulate-available-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -14521,22 +20875,39 @@ Use the `/sandbox/transfer/ledger/withdraw/simulate` endpoint to simulate a ledg
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxTransferLedgerWithdrawSimulate({ body });
+  const response = await client.sandboxTransferLedgerWithdrawSimulate({
+    body: { sweepId: "some example string", eventType: TransferLedgerSweepSimulateEventType.SweepPosted },
+  });
   // TODO: Handle 'response' of type SandboxTransferLedgerWithdrawSimulateResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.SandboxTransferLedgerWithdrawSimulateError &&
-      err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxTransferLedgerWithdrawSimulateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxTransferLedgerWithdrawSimulate({
+  body: { sweepId: "some example string", eventType: TransferLedgerSweepSimulateEventType.SweepPosted },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxTransferLedgerWithdrawSimulateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -14560,9 +20931,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxTransferLedgerWithdrawSimulateResponse](src/models/sandbox-transfer-ledger-withdraw-simulate-response.ts)</code>
+**Direct**: `await client.sandboxTransferLedgerWithdrawSimulate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxTransferLedgerWithdrawSimulateError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxTransferLedgerWithdrawSimulateResponse](src/models/sandbox-transfer-ledger-withdraw-simulate-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxTransferLedgerWithdrawSimulateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxTransferLedgerWithdrawSimulate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxTransferLedgerWithdrawSimulateResponse, ThePlaidApiClient.SandboxTransferLedgerWithdrawSimulateError&gt;</code>, with `result.value` of type <code>[SandboxTransferLedgerWithdrawSimulateResponse](src/models/sandbox-transfer-ledger-withdraw-simulate-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -14588,19 +20967,39 @@ Use the `/sandbox/transfer/refund/simulate` endpoint to simulate a refund event 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxTransferRefundSimulate({ body });
+  const response = await client.sandboxTransferRefundSimulate({
+    body: { refundId: "some example string", eventType: "some example string" },
+  });
   // TODO: Handle 'response' of type SandboxTransferRefundSimulateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxTransferRefundSimulateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxTransferRefundSimulateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxTransferRefundSimulate({
+  body: { refundId: "some example string", eventType: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxTransferRefundSimulateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -14624,9 +21023,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxTransferRefundSimulateResponse](src/models/sandbox-transfer-refund-simulate-response.ts)</code>
+**Direct**: `await client.sandboxTransferRefundSimulate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxTransferRefundSimulateError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxTransferRefundSimulateResponse](src/models/sandbox-transfer-refund-simulate-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxTransferRefundSimulateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxTransferRefundSimulate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxTransferRefundSimulateResponse, ThePlaidApiClient.SandboxTransferRefundSimulateError&gt;</code>, with `result.value` of type <code>[SandboxTransferRefundSimulateResponse](src/models/sandbox-transfer-refund-simulate-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -14652,21 +21059,35 @@ Use the `/sandbox/transfer/repayment/simulate` endpoint to trigger the creation 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxTransferRepaymentSimulate({ body });
+  const response = await client.sandboxTransferRepaymentSimulate({ body: {} });
   // TODO: Handle 'response' of type SandboxTransferRepaymentSimulateResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.SandboxTransferRepaymentSimulateError && err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxTransferRepaymentSimulateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxTransferRepaymentSimulate({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxTransferRepaymentSimulateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -14690,9 +21111,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxTransferRepaymentSimulateResponse](src/models/sandbox-transfer-repayment-simulate-response.ts)</code>
+**Direct**: `await client.sandboxTransferRepaymentSimulate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxTransferRepaymentSimulateError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxTransferRepaymentSimulateResponse](src/models/sandbox-transfer-repayment-simulate-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxTransferRepaymentSimulateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxTransferRepaymentSimulate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxTransferRepaymentSimulateResponse, ThePlaidApiClient.SandboxTransferRepaymentSimulateError&gt;</code>, with `result.value` of type <code>[SandboxTransferRepaymentSimulateResponse](src/models/sandbox-transfer-repayment-simulate-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -14718,19 +21147,39 @@ Use the `/sandbox/transfer/simulate` endpoint to simulate a transfer event in th
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxTransferSimulate({ body });
+  const response = await client.sandboxTransferSimulate({
+    body: { transferId: "some example string", eventType: "some example string" },
+  });
   // TODO: Handle 'response' of type SandboxTransferSimulateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxTransferSimulateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxTransferSimulateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxTransferSimulate({
+  body: { transferId: "some example string", eventType: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxTransferSimulateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -14754,9 +21203,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxTransferSimulateResponse](src/models/sandbox-transfer-simulate-response.ts)</code>
+**Direct**: `await client.sandboxTransferSimulate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxTransferSimulateError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxTransferSimulateResponse](src/models/sandbox-transfer-simulate-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxTransferSimulateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxTransferSimulate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxTransferSimulateResponse, ThePlaidApiClient.SandboxTransferSimulateError&gt;</code>, with `result.value` of type <code>[SandboxTransferSimulateResponse](src/models/sandbox-transfer-simulate-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -14782,19 +21239,35 @@ Use the `/sandbox/transfer/sweep/simulate` endpoint to create a sweep and associ
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxTransferSweepSimulate({ body });
+  const response = await client.sandboxTransferSweepSimulate({ body: {} });
   // TODO: Handle 'response' of type SandboxTransferSweepSimulateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxTransferSweepSimulateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxTransferSweepSimulateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxTransferSweepSimulate({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxTransferSweepSimulateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -14818,9 +21291,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxTransferSweepSimulateResponse](src/models/sandbox-transfer-sweep-simulate-response.ts)</code>
+**Direct**: `await client.sandboxTransferSweepSimulate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxTransferSweepSimulateError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxTransferSweepSimulateResponse](src/models/sandbox-transfer-sweep-simulate-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxTransferSweepSimulateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxTransferSweepSimulate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxTransferSweepSimulateResponse, ThePlaidApiClient.SandboxTransferSweepSimulateError&gt;</code>, with `result.value` of type <code>[SandboxTransferSweepSimulateResponse](src/models/sandbox-transfer-sweep-simulate-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -14856,19 +21337,39 @@ For example, if the recurring transfer associated with this test clock originate
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxTransferTestClockAdvance({ body });
+  const response = await client.sandboxTransferTestClockAdvance({
+    body: { testClockId: "some example string", newVirtualTime: new Date(Date.UTC(2024, 0, 15, 9, 30, 0)) },
+  });
   // TODO: Handle 'response' of type SandboxTransferTestClockAdvanceResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxTransferTestClockAdvanceError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxTransferTestClockAdvanceError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxTransferTestClockAdvance({
+  body: { testClockId: "some example string", newVirtualTime: new Date(Date.UTC(2024, 0, 15, 9, 30, 0)) },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxTransferTestClockAdvanceResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -14892,9 +21393,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxTransferTestClockAdvanceResponse](src/models/sandbox-transfer-test-clock-advance-response.ts)</code>
+**Direct**: `await client.sandboxTransferTestClockAdvance(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxTransferTestClockAdvanceError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxTransferTestClockAdvanceResponse](src/models/sandbox-transfer-test-clock-advance-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxTransferTestClockAdvanceError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxTransferTestClockAdvance(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxTransferTestClockAdvanceResponse, ThePlaidApiClient.SandboxTransferTestClockAdvanceError&gt;</code>, with `result.value` of type <code>[SandboxTransferTestClockAdvanceResponse](src/models/sandbox-transfer-test-clock-advance-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -14924,19 +21433,35 @@ A test clock can be associated with up to 5 recurring transfers.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxTransferTestClockCreate({ body });
+  const response = await client.sandboxTransferTestClockCreate({ body: {} });
   // TODO: Handle 'response' of type SandboxTransferTestClockCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxTransferTestClockCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxTransferTestClockCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxTransferTestClockCreate({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxTransferTestClockCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -14960,9 +21485,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxTransferTestClockCreateResponse](src/models/sandbox-transfer-test-clock-create-response.ts)</code>
+**Direct**: `await client.sandboxTransferTestClockCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxTransferTestClockCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxTransferTestClockCreateResponse](src/models/sandbox-transfer-test-clock-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxTransferTestClockCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxTransferTestClockCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxTransferTestClockCreateResponse, ThePlaidApiClient.SandboxTransferTestClockCreateError&gt;</code>, with `result.value` of type <code>[SandboxTransferTestClockCreateResponse](src/models/sandbox-transfer-test-clock-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -14988,19 +21521,37 @@ Use the `/sandbox/transfer/test_clock/get` endpoint to get a `test_clock` in the
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxTransferTestClockGet({ body });
+  const response = await client.sandboxTransferTestClockGet({ body: { testClockId: "some example string" } });
   // TODO: Handle 'response' of type SandboxTransferTestClockGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxTransferTestClockGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxTransferTestClockGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxTransferTestClockGet({
+  body: { testClockId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxTransferTestClockGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -15024,9 +21575,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxTransferTestClockGetResponse](src/models/sandbox-transfer-test-clock-get-response.ts)</code>
+**Direct**: `await client.sandboxTransferTestClockGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxTransferTestClockGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxTransferTestClockGetResponse](src/models/sandbox-transfer-test-clock-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxTransferTestClockGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxTransferTestClockGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxTransferTestClockGetResponse, ThePlaidApiClient.SandboxTransferTestClockGetError&gt;</code>, with `result.value` of type <code>[SandboxTransferTestClockGetResponse](src/models/sandbox-transfer-test-clock-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -15052,19 +21611,35 @@ Use the `/sandbox/transfer/test_clock/list` endpoint to see a list of all your t
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxTransferTestClockList({ body });
+  const response = await client.sandboxTransferTestClockList({ body: {} });
   // TODO: Handle 'response' of type SandboxTransferTestClockListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxTransferTestClockListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxTransferTestClockListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxTransferTestClockList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxTransferTestClockListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -15088,9 +21663,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxTransferTestClockListResponse](src/models/sandbox-transfer-test-clock-list-response.ts)</code>
+**Direct**: `await client.sandboxTransferTestClockList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxTransferTestClockListError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxTransferTestClockListResponse](src/models/sandbox-transfer-test-clock-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxTransferTestClockListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxTransferTestClockList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxTransferTestClockListResponse, ThePlaidApiClient.SandboxTransferTestClockListError&gt;</code>, with `result.value` of type <code>[SandboxTransferTestClockListResponse](src/models/sandbox-transfer-test-clock-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -15117,19 +21700,35 @@ In the Sandbox, Items will transition to an `ITEM_LOGIN_REQUIRED` error state au
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sandboxUserResetLogin({ body });
+  const response = await client.sandboxUserResetLogin({ body: {} });
   // TODO: Handle 'response' of type SandboxUserResetLoginResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SandboxUserResetLoginError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SandboxUserResetLoginError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sandboxUserResetLogin({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SandboxUserResetLoginResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -15153,9 +21752,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SandboxUserResetLoginResponse](src/models/sandbox-user-reset-login-response.ts)</code>
+**Direct**: `await client.sandboxUserResetLogin(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SandboxUserResetLoginError](src/client.ts)</code>
+- **OnSuccess**: <code>[SandboxUserResetLoginResponse](src/models/sandbox-user-reset-login-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SandboxUserResetLoginError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sandboxUserResetLogin(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SandboxUserResetLoginResponse, ThePlaidApiClient.SandboxUserResetLoginError&gt;</code>, with `result.value` of type <code>[SandboxUserResetLoginResponse](src/models/sandbox-user-reset-login-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -15181,19 +21788,35 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.sessionTokenCreate({ body });
+  const response = await client.sessionTokenCreate({ body: { templateId: "some example string" } });
   // TODO: Handle 'response' of type SessionTokenCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SessionTokenCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SessionTokenCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.sessionTokenCreate({ body: { templateId: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SessionTokenCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -15217,9 +21840,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SessionTokenCreateResponse](src/models/session-token-create-response.ts)</code>
+**Direct**: `await client.sessionTokenCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SessionTokenCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[SessionTokenCreateResponse](src/models/session-token-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SessionTokenCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.sessionTokenCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SessionTokenCreateResponse, ThePlaidApiClient.SessionTokenCreateError&gt;</code>, with `result.value` of type <code>[SessionTokenCreateResponse](src/models/session-token-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -15249,19 +21880,39 @@ If using a Balance-only ruleset, this endpoint will not impact scores (Balance d
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.signalDecisionReport({ body });
+  const response = await client.signalDecisionReport({
+    body: { clientTransactionId: "some example string", initiated: true },
+  });
   // TODO: Handle 'response' of type SignalDecisionReportResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SignalDecisionReportError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SignalDecisionReportError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.signalDecisionReport({
+  body: { clientTransactionId: "some example string", initiated: true },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SignalDecisionReportResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -15285,9 +21936,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SignalDecisionReportResponse](src/models/signal-decision-report-response.ts)</code>
+**Direct**: `await client.signalDecisionReport(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SignalDecisionReportError](src/client.ts)</code>
+- **OnSuccess**: <code>[SignalDecisionReportResponse](src/models/signal-decision-report-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SignalDecisionReportError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.signalDecisionReport(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SignalDecisionReportResponse, ThePlaidApiClient.SignalDecisionReportError&gt;</code>, with `result.value` of type <code>[SignalDecisionReportResponse](src/models/signal-decision-report-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -15319,19 +21978,49 @@ Note: This request may have higher latency when using a Balance-only ruleset. Th
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.signalEvaluate({ body });
+  const response = await client.signalEvaluate({
+    body: {
+      accessToken: "some example string",
+      accountId: "some example string",
+      clientTransactionId: "some example string",
+      amount: 1.5,
+    },
+  });
   // TODO: Handle 'response' of type SignalEvaluateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SignalEvaluateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SignalEvaluateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.signalEvaluate({
+  body: {
+    accessToken: "some example string",
+    accountId: "some example string",
+    clientTransactionId: "some example string",
+    amount: 1.5,
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SignalEvaluateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -15355,9 +22044,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SignalEvaluateResponse](src/models/signal-evaluate-response.ts)</code>
+**Direct**: `await client.signalEvaluate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SignalEvaluateError](src/client.ts)</code>
+- **OnSuccess**: <code>[SignalEvaluateResponse](src/models/signal-evaluate-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SignalEvaluateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.signalEvaluate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SignalEvaluateResponse, ThePlaidApiClient.SignalEvaluateError&gt;</code>, with `result.value` of type <code>[SignalEvaluateResponse](src/models/signal-evaluate-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -15387,19 +22084,35 @@ If run on an Item that is already initialized with `signal`, this endpoint will 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.signalPrepare({ body });
+  const response = await client.signalPrepare({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type SignalPrepareResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SignalPrepareError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SignalPrepareError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.signalPrepare({ body: { accessToken: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SignalPrepareResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -15423,9 +22136,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SignalPrepareResponse](src/models/signal-prepare-response.ts)</code>
+**Direct**: `await client.signalPrepare(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SignalPrepareError](src/client.ts)</code>
+- **OnSuccess**: <code>[SignalPrepareResponse](src/models/signal-prepare-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SignalPrepareError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.signalPrepare(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SignalPrepareResponse, ThePlaidApiClient.SignalPrepareError&gt;</code>, with `result.value` of type <code>[SignalPrepareResponse](src/models/signal-prepare-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -15451,19 +22172,39 @@ Call the `/signal/return/report` endpoint to report a returned transaction that 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.signalReturnReport({ body });
+  const response = await client.signalReturnReport({
+    body: { clientTransactionId: "some example string", returnCode: "some example string" },
+  });
   // TODO: Handle 'response' of type SignalReturnReportResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SignalReturnReportError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SignalReturnReportError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.signalReturnReport({
+  body: { clientTransactionId: "some example string", returnCode: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SignalReturnReportResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -15487,9 +22228,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SignalReturnReportResponse](src/models/signal-return-report-response.ts)</code>
+**Direct**: `await client.signalReturnReport(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SignalReturnReportError](src/client.ts)</code>
+- **OnSuccess**: <code>[SignalReturnReportResponse](src/models/signal-return-report-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SignalReturnReportError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.signalReturnReport(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SignalReturnReportResponse, ThePlaidApiClient.SignalReturnReportError&gt;</code>, with `result.value` of type <code>[SignalReturnReportResponse](src/models/signal-return-report-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -15515,19 +22264,49 @@ Use `/signal/schedule` to schedule a planned ACH transaction.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.signalSchedule({ body });
+  const response = await client.signalSchedule({
+    body: {
+      accessToken: "some example string",
+      accountId: "some example string",
+      clientTransactionId: "some example string",
+      amount: 1.5,
+    },
+  });
   // TODO: Handle 'response' of type SignalScheduleResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.SignalScheduleError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.SignalScheduleError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.signalSchedule({
+  body: {
+    accessToken: "some example string",
+    accountId: "some example string",
+    clientTransactionId: "some example string",
+    amount: 1.5,
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type SignalScheduleResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -15551,9 +22330,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[SignalScheduleResponse](src/models/signal-schedule-response.ts)</code>
+**Direct**: `await client.signalSchedule(request)`
 
-**OnError**: <code>[ThePlaidApiClient.SignalScheduleError](src/client.ts)</code>
+- **OnSuccess**: <code>[SignalScheduleResponse](src/models/signal-schedule-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.SignalScheduleError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.signalSchedule(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;SignalScheduleResponse, ThePlaidApiClient.SignalScheduleError&gt;</code>, with `result.value` of type <code>[SignalScheduleResponse](src/models/signal-schedule-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -15579,18 +22366,38 @@ The `/statements/download` endpoint retrieves a single statement PDF in binary f
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  await client.statementsDownload({ body });
+  await client.statementsDownload({
+    body: { accessToken: "some example string", statementId: "some example string" },
+  });
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.StatementsDownloadError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.StatementsDownloadError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.statementsDownload({
+  body: { accessToken: "some example string", statementId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: The call succeeded and resolves to no body
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -15614,9 +22421,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>undefined</code>
+**Direct**: `await client.statementsDownload(request)`
 
-**OnError**: <code>[ThePlaidApiClient.StatementsDownloadError](src/client.ts)</code>
+- **OnSuccess**: <code>undefined</code>
+- **OnError**: throws <code>[ThePlaidApiClient.StatementsDownloadError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.statementsDownload(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;undefined, ThePlaidApiClient.StatementsDownloadError&gt;</code>, with `result.value` of type <code>undefined</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -15642,19 +22457,35 @@ The `/statements/list` endpoint retrieves a list of all statements associated wi
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.statementsList({ body });
+  const response = await client.statementsList({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type StatementsListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.StatementsListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.StatementsListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.statementsList({ body: { accessToken: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type StatementsListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -15678,9 +22509,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[StatementsListResponse](src/models/statements-list-response.ts)</code>
+**Direct**: `await client.statementsList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.StatementsListError](src/client.ts)</code>
+- **OnSuccess**: <code>[StatementsListResponse](src/models/statements-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.StatementsListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.statementsList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;StatementsListResponse, ThePlaidApiClient.StatementsListError&gt;</code>, with `result.value` of type <code>[StatementsListResponse](src/models/statements-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -15706,19 +22545,39 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.statementsRefresh({ body });
+  const response = await client.statementsRefresh({
+    body: { accessToken: "some example string", startDate: "2024-01-15", endDate: "2024-01-15" },
+  });
   // TODO: Handle 'response' of type StatementsRefreshResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.StatementsRefreshError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.StatementsRefreshError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.statementsRefresh({
+  body: { accessToken: "some example string", startDate: "2024-01-15", endDate: "2024-01-15" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type StatementsRefreshResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -15742,9 +22601,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[StatementsRefreshResponse](src/models/statements-refresh-response.ts)</code>
+**Direct**: `await client.statementsRefresh(request)`
 
-**OnError**: <code>[ThePlaidApiClient.StatementsRefreshError](src/client.ts)</code>
+- **OnSuccess**: <code>[StatementsRefreshResponse](src/models/statements-refresh-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.StatementsRefreshError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.statementsRefresh(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;StatementsRefreshResponse, ThePlaidApiClient.StatementsRefreshError&gt;</code>, with `result.value` of type <code>[StatementsRefreshResponse](src/models/statements-refresh-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -15772,19 +22639,59 @@ The product is currently in beta.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transactionsEnhance({ body });
+  const response = await client.transactionsEnhance({
+    body: {
+      accountType: "some example string",
+      transactions: [
+        {
+          id: "some example string",
+          description: "some example string",
+          amount: 1.5,
+          isoCurrencyCode: "some example string",
+        },
+      ],
+    },
+  });
   // TODO: Handle 'response' of type TransactionsEnhanceGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransactionsEnhanceError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransactionsEnhanceError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transactionsEnhance({
+  body: {
+    accountType: "some example string",
+    transactions: [
+      {
+        id: "some example string",
+        description: "some example string",
+        amount: 1.5,
+        isoCurrencyCode: "some example string",
+      },
+    ],
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransactionsEnhanceGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -15808,9 +22715,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransactionsEnhanceGetResponse](src/models/transactions-enhance-get-response.ts)</code>
+**Direct**: `await client.transactionsEnhance(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransactionsEnhanceError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransactionsEnhanceGetResponse](src/models/transactions-enhance-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransactionsEnhanceError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transactionsEnhance(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransactionsEnhanceGetResponse, ThePlaidApiClient.TransactionsEnhanceError&gt;</code>, with `result.value` of type <code>[TransactionsEnhanceGetResponse](src/models/transactions-enhance-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -15836,19 +22751,61 @@ The `/transactions/enrich` endpoint enriches raw transaction data generated by y
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transactionsEnrich({ body });
+  const response = await client.transactionsEnrich({
+    body: {
+      accountType: "some example string",
+      transactions: [
+        {
+          id: "some example string",
+          description: "some example string",
+          amount: 1.5,
+          direction: EnrichTransactionDirection.Inflow,
+          isoCurrencyCode: "some example string",
+        },
+      ],
+    },
+  });
   // TODO: Handle 'response' of type TransactionsEnrichResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransactionsEnrichError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransactionsEnrichError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transactionsEnrich({
+  body: {
+    accountType: "some example string",
+    transactions: [
+      {
+        id: "some example string",
+        description: "some example string",
+        amount: 1.5,
+        direction: EnrichTransactionDirection.Inflow,
+        isoCurrencyCode: "some example string",
+      },
+    ],
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransactionsEnrichResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -15872,9 +22829,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransactionsEnrichResponse](src/models/transactions-enrich-response.ts)</code>
+**Direct**: `await client.transactionsEnrich(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransactionsEnrichError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransactionsEnrichResponse](src/models/transactions-enrich-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransactionsEnrichError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transactionsEnrich(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransactionsEnrichResponse, ThePlaidApiClient.TransactionsEnrichError&gt;</code>, with `result.value` of type <code>[TransactionsEnrichResponse](src/models/transactions-enrich-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -15907,19 +22872,39 @@ Note that data may not be immediately available to `/transactions/get`. Plaid wi
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transactionsGet({ body });
+  const response = await client.transactionsGet({
+    body: { accessToken: "some example string", startDate: "2024-01-15", endDate: "2024-01-15" },
+  });
   // TODO: Handle 'response' of type TransactionsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransactionsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransactionsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transactionsGet({
+  body: { accessToken: "some example string", startDate: "2024-01-15", endDate: "2024-01-15" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransactionsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -15943,9 +22928,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransactionsGetResponse](src/models/transactions-get-response.ts)</code>
+**Direct**: `await client.transactionsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransactionsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransactionsGetResponse](src/models/transactions-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransactionsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transactionsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransactionsGetResponse, ThePlaidApiClient.TransactionsGetError&gt;</code>, with `result.value` of type <code>[TransactionsGetResponse](src/models/transactions-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -15979,19 +22972,37 @@ After the initial call, you can call the `/transactions/recurring/get` endpoint 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transactionsRecurringGet({ body });
+  const response = await client.transactionsRecurringGet({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type TransactionsRecurringGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransactionsRecurringGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransactionsRecurringGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transactionsRecurringGet({
+  body: { accessToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransactionsRecurringGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -16015,9 +23026,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransactionsRecurringGetResponse](src/models/transactions-recurring-get-response.ts)</code>
+**Direct**: `await client.transactionsRecurringGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransactionsRecurringGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransactionsRecurringGetResponse](src/models/transactions-recurring-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransactionsRecurringGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transactionsRecurringGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransactionsRecurringGetResponse, ThePlaidApiClient.TransactionsRecurringGetError&gt;</code>, with `result.value` of type <code>[TransactionsRecurringGetResponse](src/models/transactions-recurring-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -16051,19 +23070,37 @@ As this endpoint triggers a synchronous request for fresh data, latency may be h
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transactionsRefresh({ body });
+  const response = await client.transactionsRefresh({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type TransactionsRefreshResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransactionsRefreshError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransactionsRefreshError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transactionsRefresh({
+  body: { accessToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransactionsRefreshResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -16087,9 +23124,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransactionsRefreshResponse](src/models/transactions-refresh-response.ts)</code>
+**Direct**: `await client.transactionsRefresh(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransactionsRefreshError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransactionsRefreshResponse](src/models/transactions-refresh-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransactionsRefreshError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transactionsRefresh(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransactionsRefreshResponse, ThePlaidApiClient.TransactionsRefreshError&gt;</code>, with `result.value` of type <code>[TransactionsRefreshResponse](src/models/transactions-refresh-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -16119,19 +23164,61 @@ The product is currently in beta. To request access, contact transactions-feedba
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transactionsRulesCreate({ body });
+  const response = await client.transactionsRulesCreate({
+    body: {
+      clientId: "7f57eb3d2a9j6480121fx361",
+      secret: "79g03eoofwl8240v776r2h667442119",
+      clientUserId: "your-client-user-id",
+      pfcPrimaryCategory: "FOOD_AND_DRINK",
+      pfcDetailedCategory: "FOOD_AND_DRINK_FAST_FOOD",
+      ruleDetails: {
+        field: TransactionsRuleField.MerchantName,
+        type: TransactionsRuleType.SubstringMatch,
+        query: "Burger Shack",
+      },
+    },
+  });
   // TODO: Handle 'response' of type TransactionsRulesCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransactionsRulesCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransactionsRulesCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transactionsRulesCreate({
+  body: {
+    clientId: "7f57eb3d2a9j6480121fx361",
+    secret: "79g03eoofwl8240v776r2h667442119",
+    clientUserId: "your-client-user-id",
+    pfcPrimaryCategory: "FOOD_AND_DRINK",
+    pfcDetailedCategory: "FOOD_AND_DRINK_FAST_FOOD",
+    ruleDetails: {
+      field: TransactionsRuleField.MerchantName,
+      type: TransactionsRuleType.SubstringMatch,
+      query: "Burger Shack",
+    },
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransactionsRulesCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -16155,9 +23242,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransactionsRulesCreateResponse](src/models/transactions-rules-create-response.ts)</code>
+**Direct**: `await client.transactionsRulesCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransactionsRulesCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransactionsRulesCreateResponse](src/models/transactions-rules-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransactionsRulesCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transactionsRulesCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransactionsRulesCreateResponse, ThePlaidApiClient.TransactionsRulesCreateError&gt;</code>, with `result.value` of type <code>[TransactionsRulesCreateResponse](src/models/transactions-rules-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -16183,19 +23278,47 @@ The `/beta/transactions/rules/v1/list` returns a list of transaction rules creat
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transactionsRulesList({ body });
+  const response = await client.transactionsRulesList({
+    body: {
+      clientId: "7f57eb3d2a9j6480121fx361",
+      secret: "79g03eoofwl8240v776r2h667442119",
+      clientUserId: "your-client-user-id",
+    },
+  });
   // TODO: Handle 'response' of type TransactionsRulesListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransactionsRulesListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransactionsRulesListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transactionsRulesList({
+  body: {
+    clientId: "7f57eb3d2a9j6480121fx361",
+    secret: "79g03eoofwl8240v776r2h667442119",
+    clientUserId: "your-client-user-id",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransactionsRulesListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -16219,9 +23342,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransactionsRulesListResponse](src/models/transactions-rules-list-response.ts)</code>
+**Direct**: `await client.transactionsRulesList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransactionsRulesListError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransactionsRulesListResponse](src/models/transactions-rules-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransactionsRulesListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transactionsRulesList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransactionsRulesListResponse, ThePlaidApiClient.TransactionsRulesListError&gt;</code>, with `result.value` of type <code>[TransactionsRulesListResponse](src/models/transactions-rules-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -16247,19 +23378,49 @@ The `/beta/transactions/rules/v1/remove` endpoint is used to remove a transactio
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transactionsRulesRemove({ body });
+  const response = await client.transactionsRulesRemove({
+    body: {
+      clientId: "7f57eb3d2a9j6480121fx361",
+      secret: "79g03eoofwl8240v776r2h667442119",
+      clientUserId: "your-client-user-id",
+      ruleId: "eVBnVMp7zdTJLkRNr33Rs6zr7KNJqBF",
+    },
+  });
   // TODO: Handle 'response' of type TransactionsRulesRemoveResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransactionsRulesRemoveError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransactionsRulesRemoveError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transactionsRulesRemove({
+  body: {
+    clientId: "7f57eb3d2a9j6480121fx361",
+    secret: "79g03eoofwl8240v776r2h667442119",
+    clientUserId: "your-client-user-id",
+    ruleId: "eVBnVMp7zdTJLkRNr33Rs6zr7KNJqBF",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransactionsRulesRemoveResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -16283,9 +23444,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransactionsRulesRemoveResponse](src/models/transactions-rules-remove-response.ts)</code>
+**Direct**: `await client.transactionsRulesRemove(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransactionsRulesRemoveError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransactionsRulesRemoveResponse](src/models/transactions-rules-remove-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransactionsRulesRemoveError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transactionsRulesRemove(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransactionsRulesRemoveResponse, ThePlaidApiClient.TransactionsRulesRemoveError&gt;</code>, with `result.value` of type <code>[TransactionsRulesRemoveResponse](src/models/transactions-rules-remove-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -16323,19 +23492,35 @@ To be alerted when new transactions are available, listen for the [`SYNC_UPDATES
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transactionsSync({ body });
+  const response = await client.transactionsSync({ body: { accessToken: "some example string" } });
   // TODO: Handle 'response' of type TransactionsSyncResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransactionsSyncError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransactionsSyncError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transactionsSync({ body: { accessToken: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransactionsSyncResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -16359,9 +23544,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransactionsSyncResponse](src/models/transactions-sync-response.ts)</code>
+**Direct**: `await client.transactionsSync(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransactionsSyncError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransactionsSyncResponse](src/models/transactions-sync-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransactionsSyncError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transactionsSync(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransactionsSyncResponse, ThePlaidApiClient.TransactionsSyncError&gt;</code>, with `result.value` of type <code>[TransactionsSyncResponse](src/models/transactions-sync-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -16389,19 +23582,39 @@ The product is currently in beta.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transactionsUserInsightsGet({ body });
+  const response = await client.transactionsUserInsightsGet({
+    body: { clientUserId: "some example string" },
+  });
   // TODO: Handle 'response' of type TransactionsUserInsightsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransactionsUserInsightsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransactionsUserInsightsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transactionsUserInsightsGet({
+  body: { clientUserId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransactionsUserInsightsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -16425,9 +23638,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransactionsUserInsightsGetResponse](src/models/transactions-user-insights-get-response.ts)</code>
+**Direct**: `await client.transactionsUserInsightsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransactionsUserInsightsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransactionsUserInsightsGetResponse](src/models/transactions-user-insights-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransactionsUserInsightsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transactionsUserInsightsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransactionsUserInsightsGetResponse, ThePlaidApiClient.TransactionsUserInsightsGetError&gt;</code>, with `result.value` of type <code>[TransactionsUserInsightsGetResponse](src/models/transactions-user-insights-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -16453,19 +23674,39 @@ Use the `/transfer/authorization/cancel` endpoint to cancel a transfer authoriza
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferAuthorizationCancel({ body });
+  const response = await client.transferAuthorizationCancel({
+    body: { authorizationId: "some example string" },
+  });
   // TODO: Handle 'response' of type TransferAuthorizationCancelResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferAuthorizationCancelError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferAuthorizationCancelError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferAuthorizationCancel({
+  body: { authorizationId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferAuthorizationCancelResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -16489,9 +23730,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferAuthorizationCancelResponse](src/models/transfer-authorization-cancel-response.ts)</code>
+**Direct**: `await client.transferAuthorizationCancel(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferAuthorizationCancelError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferAuthorizationCancelResponse](src/models/transfer-authorization-cancel-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferAuthorizationCancelError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferAuthorizationCancel(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferAuthorizationCancelResponse, ThePlaidApiClient.TransferAuthorizationCancelError&gt;</code>, with `result.value` of type <code>[TransferAuthorizationCancelResponse](src/models/transfer-authorization-cancel-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -16539,19 +23788,53 @@ In Plaid's Sandbox environment the decisions will be returned as follows:
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferAuthorizationCreate({ body });
+  const response = await client.transferAuthorizationCreate({
+    body: {
+      accessToken: "some example string",
+      accountId: "some example string",
+      type: TransferType.Debit,
+      network: TransferNetwork.Ach,
+      amount: "some example string",
+      user: { legalName: "some example string" },
+    },
+  });
   // TODO: Handle 'response' of type TransferAuthorizationCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferAuthorizationCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferAuthorizationCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferAuthorizationCreate({
+  body: {
+    accessToken: "some example string",
+    accountId: "some example string",
+    type: TransferType.Debit,
+    network: TransferNetwork.Ach,
+    amount: "some example string",
+    user: { legalName: "some example string" },
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferAuthorizationCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -16575,9 +23858,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferAuthorizationCreateResponse](src/models/transfer-authorization-create-response.ts)</code>
+**Direct**: `await client.transferAuthorizationCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferAuthorizationCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferAuthorizationCreateResponse](src/models/transfer-authorization-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferAuthorizationCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferAuthorizationCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferAuthorizationCreateResponse, ThePlaidApiClient.TransferAuthorizationCreateError&gt;</code>, with `result.value` of type <code>[TransferAuthorizationCreateResponse](src/models/transfer-authorization-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -16603,19 +23894,35 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferBalanceGet({ body });
+  const response = await client.transferBalanceGet({ body: {} });
   // TODO: Handle 'response' of type TransferBalanceGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferBalanceGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferBalanceGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferBalanceGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferBalanceGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -16639,9 +23946,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferBalanceGetResponse](src/models/transfer-balance-get-response.ts)</code>
+**Direct**: `await client.transferBalanceGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferBalanceGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferBalanceGetResponse](src/models/transfer-balance-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferBalanceGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferBalanceGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferBalanceGetResponse, ThePlaidApiClient.TransferBalanceGetError&gt;</code>, with `result.value` of type <code>[TransferBalanceGetResponse](src/models/transfer-balance-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -16667,19 +23982,35 @@ Use the `/transfer/cancel` endpoint to cancel a transfer.  A transfer is eligibl
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferCancel({ body });
+  const response = await client.transferCancel({ body: { transferId: "some example string" } });
   // TODO: Handle 'response' of type TransferCancelResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferCancelError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferCancelError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferCancel({ body: { transferId: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferCancelResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -16703,9 +24034,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferCancelResponse](src/models/transfer-cancel-response.ts)</code>
+**Direct**: `await client.transferCancel(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferCancelError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferCancelResponse](src/models/transfer-cancel-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferCancelError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferCancel(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferCancelResponse, ThePlaidApiClient.TransferCancelError&gt;</code>, with `result.value` of type <code>[TransferCancelResponse](src/models/transfer-cancel-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -16731,19 +24070,39 @@ Use the `/transfer/capabilities/get` endpoint to determine the RTP eligibility i
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferCapabilitiesGet({ body });
+  const response = await client.transferCapabilitiesGet({
+    body: { accessToken: "some example string", accountId: "some example string" },
+  });
   // TODO: Handle 'response' of type TransferCapabilitiesGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferCapabilitiesGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferCapabilitiesGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferCapabilitiesGet({
+  body: { accessToken: "some example string", accountId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferCapabilitiesGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -16767,9 +24126,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferCapabilitiesGetResponse](src/models/transfer-capabilities-get-response.ts)</code>
+**Direct**: `await client.transferCapabilitiesGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferCapabilitiesGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferCapabilitiesGetResponse](src/models/transfer-capabilities-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferCapabilitiesGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferCapabilitiesGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferCapabilitiesGetResponse, ThePlaidApiClient.TransferCapabilitiesGetError&gt;</code>, with `result.value` of type <code>[TransferCapabilitiesGetResponse](src/models/transfer-capabilities-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -16795,19 +24162,35 @@ Use the `/transfer/configuration/get` endpoint to view your transfer product con
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferConfigurationGet({ body });
+  const response = await client.transferConfigurationGet({ body: {} });
   // TODO: Handle 'response' of type TransferConfigurationGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferConfigurationGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferConfigurationGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferConfigurationGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferConfigurationGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -16831,9 +24214,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferConfigurationGetResponse](src/models/transfer-configuration-get-response.ts)</code>
+**Direct**: `await client.transferConfigurationGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferConfigurationGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferConfigurationGetResponse](src/models/transfer-configuration-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferConfigurationGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferConfigurationGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferConfigurationGetResponse, ThePlaidApiClient.TransferConfigurationGetError&gt;</code>, with `result.value` of type <code>[TransferConfigurationGetResponse](src/models/transfer-configuration-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -16859,19 +24250,49 @@ Use the `/transfer/create` endpoint to initiate a new transfer. This endpoint is
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferCreate({ body });
+  const response = await client.transferCreate({
+    body: {
+      accessToken: "some example string",
+      accountId: "some example string",
+      authorizationId: "some example string",
+      description: "some example string",
+    },
+  });
   // TODO: Handle 'response' of type TransferCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferCreate({
+  body: {
+    accessToken: "some example string",
+    accountId: "some example string",
+    authorizationId: "some example string",
+    description: "some example string",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -16895,9 +24316,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferCreateResponse](src/models/transfer-create-response.ts)</code>
+**Direct**: `await client.transferCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferCreateResponse](src/models/transfer-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferCreateResponse, ThePlaidApiClient.TransferCreateError&gt;</code>, with `result.value` of type <code>[TransferCreateResponse](src/models/transfer-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -16924,19 +24353,43 @@ You must provide the `client_id` in the `PLAID-CLIENT-ID` header and `secret` in
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferDiligenceDocumentUpload({ body });
+  const response = await client.transferDiligenceDocumentUpload({
+    body: {
+      originatorClientId: "some example string",
+      file: new Uint8Array(),
+      purpose: Purpose.DueDiligence,
+    },
+  });
   // TODO: Handle 'response' of type TransferDiligenceDocumentUploadResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferDiligenceDocumentUploadError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferDiligenceDocumentUploadError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferDiligenceDocumentUpload({
+  body: { originatorClientId: "some example string", file: new Uint8Array(), purpose: Purpose.DueDiligence },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferDiligenceDocumentUploadResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -16960,9 +24413,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferDiligenceDocumentUploadResponse](src/models/transfer-diligence-document-upload-response.ts)</code>
+**Direct**: `await client.transferDiligenceDocumentUpload(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferDiligenceDocumentUploadError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferDiligenceDocumentUploadResponse](src/models/transfer-diligence-document-upload-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferDiligenceDocumentUploadError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferDiligenceDocumentUpload(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferDiligenceDocumentUploadResponse, ThePlaidApiClient.TransferDiligenceDocumentUploadError&gt;</code>, with `result.value` of type <code>[TransferDiligenceDocumentUploadResponse](src/models/transfer-diligence-document-upload-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -16988,19 +24449,71 @@ Use the `/transfer/diligence/submit` endpoint to submit transfer diligence on be
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferDiligenceSubmit({ body });
+  const response = await client.transferDiligenceSubmit({
+    body: {
+      originatorClientId: "some example string",
+      originatorDiligence: {
+        dba: "some example string",
+        taxId: "some example string",
+        address: {
+          city: "some example string",
+          street: "some example string",
+          region: "some example string",
+          postalCode: "some example string",
+          countryCode: "some example string",
+        },
+        website: "some example string",
+        naicsCode: "some example string",
+        fundingAccount: { accessToken: "some example string", accountId: "some example string" },
+      },
+    },
+  });
   // TODO: Handle 'response' of type TransferDiligenceSubmitResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferDiligenceSubmitError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferDiligenceSubmitError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferDiligenceSubmit({
+  body: {
+    originatorClientId: "some example string",
+    originatorDiligence: {
+      dba: "some example string",
+      taxId: "some example string",
+      address: {
+        city: "some example string",
+        street: "some example string",
+        region: "some example string",
+        postalCode: "some example string",
+        countryCode: "some example string",
+      },
+      website: "some example string",
+      naicsCode: "some example string",
+      fundingAccount: { accessToken: "some example string", accountId: "some example string" },
+    },
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferDiligenceSubmitResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -17024,9 +24537,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferDiligenceSubmitResponse](src/models/transfer-diligence-submit-response.ts)</code>
+**Direct**: `await client.transferDiligenceSubmit(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferDiligenceSubmitError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferDiligenceSubmitResponse](src/models/transfer-diligence-submit-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferDiligenceSubmitError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferDiligenceSubmit(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferDiligenceSubmitResponse, ThePlaidApiClient.TransferDiligenceSubmitError&gt;</code>, with `result.value` of type <code>[TransferDiligenceSubmitResponse](src/models/transfer-diligence-submit-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -17052,19 +24573,35 @@ Use the `/transfer/event/list` endpoint to get a list of transfer events based o
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferEventList({ body });
+  const response = await client.transferEventList({ body: {} });
   // TODO: Handle 'response' of type TransferEventListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferEventListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferEventListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferEventList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferEventListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -17088,9 +24625,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferEventListResponse](src/models/transfer-event-list-response.ts)</code>
+**Direct**: `await client.transferEventList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferEventListError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferEventListResponse](src/models/transfer-event-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferEventListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferEventList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferEventListResponse, ThePlaidApiClient.TransferEventListError&gt;</code>, with `result.value` of type <code>[TransferEventListResponse](src/models/transfer-event-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -17116,19 +24661,35 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferEventSync({ body });
+  const response = await client.transferEventSync({ body: { afterId: 1 } });
   // TODO: Handle 'response' of type TransferEventSyncResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferEventSyncError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferEventSyncError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferEventSync({ body: { afterId: 1 } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferEventSyncResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -17152,9 +24713,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferEventSyncResponse](src/models/transfer-event-sync-response.ts)</code>
+**Direct**: `await client.transferEventSync(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferEventSyncError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferEventSyncResponse](src/models/transfer-event-sync-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferEventSyncError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferEventSync(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferEventSyncResponse, ThePlaidApiClient.TransferEventSyncError&gt;</code>, with `result.value` of type <code>[TransferEventSyncResponse](src/models/transfer-event-sync-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -17180,19 +24749,35 @@ The `/transfer/get` endpoint fetches information about the transfer correspondin
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferGet({ body });
+  const response = await client.transferGet({ body: {} });
   // TODO: Handle 'response' of type TransferGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -17216,9 +24801,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferGetResponse](src/models/transfer-get-response.ts)</code>
+**Direct**: `await client.transferGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferGetResponse](src/models/transfer-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferGetResponse, ThePlaidApiClient.TransferGetError&gt;</code>, with `result.value` of type <code>[TransferGetResponse](src/models/transfer-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -17244,19 +24837,49 @@ Use the `/transfer/intent/create` endpoint to generate a transfer intent object 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferIntentCreate({ body });
+  const response = await client.transferIntentCreate({
+    body: {
+      mode: TransferIntentCreateMode.Payment,
+      amount: "some example string",
+      description: "some example string",
+      user: { legalName: "some example string" },
+    },
+  });
   // TODO: Handle 'response' of type TransferIntentCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferIntentCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferIntentCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferIntentCreate({
+  body: {
+    mode: TransferIntentCreateMode.Payment,
+    amount: "some example string",
+    description: "some example string",
+    user: { legalName: "some example string" },
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferIntentCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -17280,9 +24903,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferIntentCreateResponse](src/models/transfer-intent-create-response.ts)</code>
+**Direct**: `await client.transferIntentCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferIntentCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferIntentCreateResponse](src/models/transfer-intent-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferIntentCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferIntentCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferIntentCreateResponse, ThePlaidApiClient.TransferIntentCreateError&gt;</code>, with `result.value` of type <code>[TransferIntentCreateResponse](src/models/transfer-intent-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -17308,19 +24939,37 @@ Use the `/transfer/intent/get` endpoint to retrieve more information about a tra
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferIntentGet({ body });
+  const response = await client.transferIntentGet({ body: { transferIntentId: "some example string" } });
   // TODO: Handle 'response' of type TransferIntentGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferIntentGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferIntentGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferIntentGet({
+  body: { transferIntentId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferIntentGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -17344,9 +24993,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferIntentGetResponse](src/models/transfer-intent-get-response.ts)</code>
+**Direct**: `await client.transferIntentGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferIntentGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferIntentGetResponse](src/models/transfer-intent-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferIntentGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferIntentGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferIntentGetResponse, ThePlaidApiClient.TransferIntentGetError&gt;</code>, with `result.value` of type <code>[TransferIntentGetResponse](src/models/transfer-intent-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -17372,19 +25029,47 @@ Use the `/transfer/ledger/deposit` endpoint to deposit funds into Plaid Ledger.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferLedgerDeposit({ body });
+  const response = await client.transferLedgerDeposit({
+    body: {
+      amount: "some example string",
+      idempotencyKey: "some example string",
+      network: TransferAchNetwork.Ach,
+    },
+  });
   // TODO: Handle 'response' of type TransferLedgerDepositResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferLedgerDepositError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferLedgerDepositError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferLedgerDeposit({
+  body: {
+    amount: "some example string",
+    idempotencyKey: "some example string",
+    network: TransferAchNetwork.Ach,
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferLedgerDepositResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -17408,9 +25093,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferLedgerDepositResponse](src/models/transfer-ledger-deposit-response.ts)</code>
+**Direct**: `await client.transferLedgerDeposit(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferLedgerDepositError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferLedgerDepositResponse](src/models/transfer-ledger-deposit-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferLedgerDepositError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferLedgerDeposit(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferLedgerDepositResponse, ThePlaidApiClient.TransferLedgerDepositError&gt;</code>, with `result.value` of type <code>[TransferLedgerDepositResponse](src/models/transfer-ledger-deposit-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -17436,19 +25129,49 @@ Use the `/transfer/ledger/distribute` endpoint to move available balance between
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferLedgerDistribute({ body });
+  const response = await client.transferLedgerDistribute({
+    body: {
+      fromLedgerId: "some example string",
+      toLedgerId: "some example string",
+      amount: "some example string",
+      idempotencyKey: "some example string",
+    },
+  });
   // TODO: Handle 'response' of type TransferLedgerDistributeResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferLedgerDistributeError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferLedgerDistributeError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferLedgerDistribute({
+  body: {
+    fromLedgerId: "some example string",
+    toLedgerId: "some example string",
+    amount: "some example string",
+    idempotencyKey: "some example string",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferLedgerDistributeResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -17472,9 +25195,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferLedgerDistributeResponse](src/models/transfer-ledger-distribute-response.ts)</code>
+**Direct**: `await client.transferLedgerDistribute(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferLedgerDistributeError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferLedgerDistributeResponse](src/models/transfer-ledger-distribute-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferLedgerDistributeError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferLedgerDistribute(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferLedgerDistributeResponse, ThePlaidApiClient.TransferLedgerDistributeError&gt;</code>, with `result.value` of type <code>[TransferLedgerDistributeResponse](src/models/transfer-ledger-distribute-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -17500,19 +25231,35 @@ Use the `/transfer/ledger/event/list` endpoint to get a list of ledger events fo
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferLedgerEventList({ body });
+  const response = await client.transferLedgerEventList({ body: {} });
   // TODO: Handle 'response' of type TransferLedgerEventListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferLedgerEventListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferLedgerEventListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferLedgerEventList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferLedgerEventListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -17536,9 +25283,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferLedgerEventListResponse](src/models/transfer-ledger-event-list-response.ts)</code>
+**Direct**: `await client.transferLedgerEventList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferLedgerEventListError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferLedgerEventListResponse](src/models/transfer-ledger-event-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferLedgerEventListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferLedgerEventList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferLedgerEventListResponse, ThePlaidApiClient.TransferLedgerEventListError&gt;</code>, with `result.value` of type <code>[TransferLedgerEventListResponse](src/models/transfer-ledger-event-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -17564,19 +25319,35 @@ Use the `/transfer/ledger/get` endpoint to view a balance on the ledger held wit
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferLedgerGet({ body });
+  const response = await client.transferLedgerGet({ body: {} });
   // TODO: Handle 'response' of type TransferLedgerGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferLedgerGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferLedgerGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferLedgerGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferLedgerGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -17600,9 +25371,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferLedgerGetResponse](src/models/transfer-ledger-get-response.ts)</code>
+**Direct**: `await client.transferLedgerGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferLedgerGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferLedgerGetResponse](src/models/transfer-ledger-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferLedgerGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferLedgerGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferLedgerGetResponse, ThePlaidApiClient.TransferLedgerGetError&gt;</code>, with `result.value` of type <code>[TransferLedgerGetResponse](src/models/transfer-ledger-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -17628,19 +25407,47 @@ Use the `/transfer/ledger/withdraw` endpoint to withdraw funds from a Plaid Ledg
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferLedgerWithdraw({ body });
+  const response = await client.transferLedgerWithdraw({
+    body: {
+      amount: "some example string",
+      idempotencyKey: "some example string",
+      network: TransferNetwork.Ach,
+    },
+  });
   // TODO: Handle 'response' of type TransferLedgerWithdrawResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferLedgerWithdrawError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferLedgerWithdrawError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferLedgerWithdraw({
+  body: {
+    amount: "some example string",
+    idempotencyKey: "some example string",
+    network: TransferNetwork.Ach,
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferLedgerWithdrawResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -17664,9 +25471,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferLedgerWithdrawResponse](src/models/transfer-ledger-withdraw-response.ts)</code>
+**Direct**: `await client.transferLedgerWithdraw(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferLedgerWithdrawError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferLedgerWithdrawResponse](src/models/transfer-ledger-withdraw-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferLedgerWithdrawError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferLedgerWithdraw(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferLedgerWithdrawResponse, ThePlaidApiClient.TransferLedgerWithdrawError&gt;</code>, with `result.value` of type <code>[TransferLedgerWithdrawResponse](src/models/transfer-ledger-withdraw-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -17693,19 +25508,35 @@ Use the `/transfer/list` endpoint to see a list of all your transfers and their 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferList({ body });
+  const response = await client.transferList({ body: {} });
   // TODO: Handle 'response' of type TransferListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -17729,9 +25560,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferListResponse](src/models/transfer-list-response.ts)</code>
+**Direct**: `await client.transferList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferListError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferListResponse](src/models/transfer-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferListResponse, ThePlaidApiClient.TransferListError&gt;</code>, with `result.value` of type <code>[TransferListResponse](src/models/transfer-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -17759,19 +25598,35 @@ In the Sandbox environment, this endpoint returns static placeholder values rath
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferMetricsGet({ body });
+  const response = await client.transferMetricsGet({ body: {} });
   // TODO: Handle 'response' of type TransferMetricsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferMetricsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferMetricsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferMetricsGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferMetricsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -17795,9 +25650,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferMetricsGetResponse](src/models/transfer-metrics-get-response.ts)</code>
+**Direct**: `await client.transferMetricsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferMetricsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferMetricsGetResponse](src/models/transfer-metrics-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferMetricsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferMetricsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferMetricsGetResponse, ThePlaidApiClient.TransferMetricsGetError&gt;</code>, with `result.value` of type <code>[TransferMetricsGetResponse](src/models/transfer-metrics-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -17823,19 +25686,47 @@ As an alternative to adding Items via Link, you can also use the `/transfer/migr
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferMigrateAccount({ body });
+  const response = await client.transferMigrateAccount({
+    body: {
+      accountNumber: "some example string",
+      routingNumber: "some example string",
+      accountType: "some example string",
+    },
+  });
   // TODO: Handle 'response' of type TransferMigrateAccountResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferMigrateAccountError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferMigrateAccountError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferMigrateAccount({
+  body: {
+    accountNumber: "some example string",
+    routingNumber: "some example string",
+    accountType: "some example string",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferMigrateAccountResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -17859,9 +25750,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferMigrateAccountResponse](src/models/transfer-migrate-account-response.ts)</code>
+**Direct**: `await client.transferMigrateAccount(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferMigrateAccountError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferMigrateAccountResponse](src/models/transfer-migrate-account-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferMigrateAccountError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferMigrateAccount(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferMigrateAccountResponse, ThePlaidApiClient.TransferMigrateAccountError&gt;</code>, with `result.value` of type <code>[TransferMigrateAccountResponse](src/models/transfer-migrate-account-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -17887,19 +25786,37 @@ Use the `/transfer/originator/create` endpoint to create a new originator and re
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferOriginatorCreate({ body });
+  const response = await client.transferOriginatorCreate({ body: { companyName: "some example string" } });
   // TODO: Handle 'response' of type TransferOriginatorCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferOriginatorCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferOriginatorCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferOriginatorCreate({
+  body: { companyName: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferOriginatorCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -17923,9 +25840,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferOriginatorCreateResponse](src/models/transfer-originator-create-response.ts)</code>
+**Direct**: `await client.transferOriginatorCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferOriginatorCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferOriginatorCreateResponse](src/models/transfer-originator-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferOriginatorCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferOriginatorCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferOriginatorCreateResponse, ThePlaidApiClient.TransferOriginatorCreateError&gt;</code>, with `result.value` of type <code>[TransferOriginatorCreateResponse](src/models/transfer-originator-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -17951,22 +25876,45 @@ Use the `/transfer/originator/funding_account/create` endpoint to create a new f
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferOriginatorFundingAccountCreate({ body });
+  const response = await client.transferOriginatorFundingAccountCreate({
+    body: {
+      originatorClientId: "some example string",
+      fundingAccount: { accessToken: "some example string", accountId: "some example string" },
+    },
+  });
   // TODO: Handle 'response' of type TransferOriginatorFundingAccountCreateResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.TransferOriginatorFundingAccountCreateError &&
-      err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferOriginatorFundingAccountCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferOriginatorFundingAccountCreate({
+  body: {
+    originatorClientId: "some example string",
+    fundingAccount: { accessToken: "some example string", accountId: "some example string" },
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferOriginatorFundingAccountCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -17990,9 +25938,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferOriginatorFundingAccountCreateResponse](src/models/transfer-originator-funding-account-create-response.ts)</code>
+**Direct**: `await client.transferOriginatorFundingAccountCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferOriginatorFundingAccountCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferOriginatorFundingAccountCreateResponse](src/models/transfer-originator-funding-account-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferOriginatorFundingAccountCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferOriginatorFundingAccountCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferOriginatorFundingAccountCreateResponse, ThePlaidApiClient.TransferOriginatorFundingAccountCreateError&gt;</code>, with `result.value` of type <code>[TransferOriginatorFundingAccountCreateResponse](src/models/transfer-originator-funding-account-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -18018,22 +25974,45 @@ Use the `/transfer/originator/funding_account/update` endpoint to update the fun
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferOriginatorFundingAccountUpdate({ body });
+  const response = await client.transferOriginatorFundingAccountUpdate({
+    body: {
+      originatorClientId: "some example string",
+      fundingAccount: { accessToken: "some example string", accountId: "some example string" },
+    },
+  });
   // TODO: Handle 'response' of type TransferOriginatorFundingAccountUpdateResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.TransferOriginatorFundingAccountUpdateError &&
-      err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferOriginatorFundingAccountUpdateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferOriginatorFundingAccountUpdate({
+  body: {
+    originatorClientId: "some example string",
+    fundingAccount: { accessToken: "some example string", accountId: "some example string" },
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferOriginatorFundingAccountUpdateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -18057,9 +26036,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferOriginatorFundingAccountUpdateResponse](src/models/transfer-originator-funding-account-update-response.ts)</code>
+**Direct**: `await client.transferOriginatorFundingAccountUpdate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferOriginatorFundingAccountUpdateError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferOriginatorFundingAccountUpdateResponse](src/models/transfer-originator-funding-account-update-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferOriginatorFundingAccountUpdateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferOriginatorFundingAccountUpdate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferOriginatorFundingAccountUpdateResponse, ThePlaidApiClient.TransferOriginatorFundingAccountUpdateError&gt;</code>, with `result.value` of type <code>[TransferOriginatorFundingAccountUpdateResponse](src/models/transfer-originator-funding-account-update-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -18085,19 +26072,39 @@ The `/transfer/originator/get` endpoint gets status updates for an originator's 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferOriginatorGet({ body });
+  const response = await client.transferOriginatorGet({
+    body: { originatorClientId: "some example string" },
+  });
   // TODO: Handle 'response' of type TransferOriginatorGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferOriginatorGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferOriginatorGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferOriginatorGet({
+  body: { originatorClientId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferOriginatorGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -18121,9 +26128,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferOriginatorGetResponse](src/models/transfer-originator-get-response.ts)</code>
+**Direct**: `await client.transferOriginatorGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferOriginatorGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferOriginatorGetResponse](src/models/transfer-originator-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferOriginatorGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferOriginatorGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferOriginatorGetResponse, ThePlaidApiClient.TransferOriginatorGetError&gt;</code>, with `result.value` of type <code>[TransferOriginatorGetResponse](src/models/transfer-originator-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -18149,19 +26164,35 @@ The `/transfer/originator/list` endpoint gets status updates for all of your ori
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferOriginatorList({ body });
+  const response = await client.transferOriginatorList({ body: {} });
   // TODO: Handle 'response' of type TransferOriginatorListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferOriginatorListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferOriginatorListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferOriginatorList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferOriginatorListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -18185,9 +26216,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferOriginatorListResponse](src/models/transfer-originator-list-response.ts)</code>
+**Direct**: `await client.transferOriginatorList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferOriginatorListError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferOriginatorListResponse](src/models/transfer-originator-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferOriginatorListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferOriginatorList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferOriginatorListResponse, ThePlaidApiClient.TransferOriginatorListError&gt;</code>, with `result.value` of type <code>[TransferOriginatorListResponse](src/models/transfer-originator-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -18213,21 +26252,55 @@ Use the `/transfer/platform/originator/create` endpoint to submit information ab
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferPlatformOriginatorCreate({ body });
+  const response = await client.transferPlatformOriginatorCreate({
+    body: {
+      originatorClientId: "some example string",
+      tosAcceptanceMetadata: {
+        agreementAccepted: true,
+        originatorIpAddress: "some example string",
+        agreementAcceptedAt: new Date(Date.UTC(2024, 0, 15, 9, 30, 0)),
+      },
+      originatorReviewedAt: new Date(Date.UTC(2024, 0, 15, 9, 30, 0)),
+    },
+  });
   // TODO: Handle 'response' of type TransferPlatformOriginatorCreateResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.TransferPlatformOriginatorCreateError && err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferPlatformOriginatorCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferPlatformOriginatorCreate({
+  body: {
+    originatorClientId: "some example string",
+    tosAcceptanceMetadata: {
+      agreementAccepted: true,
+      originatorIpAddress: "some example string",
+      agreementAcceptedAt: new Date(Date.UTC(2024, 0, 15, 9, 30, 0)),
+    },
+    originatorReviewedAt: new Date(Date.UTC(2024, 0, 15, 9, 30, 0)),
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferPlatformOriginatorCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -18251,9 +26324,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferPlatformOriginatorCreateResponse](src/models/transfer-platform-originator-create-response.ts)</code>
+**Direct**: `await client.transferPlatformOriginatorCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferPlatformOriginatorCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferPlatformOriginatorCreateResponse](src/models/transfer-platform-originator-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferPlatformOriginatorCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferPlatformOriginatorCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferPlatformOriginatorCreateResponse, ThePlaidApiClient.TransferPlatformOriginatorCreateError&gt;</code>, with `result.value` of type <code>[TransferPlatformOriginatorCreateResponse](src/models/transfer-platform-originator-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -18279,19 +26360,39 @@ Use the `/transfer/platform/person/create` endpoint to create a person associate
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferPlatformPersonCreate({ body });
+  const response = await client.transferPlatformPersonCreate({
+    body: { originatorClientId: "some example string" },
+  });
   // TODO: Handle 'response' of type TransferPlatformPersonCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferPlatformPersonCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferPlatformPersonCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferPlatformPersonCreate({
+  body: { originatorClientId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferPlatformPersonCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -18315,9 +26416,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferPlatformPersonCreateResponse](src/models/transfer-platform-person-create-response.ts)</code>
+**Direct**: `await client.transferPlatformPersonCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferPlatformPersonCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferPlatformPersonCreateResponse](src/models/transfer-platform-person-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferPlatformPersonCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferPlatformPersonCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferPlatformPersonCreateResponse, ThePlaidApiClient.TransferPlatformPersonCreateError&gt;</code>, with `result.value` of type <code>[TransferPlatformPersonCreateResponse](src/models/transfer-platform-person-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -18343,21 +26452,45 @@ Use the `/transfer/platform/requirement/submit` endpoint to submit additional on
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferPlatformRequirementSubmit({ body });
+  const response = await client.transferPlatformRequirementSubmit({
+    body: {
+      originatorClientId: "some example string",
+      requirementSubmissions: [{ requirementType: "some example string", value: "some example string" }],
+    },
+  });
   // TODO: Handle 'response' of type TransferPlatformRequirementSubmitResponse
 } catch (err) {
-  if (
-    err instanceof ThePlaidApiClient.TransferPlatformRequirementSubmitError && err.payload.kind === "error"
-  ) {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferPlatformRequirementSubmitError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferPlatformRequirementSubmit({
+  body: {
+    originatorClientId: "some example string",
+    requirementSubmissions: [{ requirementType: "some example string", value: "some example string" }],
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferPlatformRequirementSubmitResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -18381,9 +26514,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferPlatformRequirementSubmitResponse](src/models/transfer-platform-requirement-submit-response.ts)</code>
+**Direct**: `await client.transferPlatformRequirementSubmit(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferPlatformRequirementSubmitError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferPlatformRequirementSubmitResponse](src/models/transfer-platform-requirement-submit-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferPlatformRequirementSubmitError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferPlatformRequirementSubmit(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferPlatformRequirementSubmitResponse, ThePlaidApiClient.TransferPlatformRequirementSubmitError&gt;</code>, with `result.value` of type <code>[TransferPlatformRequirementSubmitResponse](src/models/transfer-platform-requirement-submit-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -18409,19 +26550,39 @@ The `/transfer/questionnaire/create` endpoint generates a Plaid-hosted onboardin
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferQuestionnaireCreate({ body });
+  const response = await client.transferQuestionnaireCreate({
+    body: { originatorClientId: "some example string", redirectUri: "some example string" },
+  });
   // TODO: Handle 'response' of type TransferQuestionnaireCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferQuestionnaireCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferQuestionnaireCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferQuestionnaireCreate({
+  body: { originatorClientId: "some example string", redirectUri: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferQuestionnaireCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -18445,9 +26606,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferQuestionnaireCreateResponse](src/models/transfer-questionnaire-create-response.ts)</code>
+**Direct**: `await client.transferQuestionnaireCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferQuestionnaireCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferQuestionnaireCreateResponse](src/models/transfer-questionnaire-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferQuestionnaireCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferQuestionnaireCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferQuestionnaireCreateResponse, ThePlaidApiClient.TransferQuestionnaireCreateError&gt;</code>, with `result.value` of type <code>[TransferQuestionnaireCreateResponse](src/models/transfer-questionnaire-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -18473,19 +26642,39 @@ Use the `/transfer/recurring/cancel` endpoint to cancel a recurring transfer.  A
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferRecurringCancel({ body });
+  const response = await client.transferRecurringCancel({
+    body: { recurringTransferId: "some example string" },
+  });
   // TODO: Handle 'response' of type TransferRecurringCancelResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferRecurringCancelError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferRecurringCancelError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferRecurringCancel({
+  body: { recurringTransferId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferRecurringCancelResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -18509,9 +26698,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferRecurringCancelResponse](src/models/transfer-recurring-cancel-response.ts)</code>
+**Direct**: `await client.transferRecurringCancel(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferRecurringCancelError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferRecurringCancelResponse](src/models/transfer-recurring-cancel-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferRecurringCancelError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferRecurringCancel(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferRecurringCancelResponse, ThePlaidApiClient.TransferRecurringCancelError&gt;</code>, with `result.value` of type <code>[TransferRecurringCancelResponse](src/models/transfer-recurring-cancel-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -18537,19 +26734,69 @@ Use the `/transfer/recurring/create` endpoint to initiate a new recurring transf
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferRecurringCreate({ body });
+  const response = await client.transferRecurringCreate({
+    body: {
+      accessToken: "some example string",
+      idempotencyKey: "some example string",
+      accountId: "some example string",
+      type: TransferType.Debit,
+      network: TransferRecurringNetwork.Ach,
+      amount: "some example string",
+      description: "some example string",
+      schedule: {
+        intervalUnit: TransferScheduleIntervalUnit.Week,
+        intervalCount: 1,
+        intervalExecutionDay: 1,
+        startDate: "2024-01-15",
+      },
+      user: { legalName: "some example string" },
+    },
+  });
   // TODO: Handle 'response' of type TransferRecurringCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferRecurringCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferRecurringCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferRecurringCreate({
+  body: {
+    accessToken: "some example string",
+    idempotencyKey: "some example string",
+    accountId: "some example string",
+    type: TransferType.Debit,
+    network: TransferRecurringNetwork.Ach,
+    amount: "some example string",
+    description: "some example string",
+    schedule: {
+      intervalUnit: TransferScheduleIntervalUnit.Week,
+      intervalCount: 1,
+      intervalExecutionDay: 1,
+      startDate: "2024-01-15",
+    },
+    user: { legalName: "some example string" },
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferRecurringCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -18573,9 +26820,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferRecurringCreateResponse](src/models/transfer-recurring-create-response.ts)</code>
+**Direct**: `await client.transferRecurringCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferRecurringCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferRecurringCreateResponse](src/models/transfer-recurring-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferRecurringCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferRecurringCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferRecurringCreateResponse, ThePlaidApiClient.TransferRecurringCreateError&gt;</code>, with `result.value` of type <code>[TransferRecurringCreateResponse](src/models/transfer-recurring-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -18601,19 +26856,39 @@ The `/transfer/recurring/get` fetches information about the recurring transfer c
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferRecurringGet({ body });
+  const response = await client.transferRecurringGet({
+    body: { recurringTransferId: "some example string" },
+  });
   // TODO: Handle 'response' of type TransferRecurringGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferRecurringGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferRecurringGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferRecurringGet({
+  body: { recurringTransferId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferRecurringGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -18637,9 +26912,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferRecurringGetResponse](src/models/transfer-recurring-get-response.ts)</code>
+**Direct**: `await client.transferRecurringGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferRecurringGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferRecurringGetResponse](src/models/transfer-recurring-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferRecurringGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferRecurringGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferRecurringGetResponse, ThePlaidApiClient.TransferRecurringGetError&gt;</code>, with `result.value` of type <code>[TransferRecurringGetResponse](src/models/transfer-recurring-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -18666,19 +26949,35 @@ Use the `/transfer/recurring/list` endpoint to see a list of all your recurring 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferRecurringList({ body });
+  const response = await client.transferRecurringList({ body: {} });
   // TODO: Handle 'response' of type TransferRecurringListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferRecurringListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferRecurringListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferRecurringList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferRecurringListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -18702,9 +27001,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferRecurringListResponse](src/models/transfer-recurring-list-response.ts)</code>
+**Direct**: `await client.transferRecurringList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferRecurringListError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferRecurringListResponse](src/models/transfer-recurring-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferRecurringListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferRecurringList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferRecurringListResponse, ThePlaidApiClient.TransferRecurringListError&gt;</code>, with `result.value` of type <code>[TransferRecurringListResponse](src/models/transfer-recurring-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -18730,19 +27037,35 @@ Use the `/transfer/refund/cancel` endpoint to cancel a refund.  A refund is elig
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferRefundCancel({ body });
+  const response = await client.transferRefundCancel({ body: { refundId: "some example string" } });
   // TODO: Handle 'response' of type TransferRefundCancelResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferRefundCancelError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferRefundCancelError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferRefundCancel({ body: { refundId: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferRefundCancelResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -18766,9 +27089,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferRefundCancelResponse](src/models/transfer-refund-cancel-response.ts)</code>
+**Direct**: `await client.transferRefundCancel(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferRefundCancelError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferRefundCancelResponse](src/models/transfer-refund-cancel-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferRefundCancelError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferRefundCancel(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferRefundCancelResponse, ThePlaidApiClient.TransferRefundCancelError&gt;</code>, with `result.value` of type <code>[TransferRefundCancelResponse](src/models/transfer-refund-cancel-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -18798,19 +27129,47 @@ A refund can still be issued even if the Item's `access_token` is no longer vali
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferRefundCreate({ body });
+  const response = await client.transferRefundCreate({
+    body: {
+      transferId: "some example string",
+      amount: "some example string",
+      idempotencyKey: "some example string",
+    },
+  });
   // TODO: Handle 'response' of type TransferRefundCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferRefundCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferRefundCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferRefundCreate({
+  body: {
+    transferId: "some example string",
+    amount: "some example string",
+    idempotencyKey: "some example string",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferRefundCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -18834,9 +27193,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferRefundCreateResponse](src/models/transfer-refund-create-response.ts)</code>
+**Direct**: `await client.transferRefundCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferRefundCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferRefundCreateResponse](src/models/transfer-refund-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferRefundCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferRefundCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferRefundCreateResponse, ThePlaidApiClient.TransferRefundCreateError&gt;</code>, with `result.value` of type <code>[TransferRefundCreateResponse](src/models/transfer-refund-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -18862,19 +27229,35 @@ The `/transfer/refund/get` endpoint fetches information about the refund corresp
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferRefundGet({ body });
+  const response = await client.transferRefundGet({ body: { refundId: "some example string" } });
   // TODO: Handle 'response' of type TransferRefundGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferRefundGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferRefundGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferRefundGet({ body: { refundId: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferRefundGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -18898,9 +27281,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferRefundGetResponse](src/models/transfer-refund-get-response.ts)</code>
+**Direct**: `await client.transferRefundGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferRefundGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferRefundGetResponse](src/models/transfer-refund-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferRefundGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferRefundGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferRefundGetResponse, ThePlaidApiClient.TransferRefundGetError&gt;</code>, with `result.value` of type <code>[TransferRefundGetResponse](src/models/transfer-refund-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -18926,19 +27317,35 @@ The `/transfer/repayment/list` endpoint fetches repayments matching the given fi
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferRepaymentList({ body });
+  const response = await client.transferRepaymentList({ body: { count: 1 } });
   // TODO: Handle 'response' of type TransferRepaymentListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferRepaymentListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferRepaymentListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferRepaymentList({ body: { count: 1 } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferRepaymentListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -18962,9 +27369,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferRepaymentListResponse](src/models/transfer-repayment-list-response.ts)</code>
+**Direct**: `await client.transferRepaymentList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferRepaymentListError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferRepaymentListResponse](src/models/transfer-repayment-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferRepaymentListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferRepaymentList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferRepaymentListResponse, ThePlaidApiClient.TransferRepaymentListError&gt;</code>, with `result.value` of type <code>[TransferRepaymentListResponse](src/models/transfer-repayment-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -18990,19 +27405,39 @@ The `/transfer/repayment/return/list` endpoint retrieves the set of returns that
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferRepaymentReturnList({ body });
+  const response = await client.transferRepaymentReturnList({
+    body: { repaymentId: "d4bfce70-2470-4298-ae87-5e9b3e18bfaf", count: 1 },
+  });
   // TODO: Handle 'response' of type TransferRepaymentReturnListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferRepaymentReturnListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferRepaymentReturnListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferRepaymentReturnList({
+  body: { repaymentId: "d4bfce70-2470-4298-ae87-5e9b3e18bfaf", count: 1 },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferRepaymentReturnListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -19026,9 +27461,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferRepaymentReturnListResponse](src/models/transfer-repayment-return-list-response.ts)</code>
+**Direct**: `await client.transferRepaymentReturnList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferRepaymentReturnListError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferRepaymentReturnListResponse](src/models/transfer-repayment-return-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferRepaymentReturnListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferRepaymentReturnList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferRepaymentReturnListResponse, ThePlaidApiClient.TransferRepaymentReturnListError&gt;</code>, with `result.value` of type <code>[TransferRepaymentReturnListResponse](src/models/transfer-repayment-return-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -19056,19 +27499,47 @@ Recovery can be reported in full or in parts; the sum of recovered amounts acros
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferReturnRecover({ body });
+  const response = await client.transferReturnRecover({
+    body: {
+      transferId: "some example string",
+      amount: "some example string",
+      idempotencyKey: "some example string",
+    },
+  });
   // TODO: Handle 'response' of type TransferReturnRecoverResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferReturnRecoverError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferReturnRecoverError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferReturnRecover({
+  body: {
+    transferId: "some example string",
+    amount: "some example string",
+    idempotencyKey: "some example string",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferReturnRecoverResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -19092,9 +27563,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferReturnRecoverResponse](src/models/transfer-return-recover-response.ts)</code>
+**Direct**: `await client.transferReturnRecover(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferReturnRecoverError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferReturnRecoverResponse](src/models/transfer-return-recover-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferReturnRecoverError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferReturnRecover(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferReturnRecoverResponse, ThePlaidApiClient.TransferReturnRecoverError&gt;</code>, with `result.value` of type <code>[TransferReturnRecoverResponse](src/models/transfer-return-recover-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -19120,19 +27599,35 @@ The `/transfer/sweep/get` endpoint fetches a sweep corresponding to the given `s
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferSweepGet({ body });
+  const response = await client.transferSweepGet({ body: { sweepId: "some example string" } });
   // TODO: Handle 'response' of type TransferSweepGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferSweepGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferSweepGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferSweepGet({ body: { sweepId: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferSweepGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -19156,9 +27651,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferSweepGetResponse](src/models/transfer-sweep-get-response.ts)</code>
+**Direct**: `await client.transferSweepGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferSweepGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferSweepGetResponse](src/models/transfer-sweep-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferSweepGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferSweepGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferSweepGetResponse, ThePlaidApiClient.TransferSweepGetError&gt;</code>, with `result.value` of type <code>[TransferSweepGetResponse](src/models/transfer-sweep-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -19184,19 +27687,35 @@ The `/transfer/sweep/list` endpoint fetches sweeps matching the given filters.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.transferSweepList({ body });
+  const response = await client.transferSweepList({ body: {} });
   // TODO: Handle 'response' of type TransferSweepListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.TransferSweepListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.TransferSweepListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.transferSweepList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type TransferSweepListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -19220,9 +27739,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[TransferSweepListResponse](src/models/transfer-sweep-list-response.ts)</code>
+**Direct**: `await client.transferSweepList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.TransferSweepListError](src/client.ts)</code>
+- **OnSuccess**: <code>[TransferSweepListResponse](src/models/transfer-sweep-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.TransferSweepListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.transferSweepList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;TransferSweepListResponse, ThePlaidApiClient.TransferSweepListError&gt;</code>, with `result.value` of type <code>[TransferSweepListResponse](src/models/transfer-sweep-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -19248,19 +27775,45 @@ This endpoint allows sending client-specific events related to Layer sessions fo
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.userAccountSessionEventSend({ body });
+  const response = await client.userAccountSessionEventSend({
+    body: {
+      linkSessionId: "some example string",
+      event: { name: "some example string", timestamp: new Date(Date.UTC(2024, 0, 15, 9, 30, 0)) },
+    },
+  });
   // TODO: Handle 'response' of type UserAccountSessionEventSendResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.UserAccountSessionEventSendError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.UserAccountSessionEventSendError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.userAccountSessionEventSend({
+  body: {
+    linkSessionId: "some example string",
+    event: { name: "some example string", timestamp: new Date(Date.UTC(2024, 0, 15, 9, 30, 0)) },
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type UserAccountSessionEventSendResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -19284,9 +27837,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[UserAccountSessionEventSendResponse](src/models/user-account-session-event-send-response.ts)</code>
+**Direct**: `await client.userAccountSessionEventSend(request)`
 
-**OnError**: <code>[ThePlaidApiClient.UserAccountSessionEventSendError](src/client.ts)</code>
+- **OnSuccess**: <code>[UserAccountSessionEventSendResponse](src/models/user-account-session-event-send-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.UserAccountSessionEventSendError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.userAccountSessionEventSend(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;UserAccountSessionEventSendResponse, ThePlaidApiClient.UserAccountSessionEventSendError&gt;</code>, with `result.value` of type <code>[UserAccountSessionEventSendResponse](src/models/user-account-session-event-send-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -19312,19 +27873,37 @@ This endpoint returns user permissioned account data, including identity and Ite
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.userAccountSessionGet({ body });
+  const response = await client.userAccountSessionGet({ body: { publicToken: "some example string" } });
   // TODO: Handle 'response' of type UserAccountSessionGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.UserAccountSessionGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.UserAccountSessionGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.userAccountSessionGet({
+  body: { publicToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type UserAccountSessionGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -19348,9 +27927,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[UserAccountSessionGetResponse](src/models/user-account-session-get-response.ts)</code>
+**Direct**: `await client.userAccountSessionGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.UserAccountSessionGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[UserAccountSessionGetResponse](src/models/user-account-session-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.UserAccountSessionGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.userAccountSessionGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;UserAccountSessionGetResponse, ThePlaidApiClient.UserAccountSessionGetError&gt;</code>, with `result.value` of type <code>[UserAccountSessionGetResponse](src/models/user-account-session-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -19387,19 +27974,35 @@ Plaid will normalize identity fields before storing them and utilize the same id
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.userCreate({ body });
+  const response = await client.userCreate({ body: { clientUserId: "some example string" } });
   // TODO: Handle 'response' of type UserCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.UserCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.UserCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.userCreate({ body: { clientUserId: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type UserCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -19413,7 +28016,7 @@ try {
 
 | Name | Type | Description |
 | --- | --- | --- |
-| <code>plaidNewUserApiEnabled?</code> | <code>boolean</code> | The HTTP header used in API requests to determine which set of User APIs to invoke: the legacy CRA version or the new User API version. |
+| <code>plaidNewUserApiEnabled?</code> | <code>boolean</code> | The HTTP header used in API requests to determine which set of User APIs to invoke: the legacy CRA version or the new User API version.<br>**Default**: false |
 | <code>body</code> | <code>[UserCreateRequest](src/models/user-create-request.ts)</code> | - |
 
 </dd>
@@ -19424,9 +28027,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[UserCreateResponse](src/models/user-create-response.ts)</code>
+**Direct**: `await client.userCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.UserCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[UserCreateResponse](src/models/user-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.UserCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.userCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;UserCreateResponse, ThePlaidApiClient.UserCreateError&gt;</code>, with `result.value` of type <code>[UserCreateResponse](src/models/user-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -19457,19 +28068,37 @@ This endpoint is distinct from `/transactions/refresh`, which triggers a refresh
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.userFinancialDataRefresh({ body });
+  const response = await client.userFinancialDataRefresh({ body: { userId: "usr_8c3ZbDBYjaqUXZ" } });
   // TODO: Handle 'response' of type UserFinancialDataRefreshResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.UserFinancialDataRefreshError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.UserFinancialDataRefreshError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.userFinancialDataRefresh({
+  body: { userId: "usr_8c3ZbDBYjaqUXZ" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type UserFinancialDataRefreshResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -19493,9 +28122,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[UserFinancialDataRefreshResponse](src/models/user-financial-data-refresh-response.ts)</code>
+**Direct**: `await client.userFinancialDataRefresh(request)`
 
-**OnError**: <code>[ThePlaidApiClient.UserFinancialDataRefreshError](src/client.ts)</code>
+- **OnSuccess**: <code>[UserFinancialDataRefreshResponse](src/models/user-financial-data-refresh-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.UserFinancialDataRefreshError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.userFinancialDataRefresh(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;UserFinancialDataRefreshResponse, ThePlaidApiClient.UserFinancialDataRefreshError&gt;</code>, with `result.value` of type <code>[UserFinancialDataRefreshResponse](src/models/user-financial-data-refresh-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -19521,19 +28158,35 @@ Get user details using a `user_id`. This endpoint only supports users that were 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.userGet({ body });
+  const response = await client.userGet({ body: { userId: "some example string" } });
   // TODO: Handle 'response' of type UserGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.UserGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.UserGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.userGet({ body: { userId: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type UserGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -19547,7 +28200,7 @@ try {
 
 | Name | Type | Description |
 | --- | --- | --- |
-| <code>plaidNewUserApiEnabled?</code> | <code>boolean</code> | The HTTP header used in API requests to determine which set of User APIs to invoke: the legacy CRA version or the new User API version. |
+| <code>plaidNewUserApiEnabled?</code> | <code>boolean</code> | The HTTP header used in API requests to determine which set of User APIs to invoke: the legacy CRA version or the new User API version.<br>**Default**: false |
 | <code>body</code> | <code>[UserGetRequest](src/models/user-get-request.ts)</code> | - |
 
 </dd>
@@ -19558,9 +28211,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[UserGetResponse](src/models/user-get-response.ts)</code>
+**Direct**: `await client.userGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.UserGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[UserGetResponse](src/models/user-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.UserGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.userGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;UserGetResponse, ThePlaidApiClient.UserGetError&gt;</code>, with `result.value` of type <code>[UserGetResponse](src/models/user-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -19586,19 +28247,35 @@ This endpoint allows customers to explicitly purge identity/PII data provided to
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.userIdentityRemove({ body });
+  const response = await client.userIdentityRemove({ body: { userId: "some example string" } });
   // TODO: Handle 'response' of type UserIdentityRemoveResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.UserIdentityRemoveError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.UserIdentityRemoveError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.userIdentityRemove({ body: { userId: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type UserIdentityRemoveResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -19612,7 +28289,7 @@ try {
 
 | Name | Type | Description |
 | --- | --- | --- |
-| <code>plaidNewUserApiEnabled?</code> | <code>boolean</code> | The HTTP header used in API requests to determine which set of User APIs to invoke: the legacy CRA version or the new User API version. |
+| <code>plaidNewUserApiEnabled?</code> | <code>boolean</code> | The HTTP header used in API requests to determine which set of User APIs to invoke: the legacy CRA version or the new User API version.<br>**Default**: false |
 | <code>body</code> | <code>[UserIdentityRemoveRequest](src/models/user-identity-remove-request.ts)</code> | - |
 
 </dd>
@@ -19623,9 +28300,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[UserIdentityRemoveResponse](src/models/user-identity-remove-response.ts)</code>
+**Direct**: `await client.userIdentityRemove(request)`
 
-**OnError**: <code>[ThePlaidApiClient.UserIdentityRemoveError](src/client.ts)</code>
+- **OnSuccess**: <code>[UserIdentityRemoveResponse](src/models/user-identity-remove-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.UserIdentityRemoveError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.userIdentityRemove(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;UserIdentityRemoveResponse, ThePlaidApiClient.UserIdentityRemoveError&gt;</code>, with `result.value` of type <code>[UserIdentityRemoveResponse](src/models/user-identity-remove-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -19651,19 +28336,39 @@ Associates Items to the target user. If an Item is already associated to another
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.userItemsAssociate({ body });
+  const response = await client.userItemsAssociate({
+    body: { userId: "some example string", itemIds: ["some example string"] },
+  });
   // TODO: Handle 'response' of type UserItemsAssociateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.UserItemsAssociateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.UserItemsAssociateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.userItemsAssociate({
+  body: { userId: "some example string", itemIds: ["some example string"] },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type UserItemsAssociateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -19687,9 +28392,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[UserItemsAssociateResponse](src/models/user-items-associate-response.ts)</code>
+**Direct**: `await client.userItemsAssociate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.UserItemsAssociateError](src/client.ts)</code>
+- **OnSuccess**: <code>[UserItemsAssociateResponse](src/models/user-items-associate-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.UserItemsAssociateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.userItemsAssociate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;UserItemsAssociateResponse, ThePlaidApiClient.UserItemsAssociateError&gt;</code>, with `result.value` of type <code>[UserItemsAssociateResponse](src/models/user-items-associate-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -19715,19 +28428,35 @@ Returns Items associated with a `user_id`, along with their corresponding status
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.userItemsGet({ body });
+  const response = await client.userItemsGet({ body: {} });
   // TODO: Handle 'response' of type UserItemsGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.UserItemsGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.UserItemsGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.userItemsGet({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type UserItemsGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -19751,9 +28480,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[UserItemsGetResponse](src/models/user-items-get-response.ts)</code>
+**Direct**: `await client.userItemsGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.UserItemsGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[UserItemsGetResponse](src/models/user-items-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.UserItemsGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.userItemsGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;UserItemsGetResponse, ThePlaidApiClient.UserItemsGetError&gt;</code>, with `result.value` of type <code>[UserItemsGetResponse](src/models/user-items-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -19780,19 +28517,35 @@ This endpoint is not intended to remove all data for a user, as it will only rem
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.userItemsRemove({ body });
+  const response = await client.userItemsRemove({ body: { itemIds: ["some example string"] } });
   // TODO: Handle 'response' of type UserItemsRemoveResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.UserItemsRemoveError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.UserItemsRemoveError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.userItemsRemove({ body: { itemIds: ["some example string"] } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type UserItemsRemoveResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -19816,9 +28569,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[UserItemsRemoveResponse](src/models/user-items-remove-response.ts)</code>
+**Direct**: `await client.userItemsRemove(request)`
 
-**OnError**: <code>[ThePlaidApiClient.UserItemsRemoveError](src/client.ts)</code>
+- **OnSuccess**: <code>[UserItemsRemoveResponse](src/models/user-items-remove-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.UserItemsRemoveError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.userItemsRemove(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;UserItemsRemoveResponse, ThePlaidApiClient.UserItemsRemoveError&gt;</code>, with `result.value` of type <code>[UserItemsRemoveResponse](src/models/user-items-remove-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -19844,19 +28605,47 @@ Terminates user-based recurring subscription bundles or products (Financial Mana
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.userProductsTerminate({ body });
+  const response = await client.userProductsTerminate({
+    body: {
+      userId: "usr_8c3ZbDBYjaqUXZ",
+      reasonCode: ProductsTerminateReasonCode.ConsumerAccountClosed,
+      reasonNote: "User closed account with client.",
+    },
+  });
   // TODO: Handle 'response' of type UserProductsTerminateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.UserProductsTerminateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.UserProductsTerminateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.userProductsTerminate({
+  body: {
+    userId: "usr_8c3ZbDBYjaqUXZ",
+    reasonCode: ProductsTerminateReasonCode.ConsumerAccountClosed,
+    reasonNote: "User closed account with client.",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type UserProductsTerminateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -19880,9 +28669,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[UserProductsTerminateResponse](src/models/user-products-terminate-response.ts)</code>
+**Direct**: `await client.userProductsTerminate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.UserProductsTerminateError](src/client.ts)</code>
+- **OnSuccess**: <code>[UserProductsTerminateResponse](src/models/user-products-terminate-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.UserProductsTerminateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.userProductsTerminate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;UserProductsTerminateResponse, ThePlaidApiClient.UserProductsTerminateError&gt;</code>, with `result.value` of type <code>[UserProductsTerminateResponse](src/models/user-products-terminate-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -19908,19 +28705,35 @@ try {
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.userRemove({ body });
+  const response = await client.userRemove({ body: {} });
   // TODO: Handle 'response' of type UserRemoveResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.UserRemoveError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.UserRemoveError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.userRemove({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type UserRemoveResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -19934,7 +28747,7 @@ try {
 
 | Name | Type | Description |
 | --- | --- | --- |
-| <code>plaidNewUserApiEnabled?</code> | <code>boolean</code> | The HTTP header used in API requests to determine which set of User APIs to invoke: the legacy CRA version or the new User API version. |
+| <code>plaidNewUserApiEnabled?</code> | <code>boolean</code> | The HTTP header used in API requests to determine which set of User APIs to invoke: the legacy CRA version or the new User API version.<br>**Default**: false |
 | <code>body</code> | <code>[UserRemoveRequest](src/models/user-remove-request.ts)</code> | - |
 
 </dd>
@@ -19945,9 +28758,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[UserRemoveResponse](src/models/user-remove-response.ts)</code>
+**Direct**: `await client.userRemove(request)`
 
-**OnError**: <code>[ThePlaidApiClient.UserRemoveError](src/client.ts)</code>
+- **OnSuccess**: <code>[UserRemoveResponse](src/models/user-remove-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.UserRemoveError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.userRemove(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;UserRemoveResponse, ThePlaidApiClient.UserRemoveError&gt;</code>, with `result.value` of type <code>[UserRemoveResponse](src/models/user-remove-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -19975,19 +28796,39 @@ Ensure you store the `third_party_user_token` along with the `user_token` and `t
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.userThirdPartyTokenCreate({ body });
+  const response = await client.userThirdPartyTokenCreate({
+    body: { thirdPartyClientId: "some example string" },
+  });
   // TODO: Handle 'response' of type UserThirdPartyTokenCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.UserThirdPartyTokenCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.UserThirdPartyTokenCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.userThirdPartyTokenCreate({
+  body: { thirdPartyClientId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type UserThirdPartyTokenCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -20011,9 +28852,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[UserThirdPartyTokenCreateResponse](src/models/user-third-party-token-create-response.ts)</code>
+**Direct**: `await client.userThirdPartyTokenCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.UserThirdPartyTokenCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[UserThirdPartyTokenCreateResponse](src/models/user-third-party-token-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.UserThirdPartyTokenCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.userThirdPartyTokenCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;UserThirdPartyTokenCreateResponse, ThePlaidApiClient.UserThirdPartyTokenCreateError&gt;</code>, with `result.value` of type <code>[UserThirdPartyTokenCreateResponse](src/models/user-third-party-token-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -20041,19 +28890,39 @@ Any subsequent calls to retrieve information using the same third-party user tok
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.userThirdPartyTokenRemove({ body });
+  const response = await client.userThirdPartyTokenRemove({
+    body: { thirdPartyUserToken: "some example string" },
+  });
   // TODO: Handle 'response' of type UserThirdPartyTokenRemoveResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.UserThirdPartyTokenRemoveError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.UserThirdPartyTokenRemoveError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.userThirdPartyTokenRemove({
+  body: { thirdPartyUserToken: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type UserThirdPartyTokenRemoveResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -20077,9 +28946,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[UserThirdPartyTokenRemoveResponse](src/models/user-third-party-token-remove-response.ts)</code>
+**Direct**: `await client.userThirdPartyTokenRemove(request)`
 
-**OnError**: <code>[ThePlaidApiClient.UserThirdPartyTokenRemoveError](src/client.ts)</code>
+- **OnSuccess**: <code>[UserThirdPartyTokenRemoveResponse](src/models/user-third-party-token-remove-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.UserThirdPartyTokenRemoveError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.userThirdPartyTokenRemove(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;UserThirdPartyTokenRemoveResponse, ThePlaidApiClient.UserThirdPartyTokenRemoveError&gt;</code>, with `result.value` of type <code>[UserThirdPartyTokenRemoveResponse](src/models/user-third-party-token-remove-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -20110,19 +28987,35 @@ This endpoint is distinct from `/transactions/refresh`, which triggers a refresh
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.userTransactionsRefresh({ body });
+  const response = await client.userTransactionsRefresh({ body: { userId: "usr_8c3ZbDBYjaqUXZ" } });
   // TODO: Handle 'response' of type UserTransactionsRefreshResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.UserTransactionsRefreshError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.UserTransactionsRefreshError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.userTransactionsRefresh({ body: { userId: "usr_8c3ZbDBYjaqUXZ" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type UserTransactionsRefreshResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -20146,9 +29039,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[UserTransactionsRefreshResponse](src/models/user-transactions-refresh-response.ts)</code>
+**Direct**: `await client.userTransactionsRefresh(request)`
 
-**OnError**: <code>[ThePlaidApiClient.UserTransactionsRefreshError](src/client.ts)</code>
+- **OnSuccess**: <code>[UserTransactionsRefreshResponse](src/models/user-transactions-refresh-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.UserTransactionsRefreshError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.userTransactionsRefresh(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;UserTransactionsRefreshResponse, ThePlaidApiClient.UserTransactionsRefreshError&gt;</code>, with `result.value` of type <code>[UserTransactionsRefreshResponse](src/models/user-transactions-refresh-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -20176,19 +29077,35 @@ Identity updates use merge semantics: provided fields overwrite existing ones; o
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.userUpdate({ body });
+  const response = await client.userUpdate({ body: {} });
   // TODO: Handle 'response' of type UserUpdateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.UserUpdateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.UserUpdateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.userUpdate({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type UserUpdateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -20202,7 +29119,7 @@ try {
 
 | Name | Type | Description |
 | --- | --- | --- |
-| <code>plaidNewUserApiEnabled?</code> | <code>boolean</code> | The HTTP header used in API requests to determine which set of User APIs to invoke: the legacy CRA version or the new User API version. |
+| <code>plaidNewUserApiEnabled?</code> | <code>boolean</code> | The HTTP header used in API requests to determine which set of User APIs to invoke: the legacy CRA version or the new User API version.<br>**Default**: false |
 | <code>body</code> | <code>[UserUpdateRequest](src/models/user-update-request.ts)</code> | - |
 
 </dd>
@@ -20213,9 +29130,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[UserUpdateResponse](src/models/user-update-response.ts)</code>
+**Direct**: `await client.userUpdate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.UserUpdateError](src/client.ts)</code>
+- **OnSuccess**: <code>[UserUpdateResponse](src/models/user-update-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.UserUpdateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.userUpdate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;UserUpdateResponse, ThePlaidApiClient.UserUpdateError&gt;</code>, with `result.value` of type <code>[UserUpdateResponse](src/models/user-update-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -20241,19 +29166,35 @@ Create an e-wallet. The response is the newly created e-wallet object.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.walletCreate({ body });
+  const response = await client.walletCreate({ body: { isoCurrencyCode: IsoCurrencyCode.Gbp } });
   // TODO: Handle 'response' of type WalletCreateResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.WalletCreateError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.WalletCreateError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.walletCreate({ body: { isoCurrencyCode: IsoCurrencyCode.Gbp } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WalletCreateResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -20277,9 +29218,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WalletCreateResponse](src/models/wallet-create-response.ts)</code>
+**Direct**: `await client.walletCreate(request)`
 
-**OnError**: <code>[ThePlaidApiClient.WalletCreateError](src/client.ts)</code>
+- **OnSuccess**: <code>[WalletCreateResponse](src/models/wallet-create-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.WalletCreateError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.walletCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WalletCreateResponse, ThePlaidApiClient.WalletCreateError&gt;</code>, with `result.value` of type <code>[WalletCreateResponse](src/models/wallet-create-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -20305,19 +29254,35 @@ Fetch an e-wallet. The response includes the current balance.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.walletGet({ body });
+  const response = await client.walletGet({ body: { walletId: "some example string" } });
   // TODO: Handle 'response' of type WalletGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.WalletGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.WalletGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.walletGet({ body: { walletId: "some example string" } }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WalletGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -20341,9 +29306,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WalletGetResponse](src/models/wallet-get-response.ts)</code>
+**Direct**: `await client.walletGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.WalletGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[WalletGetResponse](src/models/wallet-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.WalletGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.walletGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WalletGetResponse, ThePlaidApiClient.WalletGetError&gt;</code>, with `result.value` of type <code>[WalletGetResponse](src/models/wallet-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -20369,19 +29342,35 @@ This endpoint lists all e-wallets in descending order of creation.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.walletList({ body });
+  const response = await client.walletList({ body: {} });
   // TODO: Handle 'response' of type WalletListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.WalletListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.WalletListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.walletList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WalletListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -20405,9 +29394,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WalletListResponse](src/models/wallet-list-response.ts)</code>
+**Direct**: `await client.walletList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.WalletListError](src/client.ts)</code>
+- **OnSuccess**: <code>[WalletListResponse](src/models/wallet-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.WalletListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.walletList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WalletListResponse, ThePlaidApiClient.WalletListError&gt;</code>, with `result.value` of type <code>[WalletListResponse](src/models/wallet-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -20435,19 +29432,51 @@ Transactions will settle in seconds to several days, depending on the underlying
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.walletTransactionExecute({ body });
+  const response = await client.walletTransactionExecute({
+    body: {
+      idempotencyKey: "some example string",
+      walletId: "some example string",
+      counterparty: { name: "some example string", numbers: {} },
+      amount: { isoCurrencyCode: IsoCurrencyCode.Gbp, value: 1.5 },
+      reference: "some example string",
+    },
+  });
   // TODO: Handle 'response' of type WalletTransactionExecuteResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.WalletTransactionExecuteError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.WalletTransactionExecuteError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.walletTransactionExecute({
+  body: {
+    idempotencyKey: "some example string",
+    walletId: "some example string",
+    counterparty: { name: "some example string", numbers: {} },
+    amount: { isoCurrencyCode: IsoCurrencyCode.Gbp, value: 1.5 },
+    reference: "some example string",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WalletTransactionExecuteResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -20471,9 +29500,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WalletTransactionExecuteResponse](src/models/wallet-transaction-execute-response.ts)</code>
+**Direct**: `await client.walletTransactionExecute(request)`
 
-**OnError**: <code>[ThePlaidApiClient.WalletTransactionExecuteError](src/client.ts)</code>
+- **OnSuccess**: <code>[WalletTransactionExecuteResponse](src/models/wallet-transaction-execute-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.WalletTransactionExecuteError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.walletTransactionExecute(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WalletTransactionExecuteResponse, ThePlaidApiClient.WalletTransactionExecuteError&gt;</code>, with `result.value` of type <code>[WalletTransactionExecuteResponse](src/models/wallet-transaction-execute-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -20499,19 +29536,37 @@ Fetch a specific e-wallet transaction
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.walletTransactionGet({ body });
+  const response = await client.walletTransactionGet({ body: { transactionId: "some example string" } });
   // TODO: Handle 'response' of type WalletTransactionGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.WalletTransactionGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.WalletTransactionGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.walletTransactionGet({
+  body: { transactionId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WalletTransactionGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -20535,9 +29590,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WalletTransactionGetResponse](src/models/wallet-transaction-get-response.ts)</code>
+**Direct**: `await client.walletTransactionGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.WalletTransactionGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[WalletTransactionGetResponse](src/models/wallet-transaction-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.WalletTransactionGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.walletTransactionGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WalletTransactionGetResponse, ThePlaidApiClient.WalletTransactionGetError&gt;</code>, with `result.value` of type <code>[WalletTransactionGetResponse](src/models/wallet-transaction-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -20563,19 +29626,37 @@ This endpoint lists the latest transactions of the specified e-wallet. Transacti
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.walletTransactionList({ body });
+  const response = await client.walletTransactionList({ body: { walletId: "some example string" } });
   // TODO: Handle 'response' of type WalletTransactionListResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.WalletTransactionListError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.WalletTransactionListError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.walletTransactionList({
+  body: { walletId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WalletTransactionListResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -20599,9 +29680,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WalletTransactionListResponse](src/models/wallet-transaction-list-response.ts)</code>
+**Direct**: `await client.walletTransactionList(request)`
 
-**OnError**: <code>[ThePlaidApiClient.WalletTransactionListError](src/client.ts)</code>
+- **OnSuccess**: <code>[WalletTransactionListResponse](src/models/wallet-transaction-list-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.WalletTransactionListError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.walletTransactionList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WalletTransactionListResponse, ThePlaidApiClient.WalletTransactionListError&gt;</code>, with `result.value` of type <code>[WalletTransactionListResponse](src/models/wallet-transaction-list-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -20612,7 +29701,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningEntityCreate(request: ThePlaidApiClient.WatchlistScreeningEntityCreateRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityCreateResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningEntityCreate(request: ThePlaidApiClient.WatchlistScreeningEntityCreateRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityCreateResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -20627,17 +29716,43 @@ Create a new entity watchlist screening to check your customer against watchlist
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningEntityCreate({ body });
+  const response = await client.watchlistScreeningEntityCreate({
+    body: {
+      searchTerms: { entityWatchlistProgramId: "some example string", legalName: "some example string" },
+    },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningEntityCreateResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningEntityCreate({
+  body: {
+    searchTerms: { entityWatchlistProgramId: "some example string", legalName: "some example string" },
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningEntityCreateResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -20661,9 +29776,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningEntityCreateResponse](src/models/watchlist-screening-entity-create-response.ts)</code>
+**Direct**: `await client.watchlistScreeningEntityCreate(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningEntityCreateResponse](src/models/watchlist-screening-entity-create-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningEntityCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningEntityCreateResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningEntityCreateResponse](src/models/watchlist-screening-entity-create-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -20674,7 +29797,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningEntityGet(request: ThePlaidApiClient.WatchlistScreeningEntityGetRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityGetResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningEntityGet(request: ThePlaidApiClient.WatchlistScreeningEntityGetRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityGetResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -20689,17 +29812,39 @@ Retrieve an entity watchlist screening.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningEntityGet({ body });
+  const response = await client.watchlistScreeningEntityGet({
+    body: { entityWatchlistScreeningId: "some example string" },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningEntityGetResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningEntityGet({
+  body: { entityWatchlistScreeningId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningEntityGetResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -20723,9 +29868,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningEntityGetResponse](src/models/watchlist-screening-entity-get-response.ts)</code>
+**Direct**: `await client.watchlistScreeningEntityGet(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningEntityGetResponse](src/models/watchlist-screening-entity-get-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningEntityGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningEntityGetResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningEntityGetResponse](src/models/watchlist-screening-entity-get-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -20736,7 +29889,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningEntityHistoryList(request: ThePlaidApiClient.WatchlistScreeningEntityHistoryListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityHistoryListResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningEntityHistoryList(request: ThePlaidApiClient.WatchlistScreeningEntityHistoryListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityHistoryListResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -20751,17 +29904,39 @@ List all changes to the entity watchlist screening in reverse-chronological orde
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningEntityHistoryList({ body });
+  const response = await client.watchlistScreeningEntityHistoryList({
+    body: { entityWatchlistScreeningId: "some example string" },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningEntityHistoryListResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningEntityHistoryList({
+  body: { entityWatchlistScreeningId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningEntityHistoryListResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -20785,9 +29960,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningEntityHistoryListResponse](src/models/watchlist-screening-entity-history-list-response.ts)</code>
+**Direct**: `await client.watchlistScreeningEntityHistoryList(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningEntityHistoryListResponse](src/models/watchlist-screening-entity-history-list-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningEntityHistoryList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningEntityHistoryListResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningEntityHistoryListResponse](src/models/watchlist-screening-entity-history-list-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -20798,7 +29981,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningEntityHitList(request: ThePlaidApiClient.WatchlistScreeningEntityHitListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityHitListResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningEntityHitList(request: ThePlaidApiClient.WatchlistScreeningEntityHitListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityHitListResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -20813,17 +29996,39 @@ List all hits for the entity watchlist screening.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningEntityHitList({ body });
+  const response = await client.watchlistScreeningEntityHitList({
+    body: { entityWatchlistScreeningId: "some example string" },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningEntityHitListResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningEntityHitList({
+  body: { entityWatchlistScreeningId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningEntityHitListResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -20847,9 +30052,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningEntityHitListResponse](src/models/watchlist-screening-entity-hit-list-response.ts)</code>
+**Direct**: `await client.watchlistScreeningEntityHitList(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningEntityHitListResponse](src/models/watchlist-screening-entity-hit-list-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningEntityHitList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningEntityHitListResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningEntityHitListResponse](src/models/watchlist-screening-entity-hit-list-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -20860,7 +30073,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningEntityList(request: ThePlaidApiClient.WatchlistScreeningEntityListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityListResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningEntityList(request: ThePlaidApiClient.WatchlistScreeningEntityListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityListResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -20875,17 +30088,39 @@ List all entity screenings.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningEntityList({ body });
+  const response = await client.watchlistScreeningEntityList({
+    body: { entityWatchlistProgramId: "some example string" },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningEntityListResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningEntityList({
+  body: { entityWatchlistProgramId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningEntityListResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -20909,9 +30144,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningEntityListResponse](src/models/watchlist-screening-entity-list-response.ts)</code>
+**Direct**: `await client.watchlistScreeningEntityList(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningEntityListResponse](src/models/watchlist-screening-entity-list-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningEntityList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningEntityListResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningEntityListResponse](src/models/watchlist-screening-entity-list-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -20922,7 +30165,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningEntityProgramGet(request: ThePlaidApiClient.WatchlistScreeningEntityProgramGetRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityProgramGetResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningEntityProgramGet(request: ThePlaidApiClient.WatchlistScreeningEntityProgramGetRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityProgramGetResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -20937,17 +30180,39 @@ Get an entity watchlist screening program
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningEntityProgramGet({ body });
+  const response = await client.watchlistScreeningEntityProgramGet({
+    body: { entityWatchlistProgramId: "some example string" },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningEntityProgramGetResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningEntityProgramGet({
+  body: { entityWatchlistProgramId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningEntityProgramGetResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -20971,9 +30236,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningEntityProgramGetResponse](src/models/watchlist-screening-entity-program-get-response.ts)</code>
+**Direct**: `await client.watchlistScreeningEntityProgramGet(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningEntityProgramGetResponse](src/models/watchlist-screening-entity-program-get-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningEntityProgramGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningEntityProgramGetResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningEntityProgramGetResponse](src/models/watchlist-screening-entity-program-get-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -20984,7 +30257,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningEntityProgramList(request: ThePlaidApiClient.WatchlistScreeningEntityProgramListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityProgramListResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningEntityProgramList(request: ThePlaidApiClient.WatchlistScreeningEntityProgramListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityProgramListResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -20999,17 +30272,35 @@ List all entity watchlist screening programs
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningEntityProgramList({ body });
+  const response = await client.watchlistScreeningEntityProgramList({ body: {} });
   // TODO: Handle 'response' of type WatchlistScreeningEntityProgramListResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningEntityProgramList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningEntityProgramListResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -21033,9 +30324,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningEntityProgramListResponse](src/models/watchlist-screening-entity-program-list-response.ts)</code>
+**Direct**: `await client.watchlistScreeningEntityProgramList(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningEntityProgramListResponse](src/models/watchlist-screening-entity-program-list-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningEntityProgramList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningEntityProgramListResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningEntityProgramListResponse](src/models/watchlist-screening-entity-program-list-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -21046,7 +30345,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningEntityReviewCreate(request: ThePlaidApiClient.WatchlistScreeningEntityReviewCreateRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityReviewCreateResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningEntityReviewCreate(request: ThePlaidApiClient.WatchlistScreeningEntityReviewCreateRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityReviewCreateResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -21061,17 +30360,47 @@ Create a review for an entity watchlist screening. Reviews are compliance report
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningEntityReviewCreate({ body });
+  const response = await client.watchlistScreeningEntityReviewCreate({
+    body: {
+      confirmedHits: ["some example string"],
+      dismissedHits: ["some example string"],
+      entityWatchlistScreeningId: "some example string",
+    },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningEntityReviewCreateResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningEntityReviewCreate({
+  body: {
+    confirmedHits: ["some example string"],
+    dismissedHits: ["some example string"],
+    entityWatchlistScreeningId: "some example string",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningEntityReviewCreateResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -21095,9 +30424,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningEntityReviewCreateResponse](src/models/watchlist-screening-entity-review-create-response.ts)</code>
+**Direct**: `await client.watchlistScreeningEntityReviewCreate(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningEntityReviewCreateResponse](src/models/watchlist-screening-entity-review-create-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningEntityReviewCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningEntityReviewCreateResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningEntityReviewCreateResponse](src/models/watchlist-screening-entity-review-create-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -21108,7 +30445,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningEntityReviewList(request: ThePlaidApiClient.WatchlistScreeningEntityReviewListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityReviewListResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningEntityReviewList(request: ThePlaidApiClient.WatchlistScreeningEntityReviewListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityReviewListResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -21123,17 +30460,39 @@ List all reviews for a particular entity watchlist screening. Reviews are compli
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningEntityReviewList({ body });
+  const response = await client.watchlistScreeningEntityReviewList({
+    body: { entityWatchlistScreeningId: "some example string" },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningEntityReviewListResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningEntityReviewList({
+  body: { entityWatchlistScreeningId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningEntityReviewListResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -21157,9 +30516,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningEntityReviewListResponse](src/models/watchlist-screening-entity-review-list-response.ts)</code>
+**Direct**: `await client.watchlistScreeningEntityReviewList(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningEntityReviewListResponse](src/models/watchlist-screening-entity-review-list-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningEntityReviewList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningEntityReviewListResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningEntityReviewListResponse](src/models/watchlist-screening-entity-review-list-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -21170,7 +30537,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningEntityUpdate(request: ThePlaidApiClient.WatchlistScreeningEntityUpdateRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityUpdateResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningEntityUpdate(request: ThePlaidApiClient.WatchlistScreeningEntityUpdateRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningEntityUpdateResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -21185,17 +30552,39 @@ Update an entity watchlist screening.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningEntityUpdate({ body });
+  const response = await client.watchlistScreeningEntityUpdate({
+    body: { entityWatchlistScreeningId: "some example string" },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningEntityUpdateResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningEntityUpdate({
+  body: { entityWatchlistScreeningId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningEntityUpdateResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -21219,9 +30608,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningEntityUpdateResponse](src/models/watchlist-screening-entity-update-response.ts)</code>
+**Direct**: `await client.watchlistScreeningEntityUpdate(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningEntityUpdateResponse](src/models/watchlist-screening-entity-update-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningEntityUpdate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningEntityUpdateResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningEntityUpdateResponse](src/models/watchlist-screening-entity-update-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -21232,7 +30629,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningIndividualCreate(request: ThePlaidApiClient.WatchlistScreeningIndividualCreateRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualCreateResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningIndividualCreate(request: ThePlaidApiClient.WatchlistScreeningIndividualCreateRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualCreateResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -21247,17 +30644,39 @@ Create a new Watchlist Screening to check your customer against watchlists defin
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningIndividualCreate({ body });
+  const response = await client.watchlistScreeningIndividualCreate({
+    body: { searchTerms: { watchlistProgramId: "some example string", legalName: "some example string" } },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningIndividualCreateResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningIndividualCreate({
+  body: { searchTerms: { watchlistProgramId: "some example string", legalName: "some example string" } },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningIndividualCreateResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -21281,9 +30700,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningIndividualCreateResponse](src/models/watchlist-screening-individual-create-response.ts)</code>
+**Direct**: `await client.watchlistScreeningIndividualCreate(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningIndividualCreateResponse](src/models/watchlist-screening-individual-create-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningIndividualCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningIndividualCreateResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningIndividualCreateResponse](src/models/watchlist-screening-individual-create-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -21294,7 +30721,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningIndividualGet(request: ThePlaidApiClient.WatchlistScreeningIndividualGetRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualGetResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningIndividualGet(request: ThePlaidApiClient.WatchlistScreeningIndividualGetRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualGetResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -21309,17 +30736,39 @@ Retrieve a previously created individual watchlist screening
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningIndividualGet({ body });
+  const response = await client.watchlistScreeningIndividualGet({
+    body: { watchlistScreeningId: "some example string" },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningIndividualGetResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningIndividualGet({
+  body: { watchlistScreeningId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningIndividualGetResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -21343,9 +30792,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningIndividualGetResponse](src/models/watchlist-screening-individual-get-response.ts)</code>
+**Direct**: `await client.watchlistScreeningIndividualGet(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningIndividualGetResponse](src/models/watchlist-screening-individual-get-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningIndividualGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningIndividualGetResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningIndividualGetResponse](src/models/watchlist-screening-individual-get-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -21356,7 +30813,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningIndividualHistoryList(request: ThePlaidApiClient.WatchlistScreeningIndividualHistoryListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualHistoryListResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningIndividualHistoryList(request: ThePlaidApiClient.WatchlistScreeningIndividualHistoryListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualHistoryListResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -21371,17 +30828,39 @@ List all changes to the individual watchlist screening in reverse-chronological 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningIndividualHistoryList({ body });
+  const response = await client.watchlistScreeningIndividualHistoryList({
+    body: { watchlistScreeningId: "some example string" },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningIndividualHistoryListResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningIndividualHistoryList({
+  body: { watchlistScreeningId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningIndividualHistoryListResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -21405,9 +30884,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningIndividualHistoryListResponse](src/models/watchlist-screening-individual-history-list-response.ts)</code>
+**Direct**: `await client.watchlistScreeningIndividualHistoryList(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningIndividualHistoryListResponse](src/models/watchlist-screening-individual-history-list-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningIndividualHistoryList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningIndividualHistoryListResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningIndividualHistoryListResponse](src/models/watchlist-screening-individual-history-list-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -21418,7 +30905,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningIndividualHitList(request: ThePlaidApiClient.WatchlistScreeningIndividualHitListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualHitListResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningIndividualHitList(request: ThePlaidApiClient.WatchlistScreeningIndividualHitListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualHitListResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -21433,17 +30920,39 @@ List all hits found by Plaid for a particular individual watchlist screening.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningIndividualHitList({ body });
+  const response = await client.watchlistScreeningIndividualHitList({
+    body: { watchlistScreeningId: "some example string" },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningIndividualHitListResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningIndividualHitList({
+  body: { watchlistScreeningId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningIndividualHitListResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -21467,9 +30976,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningIndividualHitListResponse](src/models/watchlist-screening-individual-hit-list-response.ts)</code>
+**Direct**: `await client.watchlistScreeningIndividualHitList(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningIndividualHitListResponse](src/models/watchlist-screening-individual-hit-list-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningIndividualHitList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningIndividualHitListResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningIndividualHitListResponse](src/models/watchlist-screening-individual-hit-list-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -21480,7 +30997,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningIndividualList(request: ThePlaidApiClient.WatchlistScreeningIndividualListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualListResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningIndividualList(request: ThePlaidApiClient.WatchlistScreeningIndividualListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualListResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -21495,17 +31012,39 @@ List previously created watchlist screenings for individuals
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningIndividualList({ body });
+  const response = await client.watchlistScreeningIndividualList({
+    body: { watchlistProgramId: "some example string" },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningIndividualListResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningIndividualList({
+  body: { watchlistProgramId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningIndividualListResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -21529,9 +31068,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningIndividualListResponse](src/models/watchlist-screening-individual-list-response.ts)</code>
+**Direct**: `await client.watchlistScreeningIndividualList(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningIndividualListResponse](src/models/watchlist-screening-individual-list-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningIndividualList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningIndividualListResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningIndividualListResponse](src/models/watchlist-screening-individual-list-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -21542,7 +31089,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningIndividualProgramGet(request: ThePlaidApiClient.WatchlistScreeningIndividualProgramGetRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualProgramGetResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningIndividualProgramGet(request: ThePlaidApiClient.WatchlistScreeningIndividualProgramGetRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualProgramGetResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -21557,17 +31104,39 @@ Get an individual watchlist screening program
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningIndividualProgramGet({ body });
+  const response = await client.watchlistScreeningIndividualProgramGet({
+    body: { watchlistProgramId: "some example string" },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningIndividualProgramGetResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningIndividualProgramGet({
+  body: { watchlistProgramId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningIndividualProgramGetResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -21591,9 +31160,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningIndividualProgramGetResponse](src/models/watchlist-screening-individual-program-get-response.ts)</code>
+**Direct**: `await client.watchlistScreeningIndividualProgramGet(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningIndividualProgramGetResponse](src/models/watchlist-screening-individual-program-get-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningIndividualProgramGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningIndividualProgramGetResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningIndividualProgramGetResponse](src/models/watchlist-screening-individual-program-get-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -21604,7 +31181,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningIndividualProgramList(request: ThePlaidApiClient.WatchlistScreeningIndividualProgramListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualProgramListResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningIndividualProgramList(request: ThePlaidApiClient.WatchlistScreeningIndividualProgramListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualProgramListResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -21619,17 +31196,35 @@ List all individual watchlist screening programs
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningIndividualProgramList({ body });
+  const response = await client.watchlistScreeningIndividualProgramList({ body: {} });
   // TODO: Handle 'response' of type WatchlistScreeningIndividualProgramListResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningIndividualProgramList({ body: {} }).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningIndividualProgramListResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -21653,9 +31248,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningIndividualProgramListResponse](src/models/watchlist-screening-individual-program-list-response.ts)</code>
+**Direct**: `await client.watchlistScreeningIndividualProgramList(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningIndividualProgramListResponse](src/models/watchlist-screening-individual-program-list-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningIndividualProgramList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningIndividualProgramListResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningIndividualProgramListResponse](src/models/watchlist-screening-individual-program-list-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -21666,7 +31269,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningIndividualReviewCreate(request: ThePlaidApiClient.WatchlistScreeningIndividualReviewCreateRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualReviewCreateResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningIndividualReviewCreate(request: ThePlaidApiClient.WatchlistScreeningIndividualReviewCreateRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualReviewCreateResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -21681,17 +31284,47 @@ Create a review for the individual watchlist screening. Reviews are compliance r
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningIndividualReviewCreate({ body });
+  const response = await client.watchlistScreeningIndividualReviewCreate({
+    body: {
+      confirmedHits: ["some example string"],
+      dismissedHits: ["some example string"],
+      watchlistScreeningId: "some example string",
+    },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningIndividualReviewCreateResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningIndividualReviewCreate({
+  body: {
+    confirmedHits: ["some example string"],
+    dismissedHits: ["some example string"],
+    watchlistScreeningId: "some example string",
+  },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningIndividualReviewCreateResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -21715,9 +31348,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningIndividualReviewCreateResponse](src/models/watchlist-screening-individual-review-create-response.ts)</code>
+**Direct**: `await client.watchlistScreeningIndividualReviewCreate(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningIndividualReviewCreateResponse](src/models/watchlist-screening-individual-review-create-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningIndividualReviewCreate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningIndividualReviewCreateResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningIndividualReviewCreateResponse](src/models/watchlist-screening-individual-review-create-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -21728,7 +31369,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningIndividualReviewList(request: ThePlaidApiClient.WatchlistScreeningIndividualReviewListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualReviewListResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningIndividualReviewList(request: ThePlaidApiClient.WatchlistScreeningIndividualReviewListRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualReviewListResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -21743,17 +31384,39 @@ List all reviews for the individual watchlist screening.
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningIndividualReviewList({ body });
+  const response = await client.watchlistScreeningIndividualReviewList({
+    body: { watchlistScreeningId: "some example string" },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningIndividualReviewListResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningIndividualReviewList({
+  body: { watchlistScreeningId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningIndividualReviewListResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -21777,9 +31440,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningIndividualReviewListResponse](src/models/watchlist-screening-individual-review-list-response.ts)</code>
+**Direct**: `await client.watchlistScreeningIndividualReviewList(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningIndividualReviewListResponse](src/models/watchlist-screening-individual-review-list-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningIndividualReviewList(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningIndividualReviewListResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningIndividualReviewListResponse](src/models/watchlist-screening-individual-review-list-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -21790,7 +31461,7 @@ try {
 </details>
 
 <details>
-<summary><code>watchlistScreeningIndividualUpdate(request: ThePlaidApiClient.WatchlistScreeningIndividualUpdateRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualUpdateResponse, ResponseError&gt;</code></summary>
+<summary><code>watchlistScreeningIndividualUpdate(request: ThePlaidApiClient.WatchlistScreeningIndividualUpdateRequestParams, options?: RequestOptions): ApiPromise&lt;WatchlistScreeningIndividualUpdateResponse, ApiError&gt;</code></summary>
 
 <dl>
 <dd>
@@ -21805,17 +31476,39 @@ Update a specific individual watchlist screening. This endpoint can be used to a
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.watchlistScreeningIndividualUpdate({ body });
+  const response = await client.watchlistScreeningIndividualUpdate({
+    body: { watchlistScreeningId: "some example string" },
+  });
   // TODO: Handle 'response' of type WatchlistScreeningIndividualUpdateResponse
 } catch (err) {
-  // TODO: Handle 'err' of type ResponseError
+  // TODO: Handle 'err' of type ApiError, where 'err.payload' is always the Undeclared arm
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.watchlistScreeningIndividualUpdate({
+  body: { watchlistScreeningId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WatchlistScreeningIndividualUpdateResponse
+} else {
+  // TODO: Handle 'result', where 'result.payload' is always the Undeclared arm
 }
 ```
 
@@ -21839,9 +31532,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WatchlistScreeningIndividualUpdateResponse](src/models/watchlist-screening-individual-update-response.ts)</code>
+**Direct**: `await client.watchlistScreeningIndividualUpdate(request)`
 
-**OnError**: <code>[ResponseError](src/core/response-error.ts)</code>
+- **OnSuccess**: <code>[WatchlistScreeningIndividualUpdateResponse](src/models/watchlist-screening-individual-update-response.ts)</code>
+- **OnError**: throws <code>[ApiError](src/core/api-error.ts)</code>, with `err.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm
+
+**As ApiResult**: `await client.watchlistScreeningIndividualUpdate(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WatchlistScreeningIndividualUpdateResponse, ApiError&gt;</code>, with `result.value` of type <code>[WatchlistScreeningIndividualUpdateResponse](src/models/watchlist-screening-individual-update-response.ts)</code>
+- **OnError**: `result.payload` always the <code>[Undeclared](src/core/api-error.ts)</code> arm, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>
@@ -21869,19 +31570,37 @@ The `/webhook_verification_key/get` endpoint provides a JSON Web Key (JWK) that 
 </dd>
 </dl>
 
-### Usage
+### Direct Usage
 
 <dl>
 <dd>
 
 ```ts
 try {
-  const response = await client.webhookVerificationKeyGet({ body });
+  const response = await client.webhookVerificationKeyGet({ body: { keyId: "some example string" } });
   // TODO: Handle 'response' of type WebhookVerificationKeyGetResponse
 } catch (err) {
-  if (err instanceof ThePlaidApiClient.WebhookVerificationKeyGetError && err.payload.kind === "error") {
-    // TODO: Handle 'err.payload.body' of type Error
-  }
+  // TODO: Handle 'err' of type ThePlaidApiClient.WebhookVerificationKeyGetError, discriminated with 'err.payload.kind'
+}
+```
+
+</dd>
+</dl>
+
+### Usage as ApiResult
+
+<dl>
+<dd>
+
+```ts
+const result = await client.webhookVerificationKeyGet({
+  body: { keyId: "some example string" },
+}).asApiResult();
+// TODO: Use 'result.status' and 'result.headers' to read the raw response status and headers
+if (result.ok) {
+  // TODO: Use 'result.value' of type WebhookVerificationKeyGetResponse
+} else {
+  // TODO: Handle 'result', discriminated with 'result.payload.kind'
 }
 ```
 
@@ -21905,9 +31624,17 @@ try {
 <dl>
 <dd>
 
-**OnSuccess**: <code>[WebhookVerificationKeyGetResponse](src/models/webhook-verification-key-get-response.ts)</code>
+**Direct**: `await client.webhookVerificationKeyGet(request)`
 
-**OnError**: <code>[ThePlaidApiClient.WebhookVerificationKeyGetError](src/client.ts)</code>
+- **OnSuccess**: <code>[WebhookVerificationKeyGetResponse](src/models/webhook-verification-key-get-response.ts)</code>
+- **OnError**: throws <code>[ThePlaidApiClient.WebhookVerificationKeyGetError](src/client.ts)</code>, with `err.payload` discriminated on `kind`
+
+**As ApiResult**: `await client.webhookVerificationKeyGet(request).asApiResult()`
+
+- **OnSuccess**: <code>[ApiResult](src/core/api-promise.ts)&lt;WebhookVerificationKeyGetResponse, ThePlaidApiClient.WebhookVerificationKeyGetError&gt;</code>, with `result.value` of type <code>[WebhookVerificationKeyGetResponse](src/models/webhook-verification-key-get-response.ts)</code>
+- **OnError**: `result.payload` discriminated on `kind`, with `result.message`
+
+**Thrown**: <code>[ThePlaidApiError](src/core/errors.ts)</code> on any operational failure — a caller abort and a programmer error stay outside the family and reach you raw
 
 </dd>
 </dl>

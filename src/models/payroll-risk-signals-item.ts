@@ -5,8 +5,13 @@ import {
   type DocumentRiskSignalsObject,
 } from "./document-risk-signals-object.js";
 
+/** Object containing fraud risk data pertaining to the Item linked as part of the verification. */
 export type PayrollRiskSignalsItem = {
+  /** The `item_id` of the Item associated with this webhook, warning, or error */
   itemId: string;
+  /**
+   * Array of payroll income document authenticity data retrieved for each of the user's accounts.
+   */
   verificationRiskSignals: DocumentRiskSignalsObject[];
 };
 

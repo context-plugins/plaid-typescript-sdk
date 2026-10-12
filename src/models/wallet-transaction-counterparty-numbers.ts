@@ -9,8 +9,11 @@ import {
   type WalletTransactionCounterpartyInternational,
 } from "./wallet-transaction-counterparty-international.js";
 
+/** The counterparty's bank account numbers. Exactly one of IBAN or Bacs data is required. */
 export type WalletTransactionCounterpartyNumbers = {
+  /** The account number and sort code of the counterparty's account */
   bacs?: WalletTransactionCounterpartyBacs | null;
+  /** International Bank Account Number for a Wallet Transaction */
   international?: WalletTransactionCounterpartyInternational | null;
 };
 

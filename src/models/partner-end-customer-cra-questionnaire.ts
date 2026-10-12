@@ -5,9 +5,13 @@ import {
   type PartnerEndCustomerCraPurposes,
 } from "./partner-end-customer-cra-purposes.js";
 
+/** The CRA questionnaire for the end customer. */
 export type PartnerEndCustomerCraQuestionnaire = {
+  /** A map of permissible purposes to their corresponding use cases. */
   purposes?: PartnerEndCustomerCraPurposes;
+  /** Denotes whether the third party is involved. */
   isThirdPartyInvolved?: boolean;
+  /** Denotes whether the technical service provider is involved. */
   isTechnicalServiceProviderInvolved?: boolean;
 };
 

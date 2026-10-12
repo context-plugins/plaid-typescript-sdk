@@ -1,5 +1,8 @@
-import type { UrlTemplate } from "./core/api-request.js";
-import { SdkError } from "./core/errors.js";
+import type { ClientOptions } from "./client-options.js";
+import type { ServerBase, UrlTemplate } from "./core/api-request.js";
+import { ConfigurationError } from "./core/errors.js";
+import { resolveBaseUrl } from "./core/url.js";
+import * as s from "./core/validation/index.js";
 
 export const ServerEnvironment = {
   Production: "production",
@@ -7,85 +10,66 @@ export const ServerEnvironment = {
 } as const;
 export type ServerEnvironment = (typeof ServerEnvironment)[keyof typeof ServerEnvironment];
 
-export type DefaultServerOptions = {
-  production?: { baseUrl?: string };
-  environment2?: { baseUrl?: string };
-};
-
-export type AccessTokenServerServerOptions = {
-  production?: { baseUrl?: string };
-  environment2?: { baseUrl?: string };
-};
-
-export type ServerOptions = {
-  default?: DefaultServerOptions;
-  accessTokenServer?: AccessTokenServerServerOptions;
-};
-
 export type Servers = {
-  default: (subPath: string) => UrlTemplate;
-  accessTokenServer: (subPath: string) => UrlTemplate;
+  default: <Path extends string>(subPath: Path) => UrlTemplate<Path>;
+  accessTokenServer: <Path extends string>(subPath: Path) => UrlTemplate<Path>;
 };
 
-export const DEFAULT_SERVER_OPTIONS = {
-  default: {
-    production: { baseUrl: "https://production.plaid.com" },
-    environment2: { baseUrl: "https://sandbox.plaid.com" },
-  },
-  accessTokenServer: {
-    production: { baseUrl: "https://api.plaid.com/oauth2/apiv2" },
-    environment2: { baseUrl: "https://api.plaid.com/oauth2/apiv2" },
-  },
-} as const satisfies ServerOptions;
+const productionSchemas = {
+  default: { baseUrl: s.of(s.defaulted(s.string(), "https://production.plaid.com")) },
+  accessTokenServer: { baseUrl: s.of(s.defaulted(s.string(), "https://api.plaid.com/oauth2/apiv2")) },
+};
 
-export function buildServers(environment: ServerEnvironment, options: ServerOptions): Servers {
+const environment2Schemas = {
+  default: { baseUrl: s.of(s.defaulted(s.string(), "https://sandbox.plaid.com")) },
+  accessTokenServer: { baseUrl: s.of(s.defaulted(s.string(), "https://api.plaid.com/oauth2/apiv2")) },
+};
+
+export function buildServers(options: ClientOptions): Servers {
+  const base = {
+    default: resolveBaseUrl(defaultServer(options)),
+    accessTokenServer: resolveBaseUrl(accessTokenServerServer(options)),
+  };
   return {
-    default: (s) => defaultServer(environment, s, options.default),
-    accessTokenServer: (s) => accessTokenServerServer(environment, s, options.accessTokenServer),
+    default: (subPath) => ({ baseUrl: base.default, subPath }),
+    accessTokenServer: (subPath) => ({ baseUrl: base.accessTokenServer, subPath }),
   };
 }
 
-function defaultServer(
-  environment: ServerEnvironment,
-  subPath: string,
-  options?: DefaultServerOptions,
-): UrlTemplate {
+function defaultServer(options: ClientOptions): ServerBase {
+  const environment = options.serverEnvironment;
   switch (environment) {
-    case ServerEnvironment.Production: {
-      const production = { ...DEFAULT_SERVER_OPTIONS.default.production, ...options?.production };
-      return { baseUrl: production.baseUrl, subPath };
-    }
-    case ServerEnvironment.Environment2: {
-      const environment2 = { ...DEFAULT_SERVER_OPTIONS.default.environment2, ...options?.environment2 };
-      return { baseUrl: environment2.baseUrl, subPath };
-    }
+    case ServerEnvironment.Production:
+    case undefined:
+      return { baseUrl: productionSchemas.default.baseUrl.decode(options.serverOptions?.default?.baseUrl) };
+    case ServerEnvironment.Environment2:
+      return { baseUrl: environment2Schemas.default.baseUrl.decode(options.serverOptions?.default?.baseUrl) };
     default:
       unknownEnvironment(environment);
   }
 }
 
-function accessTokenServerServer(
-  environment: ServerEnvironment,
-  subPath: string,
-  options?: AccessTokenServerServerOptions,
-): UrlTemplate {
+function accessTokenServerServer(options: ClientOptions): ServerBase {
+  const environment = options.serverEnvironment;
   switch (environment) {
-    case ServerEnvironment.Production: {
-      const production = { ...DEFAULT_SERVER_OPTIONS.accessTokenServer.production, ...options?.production };
-      return { baseUrl: production.baseUrl, subPath };
-    }
-    case ServerEnvironment.Environment2: {
-      const environment2 = {
-        ...DEFAULT_SERVER_OPTIONS.accessTokenServer.environment2,
-        ...options?.environment2,
+    case ServerEnvironment.Production:
+    case undefined:
+      return {
+        baseUrl: productionSchemas.accessTokenServer.baseUrl.decode(
+          options.serverOptions?.accessTokenServer?.baseUrl,
+        ),
       };
-      return { baseUrl: environment2.baseUrl, subPath };
-    }
+    case ServerEnvironment.Environment2:
+      return {
+        baseUrl: environment2Schemas.accessTokenServer.baseUrl.decode(
+          options.serverOptions?.accessTokenServer?.baseUrl,
+        ),
+      };
     default:
       unknownEnvironment(environment);
   }
 }
 
 function unknownEnvironment(environment: never): never {
-  throw new SdkError({ message: `Unknown server environment: ${String(environment)}` });
+  throw new ConfigurationError(`Unknown server environment: ${String(environment)}`);
 }

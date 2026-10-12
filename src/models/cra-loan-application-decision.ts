@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The decision of the loan application. */
 export const CraLoanApplicationDecision = {
   Approved: "APPROVED",
   Declined: "DECLINED",

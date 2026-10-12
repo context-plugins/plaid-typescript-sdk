@@ -1,11 +1,23 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/** IssuesSearchRequest defines the request schema for `/issues/search`. */
 export type IssuesSearchRequest = {
+  /**
+   * Your Plaid API `client_id`. The `client_id` is required and may be provided either in the
+   * `PLAID-CLIENT-ID` header or as part of a request body.
+   */
   clientId?: string;
+  /**
+   * Your Plaid API `secret`. The `secret` is required and may be provided either in the
+   * `PLAID-SECRET` header or as part of a request body.
+   */
   secret?: string;
+  /** A unique identifier for the Plaid Item. */
   itemId?: string;
+  /** A unique identifier for the Link session. */
   linkSessionId?: string;
+  /** The `request_id` for the Link session that might have had an institution connection issue. */
   linkSessionRequestId?: string;
 };
 

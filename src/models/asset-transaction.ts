@@ -6,8 +6,14 @@ import {
 } from "./asset-transaction-description.js";
 import { assetTransactionDetailSchema, type AssetTransactionDetail } from "./asset-transaction-detail.js";
 
+/** An object representing... */
 export type AssetTransaction = {
+  /** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
   assetTransactionDetail: AssetTransactionDetail;
+  /**
+   * Documentation not found in the MISMO model viewer and not provided by Freddie Mac. Note that
+   * "DESCRIPTON" is an intentional misspelling matching the upstream MISMO field name.
+   */
   assetTransactionDescripton: AssetTransactionDescription[];
 };
 

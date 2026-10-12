@@ -9,8 +9,10 @@ import {
   type PaystubOverrideDeductionsTotal,
 } from "./paystub-override-deductions-total.js";
 
+/** An object with the deduction information found on a paystub. */
 export type PaystubOverrideDeductions = {
   breakdown?: PaystubOverrideDeductionsBreakdown[];
+  /** An object representing the total deductions for the pay period */
   total?: PaystubOverrideDeductionsTotal;
 };
 

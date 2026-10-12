@@ -5,8 +5,11 @@ import {
   type PartnerEndCustomerOAuthInstitutionApplicationStatus,
 } from "./partner-end-customer-oauth-institution-application-status.js";
 
+/** Registration statuses by environment. */
 export type PartnerEndCustomerOAuthInstitutionEnvironments = {
+  /** The registration status for the end customer's application. */
   development?: PartnerEndCustomerOAuthInstitutionApplicationStatus;
+  /** The registration status for the end customer's application. */
   production?: PartnerEndCustomerOAuthInstitutionApplicationStatus;
 };
 

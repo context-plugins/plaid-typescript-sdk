@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** A CRA use case under a permissible purpose. */
 export const PartnerEndCustomerCraUseCase = {
   CreditUnderwriting: "CREDIT_UNDERWRITING",
   TenantScreening: "TENANT_SCREENING",

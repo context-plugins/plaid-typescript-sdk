@@ -6,11 +6,23 @@ import {
 } from "./payment-initiation-address.js";
 import { recipientBacsNullableSchema, type RecipientBacsNullable } from "./recipient-bacs-nullable.js";
 
+/** PaymentInitiationRecipient defines a payment initiation recipient */
 export type PaymentInitiationRecipient = {
+  /** The ID of the recipient. */
   recipientId: string;
+  /** The name of the recipient. */
   name: string;
+  /**
+   * The optional address of the payment recipient's bank account. Required by most institutions
+   * outside of the UK.
+   */
   address?: PaymentInitiationAddress | null;
+  /** The International Bank Account Number (IBAN) for the recipient. */
   iban?: string | null;
+  /**
+   * An object containing a Bacs account number and sort code. If an IBAN is not provided or if this
+   * recipient needs to accept domestic GBP-denominated payments, Bacs data is required.
+   */
   bacs?: RecipientBacsNullable | null;
 };
 

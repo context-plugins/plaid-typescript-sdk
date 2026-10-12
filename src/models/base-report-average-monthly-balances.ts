@@ -5,9 +5,21 @@ import {
   type CreditAmountWithCurrency,
 } from "./credit-amount-with-currency.js";
 
+/** Average balance in dollar amount per month */
 export type BaseReportAverageMonthlyBalances = {
+  /**
+   * The start date of this time period. The date will be returned in an ISO 8601 format
+   * (YYYY-MM-DD).
+   */
   startDate: string;
+  /**
+   * The end date of this time period. The date will be returned in an ISO 8601 format (YYYY-MM-DD).
+   */
   endDate: string;
+  /**
+   * This contains an amount, denominated in the currency specified by either `iso_currency_code` or
+   * `unofficial_currency_code`
+   */
   averageBalance: CreditAmountWithCurrency;
 };
 

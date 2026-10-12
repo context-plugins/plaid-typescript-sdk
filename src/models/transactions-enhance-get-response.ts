@@ -5,7 +5,11 @@ import {
   type ClientProvidedEnhancedTransaction,
 } from "./client-provided-enhanced-transaction.js";
 
+/**
+ * TransactionsEnhanceGetResponse defines the response schema for `/beta/transactions/v1/enhance`.
+ */
 export type TransactionsEnhanceGetResponse = {
+  /** An array of enhanced transactions. */
   enhancedTransactions: ClientProvidedEnhancedTransaction[];
 };
 

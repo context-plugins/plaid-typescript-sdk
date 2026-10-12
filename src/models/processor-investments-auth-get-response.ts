@@ -17,15 +17,40 @@ import {
 import { investmentsAuthOwnerSchema, type InvestmentsAuthOwner } from "./investments-auth-owner.js";
 import { securitySchema, type Security } from "./security.js";
 
+/**
+ * ProcessorInvestmentsAuthGetResponse defines the response schema for
+ * `/processor/investments/auth/get`
+ */
 export type ProcessorInvestmentsAuthGetResponse = {
+  /** A single account at a financial institution. */
   account: Account;
+  /**
+   * The holdings belonging to the investment account. Details of the securities in the holdings are
+   * provided in the `securities` field.
+   */
   holdings: Holding[];
+  /** Objects describing the securities held in the account. */
   securities: Security[];
+  /** Information about the account owners for the account. */
   owners: InvestmentsAuthOwner[];
+  /** Identifying information for transferring holdings to an investment account. */
   numbers: InvestmentsAuthGetNumbers;
+  /**
+   * Object with metadata pertaining to the source of data for the account numbers, owners, and
+   * holdings that are returned.
+   */
   dataSources: InvestmentsAuthDataSources;
+  /** Additional information for accounts of 401k subtype. */
   accountDetails401K?: InvestmentsAuthAccountDetails401K[];
+  /**
+   * When true, this field indicates that the Item's portfolio was manually created with the
+   * Investments Fallback flow.
+   */
   isInvestmentsFallbackItem?: boolean;
+  /**
+   * A unique identifier for the request, which can be used for troubleshooting. This identifier,
+   * like all Plaid identifiers, is case sensitive.
+   */
   requestId: string;
 };
 

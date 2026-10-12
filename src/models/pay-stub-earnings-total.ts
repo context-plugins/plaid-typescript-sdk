@@ -1,20 +1,40 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/**
+ * An object representing both the current pay period and year to date amount for an earning
+ * category.
+ */
 export type PayStubEarningsTotal = {
+  /** Total amount of the earnings for this pay period. */
   currentAmount: number | null;
+  /** Total number of hours worked for this pay period. */
   hours: number | null;
+  /**
+   * The ISO-4217 currency code of the line item. Always `null` if `unofficial_currency_code` is
+   * non-null.
+   */
   isoCurrencyCode: string | null;
+  /**
+   * The unofficial currency code associated with the line item. Always `null` if
+   * `iso_currency_code` is non-`null`. Unofficial currency codes are used for currencies that do
+   * not have official ISO currency codes, such as cryptocurrencies and the currencies of certain
+   * countries.
+   *
+   * See the [currency code schema](https://plaid.com/docs/api/accounts#currency-code-schema) for a
+   * full listing of supported `unofficial_currency_code`s.
+   */
   unofficialCurrencyCode: string | null;
+  /** The total year-to-date amount of the earnings. */
   ytdAmount: number | null;
 };
 
 export const payStubEarningsTotalSchema: Schema<PayStubEarningsTotal> = s.object<PayStubEarningsTotal>({
-  currentAmount: s.nullable(s.number()),
-  hours: s.nullable(s.number()),
+  currentAmount: s.nullable(s.float64()),
+  hours: s.nullable(s.float64()),
   isoCurrencyCode: s.nullable(s.string()),
   unofficialCurrencyCode: s.nullable(s.string()),
-  ytdAmount: s.nullable(s.number()),
+  ytdAmount: s.nullable(s.float64()),
   _keysMap: {
     currentAmount: "current_amount",
     isoCurrencyCode: "iso_currency_code",

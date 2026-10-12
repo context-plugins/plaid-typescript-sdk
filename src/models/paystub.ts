@@ -11,17 +11,43 @@ import { paystubDetailsSchema, type PaystubDetails } from "./paystub-details.js"
 import { paystubEmployerSchema, type PaystubEmployer } from "./paystub-employer.js";
 import { paystubYtdDetailsSchema, type PaystubYtdDetails } from "./paystub-ytd-details.js";
 
+/** An object representing data extracted from the end user's paystub. */
 export type Paystub = {
+  /** An object with the deduction information found on a paystub. */
   deductions: Deductions;
+  /** An identifier of the document referenced by the document metadata. */
   docId: string;
+  /** An object representing both a breakdown of earnings on a paystub and the total earnings. */
   earnings: Earnings;
+  /** Data about the employee. */
   employee: Employee;
+  /** Information about the employer on the paystub */
   employer: PaystubEmployer;
+  /**
+   * An object representing employment details found on a paystub.
+   *
+   * @deprecated
+   */
   employmentDetails?: EmploymentDetails;
+  /** An object representing information about the net pay amount on the paystub. */
   netPay: NetPay;
+  /** Details about the pay period. */
   payPeriodDetails: PayPeriodDetails;
+  /**
+   * An object representing details that can be found on the paystub.
+   *
+   * @deprecated
+   */
   paystubDetails?: PaystubDetails;
+  /**
+   * @deprecated
+   */
   incomeBreakdown?: IncomeBreakdown[];
+  /**
+   * The amount of income earned year to date, as based on paystub data.
+   *
+   * @deprecated
+   */
   ytdEarnings?: PaystubYtdDetails;
 };
 

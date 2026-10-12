@@ -13,9 +13,16 @@ import {
   type ServiceProductFulfillment,
 } from "./service-product-fulfillment.js";
 
+/** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
 export type CreditFreddieMacVerificationOfAsset = {
+  /** Information about a report identifier and a report name. */
   reportingInformation: CreditFreddieMacReportingInformation;
+  /**
+   * A collection of details related to a fulfillment service or product in terms of request,
+   * process and result.
+   */
   serviceProductFulfillment: ServiceProductFulfillment;
+  /** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
   verificationOfAssetResponse: CreditFreddieMacVerificationOfAssetResponse;
 };
 

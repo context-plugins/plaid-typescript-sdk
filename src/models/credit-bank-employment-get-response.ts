@@ -5,8 +5,17 @@ import {
   type CreditBankEmploymentReport,
 } from "./credit-bank-employment-report.js";
 
+/**
+ * CreditBankEmploymentGetResponse defines the response schema for
+ * `/beta/credit/v1/bank_employment/get`.
+ */
 export type CreditBankEmploymentGetResponse = {
+  /** Bank Employment data. Each entry in the array will be a distinct bank employment report. */
   bankEmploymentReports: CreditBankEmploymentReport[];
+  /**
+   * A unique identifier for the request, which can be used for troubleshooting. This identifier,
+   * like all Plaid identifiers, is case sensitive.
+   */
   requestId: string;
 };
 

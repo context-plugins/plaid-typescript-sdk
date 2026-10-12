@@ -5,10 +5,15 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/** Fired when a partner insights report has finished generating and results are available */
 export type CraPartnerInsightsCompleteWebhook = {
+  /** `CRA_INSIGHTS` */
   webhookType: string;
+  /** `PARTNER_INSIGHTS_COMPLETE` */
   webhookCode: string;
+  /** The `user_id` corresponding to the user the webhook has fired for. */
   userId: string;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

@@ -7,12 +7,19 @@ import {
 } from "./employment-verification-status.js";
 import { platformIdsSchema, type PlatformIds } from "./platform-ids.js";
 
+/** An object containing proof of employment data for an individual */
 export type EmploymentVerification = {
+  /** Current employment status. */
   status?: EmploymentVerificationStatus | null;
+  /** Start of employment in ISO 8601 format (YYYY-MM-DD). */
   startDate?: string | null;
+  /** End of employment, if applicable. Provided in ISO 8601 format (YYY-MM-DD). */
   endDate?: string | null;
+  /** An object containing employer data. */
   employer?: EmployerVerification;
+  /** Current title of employee. */
   title?: string | null;
+  /** An object containing a set of ids related to an employee */
   platformIds?: PlatformIds;
 };
 

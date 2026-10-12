@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** A broad categorization of the error. Safe for programmatic use. */
 export const PlaidErrorType = {
   InvalidRequest: "INVALID_REQUEST",
   InvalidResult: "INVALID_RESULT",

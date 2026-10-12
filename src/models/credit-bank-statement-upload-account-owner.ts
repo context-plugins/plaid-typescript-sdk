@@ -5,8 +5,13 @@ import {
   type CreditBankStatementUploadAccountOwnerAddress,
 } from "./credit-bank-statement-upload-account-owner-address.js";
 
+/**
+ * An object containing data about the owner of the bank account for the uploaded bank statement.
+ */
 export type CreditBankStatementUploadAccountOwner = {
+  /** The name of the account owner */
   name: string | null;
+  /** Address on the uploaded bank statement */
   address: CreditBankStatementUploadAccountOwnerAddress;
 };
 

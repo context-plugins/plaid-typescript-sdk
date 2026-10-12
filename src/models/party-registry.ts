@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The registry containing the party's registration with name and id */
 export const PartyRegistry = {
   Fdx: "FDX",
   Gleif: "GLEIF",

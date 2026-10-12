@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Enum representing the state of the action/activity. */
 export const ActionState = {
   Unknown: "UNKNOWN",
   Attempt: "ATTEMPT",

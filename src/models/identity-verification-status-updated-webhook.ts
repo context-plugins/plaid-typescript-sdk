@@ -5,10 +5,18 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/**
+ * Fired when the status of an identity verification has been updated, which can be triggered via
+ * the dashboard or the API.
+ */
 export type IdentityVerificationStatusUpdatedWebhook = {
+  /** `IDENTITY_VERIFICATION` */
   webhookType: string;
+  /** `STATUS_UPDATED` */
   webhookCode: string;
+  /** The ID of the associated Identity Verification attempt. */
   identityVerificationId: string;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

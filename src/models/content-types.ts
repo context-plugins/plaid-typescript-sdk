@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Types of document formats. (Suggested values) */
 export const ContentTypes = {
   ApplicationPdf: "application/pdf",
   ImageGif: "image/gif",

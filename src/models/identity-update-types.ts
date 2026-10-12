@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The possible types of identity data that may have changed. */
 export const IdentityUpdateTypes = {
   Phones: "PHONES",
   Addresses: "ADDRESSES",

@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The type of balance to which the APR applies. */
 export const AprType = {
   BalanceTransferApr: "balance_transfer_apr",
   CashApr: "cash_apr",

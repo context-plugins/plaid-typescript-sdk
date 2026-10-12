@@ -6,13 +6,27 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/**
+ * Fired when the Check Report is ready to be retrieved. Once this webhook has fired, the report
+ * will be available to retrieve for 24 hours.
+ */
 export type CraCheckReportReadyWebhook = {
+  /** `CHECK_REPORT` */
   webhookType: string;
+  /** `CHECK_REPORT_READY` */
   webhookCode: string;
+  /** The `user_id` corresponding to the user the webhook has fired for. */
   userId: string;
+  /** Specifies a list of products that have successfully been generated for the report. */
   successfulProducts?: Products[] | null;
+  /**
+   * Specifies a list of products that have failed to generate for the report. Additional detail on
+   * what caused the failure can be found by calling the product /get endpoint.
+   */
   failedProducts?: Products[] | null;
+  /** A list of `item_ids` included in the Check Report. Access to this field is in closed beta. */
   itemIds?: string[] | null;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

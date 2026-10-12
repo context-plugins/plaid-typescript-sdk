@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The version of the credit profile report to retrieve. */
 export const CraCreditProfileReportVersion = {
   V1: "v1",
 } as const;

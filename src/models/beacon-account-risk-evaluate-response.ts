@@ -5,8 +5,17 @@ import {
   type BeaconAccountRiskEvaluateAccount,
 } from "./beacon-account-risk-evaluate-account.js";
 
+/**
+ * BeaconAccountRiskEvaluateResponse defines the response schema for
+ * `/beacon/account_risk/v1/evaluate`
+ */
 export type BeaconAccountRiskEvaluateResponse = {
+  /**
+   * A unique identifier for the request, which can be used for troubleshooting. This identifier,
+   * like all Plaid identifiers, is case sensitive.
+   */
   requestId: string;
+  /** The accounts for which a risk evaluation has been requested. */
   accounts: BeaconAccountRiskEvaluateAccount[];
 };
 

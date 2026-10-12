@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Types of consent activities */
 export const ActivityType = {
   Unknown: "UNKNOWN",
   ItemCreate: "ITEM_CREATE",

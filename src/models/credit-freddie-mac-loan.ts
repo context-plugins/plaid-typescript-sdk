@@ -5,8 +5,14 @@ import {
   type CreditFreddieMacLoanIdentifiers,
 } from "./credit-freddie-mac-loan-identifiers.js";
 
+/**
+ * Information specific to a mortgage loan agreement between one or more borrowers and a mortgage
+ * lender.
+ */
 export type CreditFreddieMacLoan = {
+  /** Collection of current and previous identifiers for this loan. */
   loanIdentifiers: CreditFreddieMacLoanIdentifiers;
+  /** Type of loan. The value can only be "SubjectLoan". */
   loanRoleType: string;
 };
 

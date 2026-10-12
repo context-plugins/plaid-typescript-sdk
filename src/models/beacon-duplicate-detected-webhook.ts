@@ -5,10 +5,15 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/** Fired when a Beacon User created within your organization matches one of your existing users. */
 export type BeaconDuplicateDetectedWebhook = {
+  /** `BEACON` */
   webhookType: string;
+  /** `DUPLICATE_DETECTED` */
   webhookCode: string;
+  /** The ID of the associated Beacon Duplicate. */
   beaconDuplicateId: string;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

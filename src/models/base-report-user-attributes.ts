@@ -30,27 +30,76 @@ import {
   type TotalReportOutflowAmount90D,
 } from "./total-report-outflow-amount90-d.js";
 
+/** Calculated attributes derived from transaction-level data, aggregated across accounts. */
 export type BaseReportUserAttributes = {
+  /**
+   * The number of net NSF fee transactions in the time range for the report (not counting any fees
+   * that were reversed within that time range).
+   */
   nsfOverdraftTransactionsCount?: number;
+  /**
+   * The number of net NSF fee transactions in the last 30 days in the report (not counting any fees
+   * that were reversed within that time range).
+   */
   nsfOverdraftTransactionsCount30D?: number;
+  /**
+   * The number of net NSF fee transactions in the last 60 days in the report (not counting any fees
+   * that were reversed within that time range).
+   */
   nsfOverdraftTransactionsCount60D?: number;
+  /**
+   * The number of net NSF fee transactions in the last 90 days in the report (not counting any fees
+   * that were reversed within that time range).
+   */
   nsfOverdraftTransactionsCount90D?: number;
+  /**
+   * Total amount of debit transactions into the report's accounts in the time period of the report.
+   * This field only takes into account USD transactions from the accounts.
+   */
   totalInflowAmount?: TotalReportInflowAmount | null;
+  /**
+   * Total amount of debit transactions into the report's accounts in the last 30 days. This field
+   * only takes into account USD transactions from the accounts.
+   */
   totalInflowAmount30D?: TotalReportInflowAmount30D | null;
+  /**
+   * Total amount of debit transactions into the report's accounts in the last 60 days. This field
+   * only takes into account USD transactions from the accounts.
+   */
   totalInflowAmount60D?: TotalReportInflowAmount60D | null;
+  /**
+   * Total amount of debit transactions into the report's accounts in the last 90 days. This field
+   * only takes into account USD transactions from the accounts.
+   */
   totalInflowAmount90D?: TotalReportInflowAmount90D | null;
+  /**
+   * Total amount of credit transactions out of the report's accounts in the time period of the
+   * report. This field only takes into account USD transactions from the accounts.
+   */
   totalOutflowAmount?: TotalReportOutflowAmount | null;
+  /**
+   * Total amount of credit transactions out of the report's accounts in the last 30 days. This
+   * field only takes into account USD transactions from the accounts.
+   */
   totalOutflowAmount30D?: TotalReportOutflowAmount30D | null;
+  /**
+   * Total amount of credit transactions out of the report's accounts in the last 60 days. This
+   * field only takes into account USD transactions from the accounts.
+   */
   totalOutflowAmount60D?: TotalReportOutflowAmount60D | null;
+  /**
+   * Total amount of credit transactions out of the report's accounts in the last 90 days. This
+   * field only takes into account USD transactions from the accounts.
+   */
   totalOutflowAmount90D?: TotalReportOutflowAmount90D | null;
 };
 
 export const baseReportUserAttributesSchema: Schema<BaseReportUserAttributes> =
   s.object<BaseReportUserAttributes>({
-    nsfOverdraftTransactionsCount: s.optional(s.number()),
-    nsfOverdraftTransactionsCount30D: s.optional(s.number()),
-    nsfOverdraftTransactionsCount60D: s.optional(s.number()),
-    nsfOverdraftTransactionsCount90D: s.optional(s.number()),
+    nsfOverdraftTransactionsCount: s.optional(s.int()),
+    nsfOverdraftTransactionsCount30D: s.optional(s.int()),
+    nsfOverdraftTransactionsCount60D: s.optional(s.int()),
+    nsfOverdraftTransactionsCount90D: s.optional(s.int()),
     totalInflowAmount: s.optionalNullable(s.lazy(() => totalReportInflowAmountSchema)),
     totalInflowAmount30D: s.optionalNullable(s.lazy(() => totalReportInflowAmount30DSchema)),
     totalInflowAmount60D: s.optionalNullable(s.lazy(() => totalReportInflowAmount60DSchema)),

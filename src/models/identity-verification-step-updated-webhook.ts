@@ -5,10 +5,15 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/** Fired when an end user has completed a step of the Identity Verification process. */
 export type IdentityVerificationStepUpdatedWebhook = {
+  /** `IDENTITY_VERIFICATION` */
   webhookType: string;
+  /** `STEP_UPDATED` */
   webhookCode: string;
+  /** The ID of the associated Identity Verification attempt. */
   identityVerificationId: string;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

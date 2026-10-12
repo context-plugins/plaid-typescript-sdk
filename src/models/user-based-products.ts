@@ -1,6 +1,10 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * A list of user-based products. User-based products include Financial Management products, Protect
+ * products, CRA products, and subscription products.
+ */
 export const UserBasedProducts = {
   CraBaseReport: "cra_base_report",
   CraIncomeInsights: "cra_income_insights",

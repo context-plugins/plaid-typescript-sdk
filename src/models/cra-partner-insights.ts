@@ -7,12 +7,19 @@ import {
 import { craPartnerInsightsItemSchema, type CraPartnerInsightsItem } from "./cra-partner-insights-item.js";
 import { craPartnerInsightsPrismSchema, type CraPartnerInsightsPrism } from "./cra-partner-insights-prism.js";
 
+/** The Partner Insights report of the bank data for an end user. */
 export type CraPartnerInsights = {
+  /** A unique identifier associated with the Partner Insights object. */
   reportId?: string;
+  /** The time when the Partner Insights report was generated. */
   generatedTime?: Date;
+  /** Client-generated identifier, which can be used by lenders to track loan applications. */
   clientReportId?: string | null;
+  /** The calculated UltraFICO® scores returned as part of the Partner Insights report. */
   fico?: CraPartnerInsightsFicoResults | null;
+  /** The Prism Data insights for the user. */
   prism?: CraPartnerInsightsPrism | null;
+  /** The list of Items used in the report along with the associated metadata about the Item. */
   items?: CraPartnerInsightsItem[];
 };
 

@@ -2,6 +2,7 @@ import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 import { accountSubtypeSchema, type AccountSubtype } from "./account-subtype.js";
 
+/** An account filter to apply to institutions search requests */
 export type InstitutionsSearchAccountFilter = {
   loan?: (AccountSubtype | null)[];
   depository?: (AccountSubtype | null)[];

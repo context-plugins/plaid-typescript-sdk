@@ -2,13 +2,21 @@ import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 import { issuesStatusSchema, type IssuesStatus } from "./issues-status.js";
 
+/** Information on an issue encountered with financial institution interactions during Linking. */
 export type Issue = {
+  /** The unique identifier of the issue. */
   issueId?: string;
+  /** A list of names of the financial institutions affected. */
   institutionNames?: string[];
+  /** A list of ids of the financial institutions affected. */
   institutionIds?: string[];
+  /** The creation time of the record tracking this issue. */
   createdAt?: Date;
+  /** A simple summary of the error for the end user. */
   summary?: string;
+  /** A more detailed description for the customer. */
   detailedDescription?: string;
+  /** The current status of the issue. */
   status?: IssuesStatus;
 };
 

@@ -1,6 +1,10 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * For descriptions of possible transaction types and subtypes, see the [Investment transaction
+ * types schema](https://plaid.com/docs/api/accounts/#investment-transaction-types-schema).
+ */
 export const InvestmentTransactionSubtype = {
   AccountFee: "account fee",
   Adjustment: "adjustment",

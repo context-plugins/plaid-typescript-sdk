@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** HTTP Method to use for the request */
 export const FdxHateoasLinkAction = {
   Get: "GET",
   Post: "POST",

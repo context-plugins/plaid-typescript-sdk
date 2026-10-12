@@ -9,12 +9,25 @@ import {
   type StandaloneInvestmentTransactionTransferType,
 } from "./standalone-investment-transaction-transfer-type.js";
 
+/**
+ * Valid values for investment transaction types and subtypes. Note that transactions representing
+ * inflow of cash will appear as negative amounts, outflow of cash will appear as positive amounts.
+ */
 export type StandaloneInvestmentTransactionType = {
+  /** Buying an investment */
   buy: BuyType;
+  /** Selling an investment */
   sell: SellType;
+  /** A cancellation of a pending transaction */
   cancel: string;
+  /** Activity that modifies a cash position */
   cash: CashType;
+  /** Fees on the account, e.g. commission, bookkeeping, options-related. */
   fee: FeeType;
+  /**
+   * Activity that modifies a position, but not through buy/sell activity e.g. options exercise,
+   * portfolio transfer
+   */
   transfer: StandaloneInvestmentTransactionTransferType;
 };
 

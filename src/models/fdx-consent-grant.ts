@@ -4,13 +4,24 @@ import { fdxConsentGrantResourceSchema, type FdxConsentGrantResource } from "./f
 import { fdxConsentGrantStatusSchema, type FdxConsentGrantStatus } from "./fdx-consent-grant-status.js";
 import { partyEntitySchema, type PartyEntity } from "./party-entity.js";
 
+/** An FDX consent grant. */
 export type FdxConsentGrant = {
+  /** The persistent identifier of the consent grant */
   id: string;
+  /** Current status of a consent grant. One of `ACTIVE`, `REVOKED`, `EXPIRED`. */
   status: FdxConsentGrantStatus;
+  /** When the consent was initially granted */
   createdTime: Date;
+  /** When the consent grant was last updated */
   updatedTime: Date;
+  /** When the consent grant will expire. Omitted when the grant has no expiration. */
   expirationTime?: Date;
+  /**
+   * Non-end-user parties participating in the consent grant (Data Recipient, Data Provider, Data
+   * Access Platform).
+   */
   parties: PartyEntity[];
+  /** Permissioned resource entries. Omitted when there are no resources. */
   resources?: FdxConsentGrantResource[];
 };
 

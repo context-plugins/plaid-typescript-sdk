@@ -5,8 +5,11 @@ import {
   type PaystubOverrideEmployerAddress,
 } from "./paystub-override-employer-address.js";
 
+/** The employer on the paystub. */
 export type PaystubOverrideEmployer = {
+  /** The name of the employer. */
   name?: string | null;
+  /** The address of the employer. */
   address?: PaystubOverrideEmployerAddress;
 };
 

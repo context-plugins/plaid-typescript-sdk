@@ -1,6 +1,18 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * The outcome of checking the associated hit against state databases.
+ *
+ *
+ * `match` - The field is an exact match with the state database.
+ *
+ * `partial_match` - The field is a partial match with the state database.
+ *
+ * `no_match` - The field is not an exact match with the state database.
+ *
+ * `no_data` - The field was unable to be checked against state databases.
+ */
 export const AamvaDetailedMatchResult = {
   Match: "match",
   PartialMatch: "partial_match",

@@ -4,6 +4,7 @@ import { numbersAcatsSchema, type NumbersAcats } from "./numbers-acats.js";
 import { numbersAtonSchema, type NumbersAton } from "./numbers-aton.js";
 import { numbersRetirement401KSchema, type NumbersRetirement401K } from "./numbers-retirement401-k.js";
 
+/** Identifying information for transferring holdings to an investment account. */
 export type InvestmentsAuthGetNumbers = {
   acats?: NumbersAcats[];
   aton?: NumbersAton[];

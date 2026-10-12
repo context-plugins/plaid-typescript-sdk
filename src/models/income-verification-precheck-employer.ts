@@ -5,10 +5,15 @@ import {
   type IncomeVerificationPrecheckEmployerAddress,
 } from "./income-verification-precheck-employer-address.js";
 
+/** Information about the end user's employer */
 export type IncomeVerificationPrecheckEmployer = {
+  /** The employer's name */
   name?: string | null;
+  /** The address of the employer */
   address?: IncomeVerificationPrecheckEmployerAddress | null;
+  /** The employer's tax id */
   taxId?: string | null;
+  /** The URL for the employer's public website */
   url?: string | null;
 };
 

@@ -1,6 +1,16 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * This field is deprecated in favor of the consent `type` field. Consents are required to have a
+ * single type.
+ *
+ * Payment consent scope. Defines possible directions for payments made with the given consent.
+ *
+ * `ME_TO_ME`: Allows moving money between accounts owned by the same user.
+ *
+ * `EXTERNAL`: Allows initiating payments from the user's account to third parties.
+ */
 export const PaymentInitiationConsentScope = {
   MeToMe: "ME_TO_ME",
   External: "EXTERNAL",

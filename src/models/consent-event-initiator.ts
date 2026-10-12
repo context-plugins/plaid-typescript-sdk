@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The entity that initiated collection of consent. */
 export const ConsentEventInitiator = {
   Plaid: "PLAID",
   DataProvider: "DATA_PROVIDER",

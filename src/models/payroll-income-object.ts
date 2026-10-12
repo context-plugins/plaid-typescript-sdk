@@ -5,11 +5,17 @@ import { creditPayStubSchema, type CreditPayStub } from "./credit-pay-stub.js";
 import { creditW2Schema, type CreditW2 } from "./credit-w2.js";
 import { credit1099Schema, type Credit1099 } from "./credit1099.js";
 
+/** An object representing payroll data. */
 export type PayrollIncomeObject = {
+  /** ID of the payroll provider account. */
   accountId: string | null;
+  /** Array of pay stubs for the user. */
   payStubs: CreditPayStub[];
+  /** Array of tax form W-2s. */
   w2S: CreditW2[];
+  /** Array of tax form 1099s. */
   form1099S: Credit1099[];
+  /** Array of Form I-20 US immigration student documents. */
   i20S: CreditI20[];
 };
 

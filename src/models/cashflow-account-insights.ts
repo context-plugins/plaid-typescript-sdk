@@ -9,8 +9,17 @@ import {
   type CashflowReportMonthlySummary,
 } from "./cashflow-report-monthly-summary.js";
 
+/**
+ * Insights on the account level. These are only returned for Credit and Depository type accounts.
+ */
 export type CashflowAccountInsights = {
+  /**
+   * Calculated data about the historical balances on the account.
+   *
+   * Available for `credit` and `depository` type accounts.
+   */
   historicalBalances: CashflowReportHistoricalBalance[];
+  /** Monthly summary statistics derived from transaction-level data. */
   monthlySummaries: CashflowReportMonthlySummary[];
 };
 

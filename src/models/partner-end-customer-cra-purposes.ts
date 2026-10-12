@@ -5,14 +5,23 @@ import {
   type PartnerEndCustomerCraUseCases,
 } from "./partner-end-customer-cra-use-cases.js";
 
+/** A map of permissible purposes to their corresponding use cases. */
 export type PartnerEndCustomerCraPurposes = {
+  /** The list of use cases associated with a given permissible purpose. */
   writtenInstruction?: PartnerEndCustomerCraUseCases;
+  /** The list of use cases associated with a given permissible purpose. */
   extensionOfCreditOrAccountReview?: PartnerEndCustomerCraUseCases;
+  /** The list of use cases associated with a given permissible purpose. */
   employment?: PartnerEndCustomerCraUseCases;
+  /** The list of use cases associated with a given permissible purpose. */
   insuranceUnderwriting?: PartnerEndCustomerCraUseCases;
+  /** The list of use cases associated with a given permissible purpose. */
   licenseEligibility?: PartnerEndCustomerCraUseCases;
+  /** The list of use cases associated with a given permissible purpose. */
   riskAssessment?: PartnerEndCustomerCraUseCases;
+  /** The list of use cases associated with a given permissible purpose. */
   businessNeedTransaction?: PartnerEndCustomerCraUseCases;
+  /** The list of use cases associated with a given permissible purpose. */
   businessNeedAccountReview?: PartnerEndCustomerCraUseCases;
 };
 

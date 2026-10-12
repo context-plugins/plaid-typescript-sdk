@@ -7,13 +7,22 @@ import {
 import { payrollIncomeObjectSchema, type PayrollIncomeObject } from "./payroll-income-object.js";
 import { payrollItemStatusSchema, type PayrollItemStatus } from "./payroll-item-status.js";
 
+/** An object containing information about the payroll item. */
 export type PayrollItem = {
+  /** The `item_id` of the Item associated with this webhook, warning, or error */
   itemId: string;
+  /** The unique identifier of the institution associated with the Item. */
   institutionId: string;
+  /** The name of the institution associated with the Item. */
   institutionName: string;
   accounts: (PayrollIncomeAccountData | null)[];
   payrollIncome: PayrollIncomeObject[];
+  /** Details about the status of the payroll item. */
   status: PayrollItemStatus | null;
+  /**
+   * Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DDTHH:mm:ssZ)
+   * indicating the last time that the Item was updated.
+   */
   updatedAt: Date | null;
 };
 

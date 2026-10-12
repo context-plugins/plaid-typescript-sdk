@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Status of the KYB (Know Your Business) identity assessment check */
 export const BusinessVerificationStatus = {
   Active: "active",
   Success: "success",

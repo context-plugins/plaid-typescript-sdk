@@ -1,6 +1,10 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * The ISO-4217 currency code of the payment. For standing orders and payment consents, `"GBP"` must
+ * be used. For Poland, Denmark, Sweden and Norway, only the local currency is currently supported.
+ */
 export const PaymentAmountCurrency = {
   Gbp: "GBP",
   Eur: "EUR",

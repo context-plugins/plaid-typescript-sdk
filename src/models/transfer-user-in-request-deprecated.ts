@@ -5,10 +5,15 @@ import {
   type TransferUserAddressInRequest,
 } from "./transfer-user-address-in-request.js";
 
+/** The legal name and other information for the account holder. */
 export type TransferUserInRequestDeprecated = {
+  /** The user's legal name. */
   legalName?: string;
+  /** The user's phone number. */
   phoneNumber?: string;
+  /** The user's email address. */
   emailAddress?: string;
+  /** The address associated with the account holder. */
   address?: TransferUserAddressInRequest;
 };
 

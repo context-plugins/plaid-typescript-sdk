@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The pay type - `GROSS`, `NET`, or `UNKNOWN` for a specified income source */
 export const UserStatedIncomeSourcePayType = {
   Unknown: "UNKNOWN",
   Gross: "GROSS",

@@ -9,8 +9,11 @@ import {
   type CraCheckReportVerificationGetReportType,
 } from "./cra-check-report-verification-get-report-type.js";
 
+/** Options for configuring Home Lending Report (Verification Report) generation. */
 export type CraCheckReportHomeLendingReportOptions = {
+  /** Specifies which types of home lending reports to generate. */
   reportsRequested: CraCheckReportVerificationGetReportType[];
+  /** Defines configuration options for the Employment Refresh Report. */
   employmentRefreshOptions?: CraCheckReportCreateEmploymentRefreshOptions | null;
 };
 

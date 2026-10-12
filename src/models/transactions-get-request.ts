@@ -5,12 +5,27 @@ import {
   type TransactionsGetRequestOptions,
 } from "./transactions-get-request-options.js";
 
+/** TransactionsGetRequest defines the request schema for `/transactions/get` */
 export type TransactionsGetRequest = {
+  /**
+   * Your Plaid API `client_id`. The `client_id` is required and may be provided either in the
+   * `PLAID-CLIENT-ID` header or as part of a request body.
+   */
   clientId?: string;
+  /** An optional object to be used with the request. If specified, `options` must not be `null`. */
   options?: TransactionsGetRequestOptions;
+  /** The access token associated with the Item for which data is being requested. */
   accessToken: string;
+  /**
+   * Your Plaid API `secret`. The `secret` is required and may be provided either in the
+   * `PLAID-SECRET` header or as part of a request body.
+   */
   secret?: string;
+  /**
+   * The earliest date for which data should be returned. Dates should be formatted as YYYY-MM-DD.
+   */
   startDate: string;
+  /** The latest date for which data should be returned. Dates should be formatted as YYYY-MM-DD. */
   endDate: string;
 };
 

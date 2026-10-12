@@ -4,10 +4,18 @@ import { deductionsBreakdownSchema, type DeductionsBreakdown } from "./deduction
 import { deductionsTotalSchema, type DeductionsTotal } from "./deductions-total.js";
 import { totalSchema, type Total } from "./total.js";
 
+/** An object with the deduction information found on a paystub. */
 export type Deductions = {
+  /**
+   * @deprecated
+   */
   subtotals?: Total[];
   breakdown: DeductionsBreakdown[];
+  /**
+   * @deprecated
+   */
   totals?: Total[];
+  /** An object representing the total deductions for the pay period */
   total: DeductionsTotal;
 };
 

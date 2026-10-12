@@ -10,12 +10,25 @@ import {
 } from "./cra-verification-income-report.js";
 import { craVoaReportSchema, type CraVoaReport } from "./cra-voa-report.js";
 
+/** Contains data for the CRA Home Lending Report. */
 export type CraVerificationReport = {
+  /**
+   * The unique identifier associated with the Home Lending Report object. This ID will be the same
+   * as the Base Report ID.
+   */
   reportId: string;
+  /**
+   * A unique token that can be shared with GSEs in order to provide them access to the report. This
+   * is automatically created during report generation when GSE options are specified.
+   */
   gseReferenceId?: string;
+  /** Client-generated identifier, which can be used by lenders to track loan applications. */
   clientReportId?: string | null;
+  /** An object representing a VOA report. */
   voa?: CraVoaReport | null;
+  /** An object representing an Employment Refresh Report. */
   employmentRefresh?: CraEmploymentRefreshReport | null;
+  /** An object representing an Income Report within the Home Lending Report. */
   income?: CraVerificationIncomeReport | null;
 };
 

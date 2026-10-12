@@ -6,11 +6,17 @@ import { assetOwnersSchema, type AssetOwners } from "./asset-owners.js";
 import { assetTransactionsSchema, type AssetTransactions } from "./asset-transactions.js";
 import { validationSourcesSchema, type ValidationSources } from "./validation-sources.js";
 
+/** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
 export type Asset = {
+  /** Details about an asset. */
   assetDetail: AssetDetail;
+  /** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
   assetOwners: AssetOwners;
+  /** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
   assetHolder: AssetHolder;
+  /** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
   assetTransactions: AssetTransactions;
+  /** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
   validationSources: ValidationSources;
 };
 

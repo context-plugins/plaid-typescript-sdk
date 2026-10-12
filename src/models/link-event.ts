@@ -2,10 +2,15 @@ import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 import { linkEventMetadataSchema, type LinkEventMetadata } from "./link-event-metadata.js";
 
+/** An event that occurred while the user was going through Link */
 export type LinkEvent = {
+  /** Event name */
   eventName: string;
+  /** Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format. */
   timestamp: string;
+  /** UUID that can be used to deduplicate events */
   eventId: string;
+  /** Metadata about an event that occurred while the user was going through Link */
   eventMetadata: LinkEventMetadata;
 };
 

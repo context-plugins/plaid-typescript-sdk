@@ -1,10 +1,15 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/** Details regarding authorization usage. */
 export type TransferMetricsGetAuthorizationUsage = {
+  /** The daily credit utilization formatted as a decimal. */
   dailyCreditUtilization?: string;
+  /** The daily debit utilization formatted as a decimal. */
   dailyDebitUtilization?: string;
+  /** The monthly credit utilization formatted as a decimal. */
   monthlyCreditUtilization?: string;
+  /** The monthly debit utilization formatted as a decimal. */
   monthlyDebitUtilization?: string;
 };
 

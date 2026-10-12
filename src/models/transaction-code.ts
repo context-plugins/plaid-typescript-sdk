@@ -1,6 +1,49 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * An identifier classifying the transaction type.
+ *
+ * This field is populated for European institutions, as well as certain institutions in the United
+ * States. For institutions where this classification is not available, this field is set to `null`.
+ *
+ * `adjustment:` Bank adjustment
+ *
+ * `atm:` Cash deposit or withdrawal via an automated teller machine
+ *
+ * `bank charge:` Charge or fee levied by the institution
+ *
+ * `bill payment`: Payment of a bill
+ *
+ * `cash:` Cash deposit or withdrawal
+ *
+ * `cash advance:` Cash advance drawn against a credit card or line of credit
+ *
+ * `cashback:` Cash withdrawal while making a debit card purchase
+ *
+ * `cheque:` Document ordering the payment of money to another person or organization
+ *
+ * `direct debit:` Automatic withdrawal of funds initiated by a third party at a regular interval
+ *
+ * `interest:` Interest earned or incurred
+ *
+ * `late fee:` Fee associated with a late or past-due payment
+ *
+ * `membership fee:` Annual or recurring membership fee
+ *
+ * `payment:` One-off outbound payment not classified as a bill payment, direct debit, or standing
+ * order
+ *
+ * `purchase:` Purchase made with a debit or credit card
+ *
+ * `refund:` Merchant credit or return, such as a refund of a prior purchase
+ *
+ * `returned item fee:` Fee for a returned item, such as a returned check or stop payment
+ *
+ * `standing order:` Payment instructed by the account holder to a third party at a regular interval
+ *
+ * `transfer:` Transfer of money between accounts
+ */
 export const TransactionCode = {
   Adjustment: "adjustment",
   Atm: "atm",

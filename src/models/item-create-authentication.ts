@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Enum representing the entity authenticating the user. */
 export const ItemCreateAuthentication = {
   Unknown: "UNKNOWN",
   DataPartner: "DATA_PARTNER",

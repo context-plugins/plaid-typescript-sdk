@@ -6,8 +6,10 @@ import {
 } from "./pay-stub-deductions-breakdown.js";
 import { payStubDeductionsTotalSchema, type PayStubDeductionsTotal } from "./pay-stub-deductions-total.js";
 
+/** An object with the deduction information found on a pay stub. */
 export type CreditPayStubDeductions = {
   breakdown: PayStubDeductionsBreakdown[];
+  /** An object representing the total deductions for the pay period */
   total: PayStubDeductionsTotal;
 };
 

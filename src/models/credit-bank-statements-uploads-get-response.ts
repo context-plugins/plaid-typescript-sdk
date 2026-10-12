@@ -5,8 +5,17 @@ import {
   type CreditBankStatementUploadItem,
 } from "./credit-bank-statement-upload-item.js";
 
+/**
+ * CreditBankStatementsUploadsGetResponse defines the response schema for
+ * `/credit/bank_statements/uploads/get`
+ */
 export type CreditBankStatementsUploadsGetResponse = {
+  /** Array of bank statement upload items. */
   items: CreditBankStatementUploadItem[];
+  /**
+   * A unique identifier for the request, which can be used for troubleshooting. This identifier,
+   * like all Plaid identifiers, is case sensitive.
+   */
   requestId: string;
 };
 

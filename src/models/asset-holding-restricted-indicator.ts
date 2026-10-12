@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Whether or not the stock is restricted, i.e. "Restricted" or "Not Restricted" */
 export const AssetHoldingRestrictedIndicator = {
   Yes: "Yes",
   No: "No",

@@ -8,26 +8,46 @@ import {
   type W2StateAndLocalWagesOverride,
 } from "./w2-state-and-local-wages-override.js";
 
+/** W2 is an object that represents income data taken from a W2 tax document. */
 export type W2Override = {
+  /** The employer on the paystub. */
   employer?: PaystubOverrideEmployer;
+  /** The employee on the paystub. */
   employee?: PaystubOverrideEmployee;
+  /** The tax year of the W2 document. */
   taxYear?: string | null;
+  /** An employer identification number or EIN. */
   employerIdNumber?: string | null;
+  /** Wages from tips and other compensation. */
   wagesTipsOtherComp?: string | null;
+  /** Federal income tax withheld for the tax year. */
   federalIncomeTaxWithheld?: string | null;
+  /** Wages from Social Security. */
   socialSecurityWages?: string | null;
+  /** Social Security tax withheld for the tax year. */
   socialSecurityTaxWithheld?: string | null;
+  /** Wages and tips from medicare. */
   medicareWagesAndTips?: string | null;
+  /** Medicare tax withheld for the tax year. */
   medicareTaxWithheld?: string | null;
+  /** Tips from Social Security. */
   socialSecurityTips?: string | null;
+  /** Allocated tips. */
   allocatedTips?: string | null;
+  /** Contents from box 9 on the W2. */
   box9?: string | null;
+  /** Dependent care benefits. */
   dependentCareBenefits?: string | null;
+  /** Nonqualified plans. */
   nonqualifiedPlans?: string | null;
   box12?: W2Box12Override[];
+  /** Statutory employee. */
   statutoryEmployee?: string | null;
+  /** Retirement plan. */
   retirementPlan?: string | null;
+  /** Third party sick pay. */
   thirdPartySickPay?: string | null;
+  /** Other. */
   other?: string | null;
   stateAndLocalWages?: W2StateAndLocalWagesOverride[];
 };

@@ -1,6 +1,21 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * The status of the transfer.
+ *
+ * `pending`: A new transfer was created; it is in the pending state. `posted`: The transfer has
+ * been successfully submitted to the payment network. `settled`: The transfer was successfully
+ * completed by the payment network. Note that funds from received debits are not available to be
+ * moved out of the Ledger until the transfer reaches `funds_available` status. For credit
+ * transactions, `settled` means the funds have been delivered to the receiving bank account. This
+ * is the terminal state of a successful credit transfer. `funds_available`: Funds from the transfer
+ * have been released from hold and applied to the ledger's available balance. (Only applicable to
+ * ACH debits.) This is the terminal state of a successful debit transfer. `cancelled`: The transfer
+ * was cancelled by the client. This is the terminal state of a cancelled transfer. `failed`: The
+ * transfer failed, no funds were moved. This is the terminal state of a failed transfer.
+ * `returned`: A posted transfer was returned. This is the terminal state of a returned transfer.
+ */
 export const TransferStatus = {
   Pending: "pending",
   Posted: "posted",

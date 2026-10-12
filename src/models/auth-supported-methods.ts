@@ -1,10 +1,15 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/** Metadata specifically related to which auth methods an institution supports. */
 export type AuthSupportedMethods = {
+  /** Indicates if instant auth is supported. */
   instantAuth: boolean;
+  /** Indicates if instant match is supported. */
   instantMatch: boolean;
+  /** Indicates if automated micro-deposits are supported. */
   automatedMicroDeposits: boolean;
+  /** Indicates if instant micro-deposits are supported. */
   instantMicroDeposits: boolean;
 };
 

@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Networks eligible for recurring transfers. */
 export const TransferRecurringNetwork = {
   Ach: "ach",
   SameDayAch: "same-day-ach",

@@ -5,6 +5,7 @@ import {
   type CreditFreddieMacAssetTransaction,
 } from "./credit-freddie-mac-asset-transaction.js";
 
+/** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
 export type CreditFreddieMacAssetTransactions = {
   assetTransaction: CreditFreddieMacAssetTransaction[];
 };

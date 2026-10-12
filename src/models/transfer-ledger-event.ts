@@ -1,17 +1,29 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/** Represents a ledger event in the Transfers API. */
 export type TransferLedgerEvent = {
+  /** Plaid's unique identifier for this ledger event. */
   ledgerEventId: string;
+  /** The ID of the ledger this event belongs to. */
   ledgerId: string;
+  /** The amount of the ledger event as a decimal string. */
   amount: string;
+  /** The ID of the transfer source that triggered this ledger event. */
   transferId?: string | null;
+  /** The ID of the refund source that triggered this ledger event. */
   refundId?: string | null;
+  /** The ID of the sweep source that triggered this ledger event. */
   sweepId?: string | null;
+  /** A description of the ledger event. */
   description: string;
+  /** The new pending balance after this event. */
   pendingBalance: string;
+  /** The new available balance after this event. */
   availableBalance: string;
+  /** The type of balance that was impacted by this event. */
   type: string;
+  /** The datetime when this ledger event occurred. */
   timestamp: Date;
 };
 

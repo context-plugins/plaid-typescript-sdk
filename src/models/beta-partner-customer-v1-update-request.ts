@@ -9,13 +9,24 @@ import {
   type PartnerEndCustomerQuestionnaires,
 } from "./partner-end-customer-questionnaires.js";
 
+/** Request schema for `/beta/partner/customer/v1/update`. */
 export type BetaPartnerCustomerV1UpdateRequest = {
+  /**
+   * Your Plaid API `client_id`. The `client_id` is required and may be provided either in the
+   * `PLAID-CLIENT-ID` header or as part of a request body.
+   */
   clientId?: string;
+  /**
+   * Your Plaid API `secret`. The `secret` is required and may be provided either in the
+   * `PLAID-SECRET` header or as part of a request body.
+   */
   secret?: string;
   endCustomerClientId: string;
   legalEntityName?: string;
   redirectUris?: string[];
+  /** The bank addendum acceptance for the end customer. */
   bankAddendumAcceptance?: PartnerEndCustomerBankAddendumAcceptance;
+  /** The questionnaires for the end customer. */
   questionnaires?: PartnerEndCustomerQuestionnaires;
 };
 

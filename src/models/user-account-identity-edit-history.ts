@@ -9,11 +9,17 @@ import {
   type UserAccountIdentityOfficialDocument,
 } from "./user-account-identity-official-document.js";
 
+/** Statistics tracking the number of edits made to identity fields over various time periods. */
 export type UserAccountIdentityEditHistory = {
+  /** Edit counts over various time periods. */
   name?: UserAccountIdentityEditCounts;
+  /** Edit counts over various time periods. */
   address?: UserAccountIdentityEditCounts;
+  /** Edit counts over various time periods. */
   email?: UserAccountIdentityEditCounts;
+  /** Edit counts over various time periods. */
   dateOfBirth?: UserAccountIdentityEditCounts;
+  /** Official identity document edit statistics. */
   officialDocument?: UserAccountIdentityOfficialDocument | null;
 };
 

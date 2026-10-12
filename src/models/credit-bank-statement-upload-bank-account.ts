@@ -9,13 +9,23 @@ import {
   type CreditBankStatementUploadBankAccountPeriod,
 } from "./credit-bank-statement-upload-bank-account-period.js";
 
+/** An object containing data about a user's bank account related to an uploaded bank statement. */
 export type CreditBankStatementUploadBankAccount = {
+  /** The name of the bank account */
   name: string | null;
+  /** The name of the bank institution. */
   bankName: string | null;
+  /** The type of the bank account. */
   accountType: string | null;
+  /** The bank account number. */
   accountNumber: string | null;
+  /**
+   * An object containing data about the owner of the bank account for the uploaded bank statement.
+   */
   owner: CreditBankStatementUploadAccountOwner;
+  /** An array of period objects, containing more data on the overall period of the statement. */
   periods: CreditBankStatementUploadBankAccountPeriod[];
+  /** The unique id of the bank account */
   accountId: string | null;
 };
 

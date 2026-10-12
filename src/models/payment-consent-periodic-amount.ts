@@ -10,9 +10,21 @@ import {
   type PaymentConsentPeriodicInterval,
 } from "./payment-consent-periodic-interval.js";
 
+/** Defines consent payments limitations per period. */
 export type PaymentConsentPeriodicAmount = {
+  /** Maximum cumulative amount for all payments in the specified interval. */
   amount: PaymentAmount;
+  /** Payment consent periodic interval. */
   interval: PaymentConsentPeriodicInterval;
+  /**
+   * Where the payment consent period should start.
+   *
+   * If the institution is Monzo, only `CONSENT` alignments are supported.
+   *
+   * `CALENDAR`: line up with a calendar.
+   *
+   * `CONSENT`: on the date of consent creation.
+   */
   alignment: PaymentConsentPeriodicAlignment;
 };
 

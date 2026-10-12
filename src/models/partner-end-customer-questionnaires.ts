@@ -5,7 +5,9 @@ import {
   type PartnerEndCustomerCraQuestionnaire,
 } from "./partner-end-customer-cra-questionnaire.js";
 
+/** The questionnaires for the end customer. */
 export type PartnerEndCustomerQuestionnaires = {
+  /** The CRA questionnaire for the end customer. */
   cra?: PartnerEndCustomerCraQuestionnaire;
 };
 

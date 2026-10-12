@@ -5,7 +5,9 @@ import {
   type BusinessCheckBooleanStatus,
 } from "./business-check-boolean-status.js";
 
+/** SSL status for the business website. */
 export type BusinessWebsiteSsl = {
+  /** Tri-state boolean status, where `no_data` indicates the check could not determine a value. */
   isValid: BusinessCheckBooleanStatus;
 };
 

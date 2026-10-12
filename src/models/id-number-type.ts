@@ -1,6 +1,11 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * A globally unique and human readable ID type, specific to the country and document category. For
+ * more context on this field, see [Input Validation
+ * Rules](https://plaid.com/docs/identity-verification/hybrid-input-validation/#id-numbers).
+ */
 export const IdNumberType = {
   ArDni: "ar_dni",
   AuDriversLicense: "au_drivers_license",

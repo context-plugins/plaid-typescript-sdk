@@ -3,12 +3,25 @@ import type { Schema } from "../core/validation/schema.js";
 import { creditBankEmploymentSchema, type CreditBankEmployment } from "./credit-bank-employment.js";
 import { creditBankIncomeAccountSchema, type CreditBankIncomeAccount } from "./credit-bank-income-account.js";
 
+/** The details and metadata for an end user's Item. */
 export type CreditBankEmploymentItem = {
+  /** The unique identifier for the Item. */
   itemId: string;
+  /**
+   * The time when this Item's data was last retrieved from the financial institution, in [ISO
+   * 8601](https://wikipedia.org/wiki/ISO_8601) format (e.g. "2018-04-12T03:32:11Z").
+   */
   lastUpdatedTime: Date;
+  /** The unique identifier of the institution associated with the Item. */
   institutionId: string;
+  /** The name of the institution associated with the Item. */
   institutionName: string;
+  /**
+   * The bank employment information for this Item. Each entry in the array is a different employer
+   * found.
+   */
   bankEmployments: CreditBankEmployment[];
+  /** The Item's accounts that have Bank Employment data. */
   bankEmploymentAccounts: CreditBankIncomeAccount[];
 };
 

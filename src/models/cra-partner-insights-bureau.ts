@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The credit bureau that provided the base FICO score. */
 export const CraPartnerInsightsBureau = {
   Equifax: "EQUIFAX",
   Experian: "EXPERIAN",

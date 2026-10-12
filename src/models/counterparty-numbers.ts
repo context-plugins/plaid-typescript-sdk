@@ -6,8 +6,14 @@ import {
   type CounterpartyNumbersInternational,
 } from "./counterparty-numbers-international.js";
 
+/**
+ * Account numbers associated with the counterparty, when available. This field is currently only
+ * filled in for select financial institutions in Europe.
+ */
 export type CounterpartyNumbers = {
+  /** Identifying information for a UK bank account via Bacs. */
   bacs?: CounterpartyNumbersBacs | null;
+  /** Account numbers using the International Bank Account Number and BIC/SWIFT code format. */
   international?: CounterpartyNumbersInternational | null;
 };
 

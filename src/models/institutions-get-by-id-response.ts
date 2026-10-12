@@ -2,8 +2,14 @@ import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 import { institutionSchema, type Institution } from "./institution.js";
 
+/** InstitutionsGetByIdResponse defines the response schema for `/institutions/get_by_id` */
 export type InstitutionsGetByIdResponse = {
+  /** Details relating to a specific financial institution */
   institution: Institution;
+  /**
+   * A unique identifier for the request, which can be used for troubleshooting. This identifier,
+   * like all Plaid identifiers, is case sensitive.
+   */
   requestId: string;
 };
 

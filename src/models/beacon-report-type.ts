@@ -1,6 +1,21 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * The type of Beacon Report.
+ *
+ * `first_party`: If this is the same individual as the one who submitted the KYC.
+ *
+ * `stolen`: If this is a different individual from the one who submitted the KYC.
+ *
+ * `synthetic`: If this is an individual using fabricated information.
+ *
+ * `account_takeover`: If this individual's account was compromised.
+ *
+ * `data_breach`: If this individual's data was compromised in a breach.
+ *
+ * `unknown`: If you aren't sure who committed the fraud.
+ */
 export const BeaconReportType = {
   FirstParty: "first_party",
   Stolen: "stolen",

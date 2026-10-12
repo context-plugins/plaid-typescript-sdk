@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The explicit pay basis on the paystub (if present). */
 export const CreditPayStubPayBasisType = {
   Salary: "SALARY",
   Hourly: "HOURLY",

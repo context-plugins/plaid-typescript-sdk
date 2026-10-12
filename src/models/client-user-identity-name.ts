@@ -1,8 +1,11 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/** User name information. */
 export type ClientUserIdentityName = {
+  /** User's given name. */
   givenName: string;
+  /** User's family name. */
   familyName: string;
 };
 

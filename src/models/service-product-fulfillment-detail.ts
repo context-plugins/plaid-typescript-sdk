@@ -5,8 +5,11 @@ import {
   type ServiceProductFulfillmentIdentifier,
 } from "./service-product-fulfillment-identifier.js";
 
+/** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
 export type ServiceProductFulfillmentDetail = {
+  /** A string that uniquely identifies a type of order Verification of Asset. */
   vendorOrderIdentifier: string | null;
+  /** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
   serviceProductFulfillmentIdentifier: ServiceProductFulfillmentIdentifier;
 };
 

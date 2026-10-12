@@ -9,11 +9,21 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/**
+ * For each user's Item enabled for Cash Flow Updates, this webhook will fire when an update detects
+ * that an expected deposit was missed. Upon receiving the webhook, call
+ * `/cra/monitoring_insights/get` to retrieve the updated insights.
+ */
 export type CashFlowUpdatesExpectedDepositMissedWebhook = {
+  /** `CASH_FLOW_UPDATES` */
   webhookType: string;
+  /** `EXPECTED_DEPOSIT_MISSED` */
   webhookCode: string;
+  /** Enum for the status of the insights */
   status: MonitoringInsightsStatus;
+  /** The `user_id` that the report is associated with */
   userId: string;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** SMTP-MX check to confirm the email address exists if known. */
 export const RiskCheckEmailIsDeliverableStatus = {
   Yes: "yes",
   No: "no",

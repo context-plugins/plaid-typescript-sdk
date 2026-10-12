@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Tri-state boolean status, where `no_data` indicates the check could not determine a value. */
 export const BusinessCheckBooleanStatus = {
   Yes: "yes",
   No: "no",

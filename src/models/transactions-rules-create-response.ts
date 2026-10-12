@@ -5,8 +5,17 @@ import {
   type TransactionsCategoryRule,
 } from "./transactions-category-rule.js";
 
+/**
+ * TransactionsRulesCreateResponse defines the response schema for
+ * `/beta/transactions/rules/v1/create`
+ */
 export type TransactionsRulesCreateResponse = {
+  /** A representation of a transactions category rule. */
   rule: TransactionsCategoryRule;
+  /**
+   * A unique identifier for the request, which can be used for troubleshooting. This identifier,
+   * like all Plaid identifiers, is case sensitive.
+   */
   requestId: string;
 };
 

@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** A loan type account. */
 export const LoanAccount = {
   Auto: "auto",
   Business: "business",

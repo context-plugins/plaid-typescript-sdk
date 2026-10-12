@@ -5,9 +5,12 @@ import {
   type CreditEmploymentVerification,
 } from "./credit-employment-verification.js";
 
+/** The object containing employment items. */
 export type CreditEmploymentItem = {
+  /** The `item_id` of the Item associated with this webhook, warning, or error */
   itemId: string;
   employments: CreditEmploymentVerification[];
+  /** Token to represent the underlying Employment data */
   employmentReportToken?: string;
 };
 

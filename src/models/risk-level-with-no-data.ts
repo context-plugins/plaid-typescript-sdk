@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Risk level for the given risk check type, when available. */
 export const RiskLevelWithNoData = {
   Low: "low",
   Medium: "medium",

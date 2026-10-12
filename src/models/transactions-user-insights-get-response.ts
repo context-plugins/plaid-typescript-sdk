@@ -5,10 +5,21 @@ import { counterpartyInsightsSchema, type CounterpartyInsights } from "./counter
 import { recurringTransactionsSchema, type RecurringTransactions } from "./recurring-transactions.js";
 import { userDataOverviewSchema, type UserDataOverview } from "./user-data-overview.js";
 
+/**
+ * TransactionsUserInsightsGetResponse defines the response schema for
+ * `/beta/transactions/user_insights/v1/get`.
+ */
 export type TransactionsUserInsightsGetResponse = {
+  /** metadata for the set of insights provided in `TransactionsUserInsightsGetResponse` */
   userDataOverview: UserDataOverview;
+  /** Insights around a user's counterparties */
   counterpartyInsights?: CounterpartyInsights;
+  /** Insights on a user's top personal finance categories. */
   categoryInsights?: CategoryInsights;
+  /**
+   * Insights object for recurring transactions for `/beta/transactions/user_insights/v1/get`
+   * endpoint
+   */
   recurringTransactions?: RecurringTransactions;
 };
 

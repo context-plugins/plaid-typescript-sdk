@@ -1,6 +1,17 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * The reason for removing the Item
+ *
+ * `FRAUD_FIRST_PARTY`: The end user who owns the connected bank account committed fraud
+ * `FRAUD_FALSE_IDENTITY`: The end user created the connection using false identity information or
+ * stolen credentials `FRAUD_ABUSE`: The end user is abusing the client's service or platform
+ * through their connected account `FRAUD_OTHER`: Other fraud-related reasons involving the end user
+ * not covered by the specific fraud categories `CONNECTION_IS_NON_FUNCTIONAL`: The connection to
+ * the end user's financial institution is broken and cannot be restored `OTHER`: Any other reason
+ * for removing the connection not covered by the above categories
+ */
 export const ItemRemoveReasonCode = {
   FraudFirstParty: "FRAUD_FIRST_PARTY",
   FraudFalseIdentity: "FRAUD_FALSE_IDENTITY",

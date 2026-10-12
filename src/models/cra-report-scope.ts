@@ -1,6 +1,10 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * Determines whose items are used. `PLAID_NETWORK` (default) uses the Plaid Network view of the
+ * user's profile. `CLIENT_USER` uses only the items linked by this client.
+ */
 export const CraReportScope = {
   PlaidNetwork: "PLAID_NETWORK",
   ClientUser: "CLIENT_USER",

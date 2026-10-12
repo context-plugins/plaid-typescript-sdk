@@ -9,11 +9,21 @@ import {
   type TotalMonthlyIncomeInsights,
 } from "./total-monthly-income-insights.js";
 
+/** An object representing the income subcategory of the report */
 export type MonitoringIncomeInsights = {
+  /** Details about the total monthly income */
   totalMonthlyIncome: TotalMonthlyIncomeInsights;
+  /** Details about the number of income sources */
   incomeSourcesCounts: IncomeSourcesCounts;
+  /**
+   * An object representing the predicted average monthly net income amount. This amount reflects
+   * the funds deposited into the account and may not include any withheld income such as taxes or
+   * other payroll deductions
+   */
   forecastedMonthlyIncome: ForecastedMonthlyIncome;
+  /** An object representing the historical annual income amount. */
   historicalAnnualIncome: HistoricalAnnualIncome;
+  /** The income sources for this Item. Each entry in the array is a single income source */
   incomeSources: MonitoringIncomeSource[];
 };
 

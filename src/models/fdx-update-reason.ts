@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Reason for lifecycle event status change */
 export const FdxUpdateReason = {
   BusinessRule: "BUSINESS_RULE",
   SecurityEvent: "SECURITY_EVENT",

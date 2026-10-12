@@ -9,9 +9,16 @@ import {
   type IdentityDocumentUploadRiskInsights,
 } from "./identity-document-upload-risk-insights.js";
 
+/** Document object with metadata of the uploaded document */
 export type IdentityDocumentUpload = {
+  /** A UUID identifying the document. */
   documentId?: string;
+  /** Metadata pertaining to the document. */
   metadata?: IdentityDocumentUploadMetadata;
+  /**
+   * Object representing fraud risk data of the uploaded document. Only provided when using Identity
+   * Document Upload with Fraud Risk enabled.
+   */
   riskInsights?: IdentityDocumentUploadRiskInsights;
 };
 

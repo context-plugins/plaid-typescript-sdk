@@ -5,7 +5,9 @@ import {
   type TransferMetricsGetReturnRatesOverInterval,
 } from "./transfer-metrics-get-return-rates-over-interval.js";
 
+/** Details regarding return rates. */
 export type TransferMetricsGetReturnRates = {
+  /** Details regarding return rates. */
   last60D?: TransferMetricsGetReturnRatesOverInterval | null;
 };
 

@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/** A JWT Header, used for webhook validation */
 export type JwtHeader = {
   id: string;
   kid: string;

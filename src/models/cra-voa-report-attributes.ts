@@ -6,8 +6,17 @@ import {
   type TotalReportOutflowAmount,
 } from "./total-report-outflow-amount.js";
 
+/** Attributes for the VOA report. */
 export type CraVoaReportAttributes = {
+  /**
+   * Total amount of debit transactions into the report's accounts in the time period of the report.
+   * This field only takes into account USD transactions from the accounts.
+   */
   totalInflowAmount: TotalReportInflowAmount | null;
+  /**
+   * Total amount of credit transactions out of the report's accounts in the time period of the
+   * report. This field only takes into account USD transactions from the accounts.
+   */
   totalOutflowAmount: TotalReportOutflowAmount | null;
 };
 

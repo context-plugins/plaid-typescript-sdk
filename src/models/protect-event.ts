@@ -1,11 +1,20 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/** Event data for Protect events. */
 export type ProtectEvent = {
+  /**
+   * The timestamp of the event, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format, e.g.
+   * `"2017-09-14T14:42:19.350Z"`
+   */
   timestamp: Date;
+  /** If present, contains the current Protect Session ID from the Protect SDK. */
   protectSessionId?: string;
+  /** This event type represents a user visiting the client application. */
   appVisit?: Record<string, unknown> | null;
+  /** This event type represents a user signing in to the application. */
   userSignIn?: Record<string, unknown> | null;
+  /** This event type represents a user signing up for the application. */
   userSignUp?: Record<string, unknown> | null;
 };
 

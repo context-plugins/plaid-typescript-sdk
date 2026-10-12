@@ -1,8 +1,11 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/** Depository account information for the associated user. */
 export type BeaconUserRequestDepositoryAccount = {
+  /** Must be a valid US Bank Account Number */
   accountNumber: string;
+  /** The routing number of the account. */
   routingNumber: string;
 };
 

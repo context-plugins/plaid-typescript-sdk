@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The webhook codes that can be fired by this test endpoint. */
 export const WebhookCode = {
   DefaultUpdate: "DEFAULT_UPDATE",
   NewAccountsAvailable: "NEW_ACCOUNTS_AVAILABLE",

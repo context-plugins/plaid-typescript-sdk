@@ -6,8 +6,11 @@ import {
 } from "./asset-transaction-description.js";
 import { assetTransactionDetailSchema, type AssetTransactionDetail } from "./asset-transaction-detail.js";
 
+/** An object representing... */
 export type CreditFreddieMacAssetTransaction = {
+  /** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
   assetTransactionDetail: AssetTransactionDetail;
+  /** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
   assetTransactionDescription: AssetTransactionDescription[];
 };
 

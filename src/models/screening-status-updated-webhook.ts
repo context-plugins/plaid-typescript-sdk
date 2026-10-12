@@ -5,10 +5,18 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/**
+ * Fired when an individual screening status has changed, which can occur manually via the dashboard
+ * or during ongoing monitoring.
+ */
 export type ScreeningStatusUpdatedWebhook = {
+  /** `SCREENING` */
   webhookType: string;
+  /** `STATUS_UPDATED` */
   webhookCode: string;
+  /** The ID of the associated screening. */
   screeningId: string;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

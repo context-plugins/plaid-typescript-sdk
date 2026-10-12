@@ -6,10 +6,18 @@ import {
   type TransferPlatformRequirement,
 } from "./transfer-platform-requirement.js";
 
+/** Originator and their status. */
 export type DetailedOriginator = {
+  /** Originator's client ID. */
   clientId: string;
+  /** Originator's diligence status. */
   transferDiligenceStatus: TransferDiligenceStatus;
+  /** The company name of the end customer. */
   companyName: string;
+  /**
+   * List of outstanding requirements that must be submitted before Plaid can approve the
+   * originator. Only populated when `transfer_diligence_status` is `more_information_required`.
+   */
   outstandingRequirements?: TransferPlatformRequirement[];
 };
 

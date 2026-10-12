@@ -18,15 +18,34 @@ import { investmentsAuthOwnerSchema, type InvestmentsAuthOwner } from "./investm
 import { itemSchema, type Item } from "./item.js";
 import { securitySchema, type Security } from "./security.js";
 
+/** InvestmentsAuthGetResponse defines the response schema for `/investments/auth/get` */
 export type InvestmentsAuthGetResponse = {
+  /** The accounts for which data is being retrieved */
   accounts: InvestmentAccount[];
+  /**
+   * The holdings belonging to investment accounts associated with the Item. Details of the
+   * securities in the holdings are provided in the `securities` field.
+   */
   holdings: Holding[];
+  /** Objects describing the securities held in the accounts associated with the Item. */
   securities: Security[];
+  /** Information about the account owners for the accounts associated with the Item. */
   owners: InvestmentsAuthOwner[];
+  /** Identifying information for transferring holdings to an investment account. */
   numbers: InvestmentsAuthGetNumbers;
+  /**
+   * Object with metadata pertaining to the source of data for the account numbers, owners, and
+   * holdings that are returned.
+   */
   dataSources: InvestmentsAuthDataSources;
+  /** Additional information for accounts of 401k subtype. */
   accountDetails401K?: InvestmentsAuthAccountDetails401K[];
+  /** Metadata about the Item. */
   item: Item;
+  /**
+   * A unique identifier for the request, which can be used for troubleshooting. This identifier,
+   * like all Plaid identifiers, is case sensitive.
+   */
   requestId: string;
 };
 

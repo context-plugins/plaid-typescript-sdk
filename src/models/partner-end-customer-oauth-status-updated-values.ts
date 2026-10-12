@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The OAuth status of the update */
 export const PartnerEndCustomerOAuthStatusUpdatedValues = {
   NotStarted: "not-started",
   Processing: "processing",

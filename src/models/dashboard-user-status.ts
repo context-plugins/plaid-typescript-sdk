@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The current status of the user. */
 export const DashboardUserStatus = {
   Invited: "invited",
   Active: "active",

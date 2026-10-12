@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Indicates an Item's micro-deposit-based verification or database verification status. */
 export const LinkDeliveryVerificationStatus = {
   AutomaticallyVerified: "automatically_verified",
   PendingAutomaticVerification: "pending_automatic_verification",

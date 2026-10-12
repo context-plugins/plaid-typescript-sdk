@@ -5,10 +5,18 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/**
+ * Fired when the status of an onboarding originator has been updated. Call
+ * `/transfer/originator/get` to check the latest status
+ */
 export type TransferPlatformOnboardingUpdateWebhook = {
+  /** `"TRANSFER"` */
   webhookType: string;
+  /** `"PLATFORM_ONBOARDING_UPDATE"` */
   webhookCode: string;
+  /** The client ID of the originator */
   originatorClientId: string;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

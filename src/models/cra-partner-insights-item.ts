@@ -5,10 +5,15 @@ import {
   type CraPartnerInsightsItemAccount,
 } from "./cra-partner-insights-item-account.js";
 
+/** The details and metadata for an end user's Item. */
 export type CraPartnerInsightsItem = {
+  /** The ID for the institution that the user linked. */
   institutionId?: string;
+  /** The name of the institution the user linked. */
   institutionName?: string;
+  /** The identifier for the Item. */
   itemId?: string;
+  /** A list of accounts in the Item. */
   accounts?: CraPartnerInsightsItemAccount[];
 };
 

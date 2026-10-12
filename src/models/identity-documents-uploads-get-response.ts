@@ -6,9 +6,19 @@ import {
 } from "./account-identity-document-upload.js";
 import { itemSchema, type Item } from "./item.js";
 
+/**
+ * IdentityDocumentsUploadsGetResponse defines the response schema for
+ * `/identity/documents/uploads/get`
+ */
 export type IdentityDocumentsUploadsGetResponse = {
+  /** The accounts for which Identity data has been requested */
   accounts: AccountIdentityDocumentUpload[];
+  /** Metadata about the Item. */
   item: Item;
+  /**
+   * A unique identifier for the request, which can be used for troubleshooting. This identifier,
+   * like all Plaid identifiers, is case sensitive.
+   */
   requestId: string;
 };
 

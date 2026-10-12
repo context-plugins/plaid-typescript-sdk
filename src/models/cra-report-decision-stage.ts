@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The stage in the lending lifecycle for which the report is being retrieved. */
 export const CraReportDecisionStage = {
   Prequalification: "PREQUALIFICATION",
   Decisioning: "DECISIONING",

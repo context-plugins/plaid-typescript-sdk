@@ -2,12 +2,19 @@ import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 import { creditPayStubAddressSchema, type CreditPayStubAddress } from "./credit-pay-stub-address.js";
 
+/** An object representing a recipient used in both 1099-K and 1099-MISC tax documents. */
 export type Credit1099Recipient = {
+  /** Address on the pay stub. */
   address?: CreditPayStubAddress;
+  /** Name of recipient. */
   name?: string | null;
+  /** Tax identification number of recipient. */
   tin?: string | null;
+  /** Account number of recipient. */
   accountNumber?: string | null;
+  /** Checked if FATCA is a filing requirement. */
   factaFilingRequirement?: string | null;
+  /** Checked if 2nd TIN exists. */
   secondTinExists?: string | null;
 };
 

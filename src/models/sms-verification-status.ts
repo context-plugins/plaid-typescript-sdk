@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The outcome status for the individual SMS verification. */
 export const SmsVerificationStatus = {
   Pending: "pending",
   Success: "success",

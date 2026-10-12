@@ -1,6 +1,16 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * A description of the update status for transaction pulls of an Item. This field contains the same
+ * information provided by transactions webhooks, and may be helpful for webhook troubleshooting or
+ * when recovering from missed webhooks.
+ *
+ * `TRANSACTIONS_UPDATE_STATUS_UNKNOWN`: Unable to fetch transactions update status for Item.
+ * `NOT_READY`: The Item is pending transaction pull. `INITIAL_UPDATE_COMPLETE`: Initial pull for
+ * the Item is complete, historical pull is pending. `HISTORICAL_UPDATE_COMPLETE`: Both initial and
+ * historical pull for Item are complete.
+ */
 export const TransactionsUpdateStatus = {
   TransactionsUpdateStatusUnknown: "TRANSACTIONS_UPDATE_STATUS_UNKNOWN",
   NotReady: "NOT_READY",

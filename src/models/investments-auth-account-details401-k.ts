@@ -9,9 +9,16 @@ import {
   type InvestmentsAuth401KFeeDetails,
 } from "./investments-auth401-kfee-details.js";
 
+/** Additional account fee and contribution information for 401k type accounts. */
 export type InvestmentsAuthAccountDetails401K = {
+  /** The ID of the 401k account. */
   accountId?: string;
+  /** Object containing information on account fee transactions for the 401k account. */
   feeDetails?: InvestmentsAuth401KFeeDetails;
+  /**
+   * Object containing information on contribution transactions for the 401k account. Note that the
+   * sum fields in this object represent the total of absolute contribution values.
+   */
   contributionDetails?: InvestmentsAuth401KContributionDetails;
 };
 

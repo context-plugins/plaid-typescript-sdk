@@ -5,16 +5,54 @@ import { consentEventInitiatorSchema, type ConsentEventInitiator } from "./conse
 import { consentEventTypeSchema, type ConsentEventType } from "./consent-event-type.js";
 import { consentedAccountSchema, type ConsentedAccount } from "./consented-account.js";
 
+/** Describes a consent event. */
 export type ConsentEvent = {
+  /**
+   * The Plaid Item ID. The `item_id` is always unique; linking the same account at the same
+   * institution twice will result in two Items with different `item_id` values. Like all Plaid
+   * identifiers, the `item_id` is case-sensitive.
+   */
   itemId?: string;
+  /**
+   * The date and time when the consent event occurred, in [ISO
+   * 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+   */
   createdAt?: Date;
+  /** A broad categorization of the consent event. */
   eventType?: ConsentEventType;
+  /** Codes describing the object of a consent event. */
   eventCode?: ConsentEventCode;
+  /**
+   * Unique identifier for the institution associated with the Item. Field is `null` for Items
+   * created via Same-Day Micro-deposits.
+   */
   institutionId?: string | null;
+  /**
+   * The full name of the institution associated with the Item. Field is `null` for Items created
+   * via Same-Day Micro-deposits.
+   */
   institutionName?: string | null;
+  /** The entity that initiated collection of consent. */
   initiator?: ConsentEventInitiator;
+  /**
+   * A list of strings containing the full list of use cases the end user has consented to for the
+   * Item.
+   *
+   * See the [full
+   * list](https://plaid.com/docs/link/data-transparency-messaging-migration-guide/#updating-link-customizations)
+   * of use cases.
+   */
   consentedUseCases?: string[];
+  /**
+   * A list of strings containing the full list of data scopes the end user has consented to for the
+   * Item. These correspond to consented products; see the [full
+   * mapping](https://plaid.com/docs/link/data-transparency-messaging-migration-guide/#data-scopes-by-product)
+   * of data scopes and products.
+   */
   consentedDataScopes?: string[];
+  /**
+   * An array containing the accounts associated with the Item for which authorizations are granted.
+   */
   consentedAccounts?: ConsentedAccount[];
 };
 

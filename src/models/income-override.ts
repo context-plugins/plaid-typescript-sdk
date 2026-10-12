@@ -3,8 +3,11 @@ import type { Schema } from "../core/validation/schema.js";
 import { paystubOverrideSchema, type PaystubOverride } from "./paystub-override.js";
 import { w2OverrideSchema, type W2Override } from "./w2-override.js";
 
+/** Specify payroll data on the account. */
 export type IncomeOverride = {
+  /** A list of paystubs associated with the account. */
   paystubs?: PaystubOverride[];
+  /** A list of w2s associated with the account. */
   w2S?: W2Override[];
 };
 

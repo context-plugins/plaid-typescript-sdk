@@ -6,10 +6,23 @@ import {
   type TotalCanonicalDescription,
 } from "./total-canonical-description.js";
 
+/** An object representing both the current pay period and year to date amount for a category. */
 export type Total = {
+  /** Commonly used term to describe the line item. */
   canonicalDescription?: TotalCanonicalDescription | null;
+  /** Text of the line item as printed on the paystub. */
   description?: string | null;
+  /**
+   * An object representing a monetary amount.
+   *
+   * @deprecated
+   */
   currentPay?: Pay;
+  /**
+   * An object representing a monetary amount.
+   *
+   * @deprecated
+   */
   ytdPay?: Pay;
 };
 

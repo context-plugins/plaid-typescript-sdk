@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Status of a document for risk signal analysis */
 export const RiskSignalDocumentStatus = {
   Processing: "PROCESSING",
   ProcessingComplete: "PROCESSING_COMPLETE",

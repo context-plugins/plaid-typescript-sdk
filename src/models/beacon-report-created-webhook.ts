@@ -5,10 +5,15 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/** Fired when one of your Beacon Users is first reported to the Beacon network. */
 export type BeaconReportCreatedWebhook = {
+  /** `BEACON` */
   webhookType: string;
+  /** `REPORT_CREATED` */
   webhookCode: string;
+  /** The ID of the associated Beacon Report. */
   beaconReportId: string;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

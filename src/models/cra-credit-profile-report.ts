@@ -13,13 +13,28 @@ import {
   type CraCreditProfileReportMetadata,
 } from "./cra-credit-profile-report-metadata.js";
 
+/** Contains data for the CRA Credit Profile Report. */
 export type CraCreditProfileReport = {
+  /** The time when the report was retrieved. */
   dateRetrieved: Date;
+  /** The inquiry type of credit profile report. */
   inquiryType: CraCreditProfileInquiryType;
+  /** Client-generated identifier, which can be used by lenders to track loan applications. */
   clientReportId: string;
+  /** The LendScore results for the credit profile report. */
   lendScores: (CraCreditProfileLendScore | null)[];
+  /**
+   * A map of cash flow attributes, where the key is a string, and the value is a string, float,
+   * int, or boolean. The specific list of attributes will depend on the cash flow attributes
+   * version used. For a full list of attributes, contact your account manager.
+   */
   cashflowInsightsAttributes: Record<string, Record<string, unknown>> | null;
+  /**
+   * A map of network attributes, where the key is a string, and the value is a float, int, or
+   * boolean. For a full list of attributes, contact your account manager.
+   */
   networkInsightsAttributes: Record<string, Record<string, unknown>> | null;
+  /** Metadata about the CRA Credit Profile Report. */
   metadata: CraCreditProfileReportMetadata | null;
 };
 

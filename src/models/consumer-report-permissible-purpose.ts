@@ -1,6 +1,43 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * Describes the reason you are generating a Consumer Report for this user. When calling
+ * `/link/token/create`, this field is required when using Plaid Check (CRA) products; invalid if
+ * not using Plaid Check (CRA) products.
+ *
+ * `ACCOUNT_REVIEW_CREDIT`: In connection with a consumer credit transaction for the review or
+ * collection of an account pursuant to FCRA Section 604(a)(3)(A).
+ *
+ * `ACCOUNT_REVIEW_NON_CREDIT`: For a legitimate business need of the information to review a
+ * non-credit account provided primarily for personal, family, or household purposes to determine
+ * whether the consumer continues to meet the terms of the account pursuant to FCRA Section
+ * 604(a)(3)(F)(2).
+ *
+ * `EXTENSION_OF_CREDIT`: In connection with a credit transaction initiated by and involving the
+ * consumer pursuant to FCRA Section 604(a)(3)(A).
+ *
+ * `LEGITIMATE_BUSINESS_NEED_TENANT_SCREENING`: For a legitimate business need in connection with a
+ * business transaction initiated by the consumer primarily for personal, family, or household
+ * purposes in connection with a property rental assessment pursuant to FCRA Section
+ * 604(a)(3)(F)(i).
+ *
+ * `LEGITIMATE_BUSINESS_NEED_OTHER`: For a legitimate business need in connection with a business
+ * transaction made primarily for personal, family, or household initiated by the consumer pursuant
+ * to FCRA Section 604(a)(3)(F)(i).
+ *
+ * `WRITTEN_INSTRUCTION_PREQUALIFICATION`: In accordance with the written instructions of the
+ * consumer pursuant to FCRA Section 604(a)(2), to evaluate an application's profile to make an
+ * offer to the consumer.
+ *
+ * `WRITTEN_INSTRUCTION_OTHER`: In accordance with the written instructions of the consumer pursuant
+ * to FCRA Section 604(a)(2), such as when an individual agrees to act as a guarantor or assumes
+ * personal liability for a consumer, business, or commercial loan.
+ *
+ * `ELIGIBILITY_FOR_GOVT_BENEFITS`: In connection with an eligibility determination for a government
+ * benefit where the entity is required to consider an applicant's financial status pursuant to FCRA
+ * Section 604(a)(3)(D).
+ */
 export const ConsumerReportPermissiblePurpose = {
   AccountReviewCredit: "ACCOUNT_REVIEW_CREDIT",
   AccountReviewNonCredit: "ACCOUNT_REVIEW_NON_CREDIT",

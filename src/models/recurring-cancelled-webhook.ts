@@ -5,10 +5,15 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/** Fired when a recurring transfer is cancelled by Plaid. */
 export type RecurringCancelledWebhook = {
+  /** `TRANSFER` */
   webhookType: string;
+  /** `RECURRING_CANCELLED` */
   webhookCode: string;
+  /** Plaid's unique identifier for a recurring transfer. */
   recurringTransferId: string;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

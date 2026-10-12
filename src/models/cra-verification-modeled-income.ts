@@ -5,8 +5,11 @@ import {
   type CraVerificationIncomeValues,
 } from "./cra-verification-income-values.js";
 
+/** Modeled estimate of current income based on recently observed income transactions. */
 export type CraVerificationModeledIncome = {
+  /** Modeled income values for a given time period. */
   monthly: CraVerificationIncomeValues;
+  /** Modeled income values for a given time period. */
   annual: CraVerificationIncomeValues;
 };
 

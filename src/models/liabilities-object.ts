@@ -4,9 +4,13 @@ import { creditCardLiabilitySchema, type CreditCardLiability } from "./credit-ca
 import { mortgageLiabilitySchema, type MortgageLiability } from "./mortgage-liability.js";
 import { studentLoanSchema, type StudentLoan } from "./student-loan.js";
 
+/** An object containing liability accounts */
 export type LiabilitiesObject = {
+  /** The credit accounts returned. */
   credit: CreditCardLiability[] | null;
+  /** The mortgage accounts returned. */
   mortgage: MortgageLiability[] | null;
+  /** The student loan accounts returned. */
   student: StudentLoan[] | null;
 };
 

@@ -23,13 +23,32 @@ import {
   type YtdNetIncomeSummaryFieldNumber,
 } from "./ytd-net-income-summary-field-number.js";
 
+/**
+ * The verified fields from a paystub verification. All fields are provided as reported on the
+ * paystub.
+ */
 export type IncomeSummary = {
+  /** The name of the employer, as reported on the paystub. */
   employerName: EmployerIncomeSummaryFieldString | null;
+  /** The name of the employee, as reported on the paystub. */
   employeeName: EmployeeIncomeSummaryFieldString | null;
+  /** Year-to-date pre-tax earnings, as reported on the paystub. */
   ytdGrossIncome: YtdGrossIncomeSummaryFieldNumber | null;
+  /**
+   * Year-to-date earnings after any tax withholdings, benefit payments or deductions, as reported
+   * on the paystub.
+   */
   ytdNetIncome: YtdNetIncomeSummaryFieldNumber | null;
+  /** The frequency of the pay period. */
   payFrequency: PayFrequency | null;
+  /**
+   * The employee's estimated annual salary, as derived from information reported on the paystub.
+   */
   projectedWage: ProjectedIncomeSummaryFieldNumber | null;
+  /**
+   * Information about the matched direct deposit transaction used to verify a user's payroll
+   * information.
+   */
   verifiedTransaction: TransactionData | null;
 };
 

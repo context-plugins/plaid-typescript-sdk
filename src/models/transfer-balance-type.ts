@@ -1,6 +1,12 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * The type of balance.
+ *
+ * `prefunded_rtp_credits` - Your prefunded RTP credit balance with Plaid `prefunded_ach_credits` -
+ * Your prefunded ACH credit balance with Plaid
+ */
 export const TransferBalanceType = {
   PrefundedRtpCredits: "prefunded_rtp_credits",
   PrefundedAchCredits: "prefunded_ach_credits",

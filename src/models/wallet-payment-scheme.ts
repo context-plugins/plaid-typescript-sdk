@@ -1,6 +1,16 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * The payment scheme used to execute this transaction. This is present only for transaction types
+ * `PAYOUT` and `REFUND`.
+ *
+ * `FASTER_PAYMENTS`: The standard payment scheme within the UK.
+ *
+ * `SEPA_CREDIT_TRANSFER`: The standard payment to a beneficiary within the SEPA area.
+ *
+ * `SEPA_CREDIT_TRANSFER_INSTANT`: Instant payment to a beneficiary within the SEPA area.
+ */
 export const WalletPaymentScheme = {
   FasterPayments: "FASTER_PAYMENTS",
   SepaCreditTransfer: "SEPA_CREDIT_TRANSFER",

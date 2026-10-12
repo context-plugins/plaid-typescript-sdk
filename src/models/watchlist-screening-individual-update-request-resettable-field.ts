@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The name of a field that can be reset back to null */
 export const WatchlistScreeningIndividualUpdateRequestResettableField = {
   Assignee: "assignee",
 } as const;

@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The status type of the student loan */
 export const Type2 = {
   Cancelled: "cancelled",
   ChargedOff: "charged off",

@@ -5,8 +5,11 @@ import {
   type UnofficialCurrencyCodeList,
 } from "./unofficial-currency-code-list.js";
 
+/** The following currency codes are supported by Plaid. */
 export type StandaloneCurrencyCodeList = {
+  /** Plaid supports all ISO 4217 currency codes. */
   isoCurrencyCode: string;
+  /** List of unofficial currency codes */
   unofficialCurrencyCode: UnofficialCurrencyCodeList;
 };
 

@@ -6,8 +6,11 @@ import {
 } from "./individual-screening-hit-names.js";
 import { matchSummarySchema, type MatchSummary } from "./match-summary.js";
 
+/** Analyzed name information for the associated hit */
 export type ScreeningHitNamesItems = {
+  /** Summary object reflecting the match result of the associated data */
   analysis?: MatchSummary;
+  /** Name information for the associated individual watchlist hit */
   data?: IndividualScreeningHitNames;
 };
 

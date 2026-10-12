@@ -7,9 +7,13 @@ import {
   type RiskSignalDocumentReference,
 } from "./risk-signal-document-reference.js";
 
+/** Object containing all risk signals and relevant metadata for a single document */
 export type SingleDocumentRiskSignal = {
+  /** Object containing metadata for the document */
   documentReference: RiskSignalDocumentReference;
+  /** Array of attributes that indicate whether or not there is fraud risk with a document */
   riskSignals: (DocumentRiskSignal | null)[];
+  /** A summary across all risk signals associated with a document */
   riskSummary: DocumentRiskSummary;
 };
 

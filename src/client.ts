@@ -1,10 +1,13 @@
 import { buildAuthSchemes, type AuthSchemes } from "./auth-schemes.js";
-import { DEFAULT_CLIENT_OPTIONS, type ClientOptions } from "./client-options.js";
+import type { ClientOptions } from "./client-options.js";
+import { ApiError, type Declared, type ErrorDecoders, type ErrorPayload } from "./core/api-error.js";
 import type { ApiPromise } from "./core/api-promise.js";
 import type { RequestOptions } from "./core/api-request.js";
 import { allAuth, anyAuth, noneAuth } from "./core/auth/schemes.js";
+import { buildCoreClientOptions } from "./core/client-options.js";
 import { RawClient } from "./core/raw-client.js";
-import { ResponseError, type Declared, type ErrorDecoders } from "./core/response-error.js";
+import * as host from "./core/runtime-environment.js";
+import { uuid } from "./core/uuid.js";
 import * as s from "./core/validation/index.js";
 import {
   accountsBalanceGetRequestSchema,
@@ -2401,27 +2404,67 @@ import {
 } from "./models/webhook-verification-key-get-response.js";
 import { buildServers, type Servers } from "./servers.js";
 
+/**
+ * The Plaid REST API. Please see https://plaid.com/docs/api for more details.
+ */
 export class ThePlaidApiClient {
   readonly #rawClient: RawClient;
   readonly #servers: Servers;
   readonly #auth: AuthSchemes;
 
-  constructor(clientOptions: Partial<ClientOptions> = {}) {
-    const options = { ...DEFAULT_CLIENT_OPTIONS, ...clientOptions };
-
+  constructor(options: ClientOptions = {}) {
     this.#rawClient = new RawClient({
-      timeout: options.timeout,
-      defaultHeaders: [],
+      ...buildCoreClientOptions(options, "THE_PLAID_API_CLIENT_LOG"),
+      defaultHeaders: [
+        { name: "User-Agent", value: "ThePlaidApiClient/0.1.0 TypeScript", schema: s.string() },
+        { name: "X-APIMatic-Lang", value: "TypeScript", schema: s.string() },
+        { name: "X-APIMatic-Package-Version", value: "0.1.0", schema: s.string() },
+        { name: "X-APIMatic-Gen-Version", value: "4.0.0", schema: s.string() },
+        { name: "X-APIMatic-OS", value: host.operatingSystem(), schema: s.optional(s.string()) },
+        { name: "X-APIMatic-Runtime", value: host.runtimeDescription(), schema: s.optional(s.string()) },
+      ],
       defaultQuery: [],
       defaultPathParams: [],
-      fetch: options.fetch,
     });
 
-    this.#servers = buildServers(options.serverEnvironment, options.serverOptions);
+    this.#servers = buildServers(options);
 
     this.#auth = buildAuthSchemes(options, this.#servers, this.#rawClient);
   }
 
+  /**
+   * Retrieve real-time balance data
+   *
+   * @remarks
+   * The `/accounts/balance/get` endpoint returns the real-time balance for each of an Item's
+   * accounts. While other endpoints, such as `/accounts/get`, return a balance object,
+   * `/accounts/balance/get` forces the available and current balance fields to be refreshed rather
+   * than cached. This endpoint can be used for existing Items that were added via any of Plaid's
+   * other products. This endpoint can be used as long as Link has been initialized with any other
+   * product; `balance` itself is not a product that can be used to initialize Link. As this
+   * endpoint triggers a synchronous request for fresh data, latency may be higher than for other
+   * Plaid endpoints (typically less than 10 seconds, but occasionally up to 30 seconds or more); if
+   * you encounter errors, you may find it necessary to adjust your timeout period when making
+   * requests.
+   *
+   * Note: If you are getting real-time balance for the purpose of assessing the return risk of a
+   * proposed ACH transaction, it is recommended to use `/signal/evaluate` instead of
+   * `/accounts/balance/get`. `/signal/evaluate` returns the same real-time balance information and
+   * also provides access to Signal Rules, which provides no-code transaction business logic
+   * configuration, backtesting and recommendations for tuning your transaction acceptance logic,
+   * and the ability to easily switch between Balance and Signal Transaction Scores as needed for
+   * ultra-low-latency, ML-powered risk assessments. For more details, see the [Balance
+   * documentation](https://plaid.com/docs/balance/#balance-integration-options).
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.AccountsBalanceGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   accountsBalanceGet(
     request: ThePlaidApiClient.AccountsBalanceGetRequestParams,
     options?: RequestOptions,
@@ -2429,8 +2472,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/accounts/balance/get"),
+        urlTemplate: this.#servers.default("/accounts/balance/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: accountsBalanceGetRequestSchema },
       },
       {
@@ -2441,6 +2487,37 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve accounts
+   *
+   * @remarks
+   * The `/accounts/get` endpoint can be used to retrieve a list of accounts associated with any
+   * linked Item. Plaid will only return active bank accounts -- that is, accounts that are not
+   * closed and are capable of carrying a balance. To return new accounts that were created after
+   * the user linked their Item, you can listen for the
+   * [`NEW_ACCOUNTS_AVAILABLE`](https://plaid.com/docs/api/items/#new_accounts_available) webhook
+   * and then use Link's [update mode](https://plaid.com/docs/link/update-mode/) to request that the
+   * user share this new account with you.
+   *
+   * `/accounts/get` is free to use and retrieves cached information, rather than extracting fresh
+   * information from the institution. The balance returned will reflect the balance at the time of
+   * the last successful Item update. If the Item is enabled for a regularly updating product, such
+   * as Transactions, Investments, or Liabilities, the balance will typically update about once a
+   * day, as long as the Item is healthy. If the Item is enabled only for products that do not
+   * frequently update, such as Auth or Identity, balance data may be much older.
+   *
+   * For real-time balance information, use the paid endpoints `/accounts/balance/get` or
+   * `/signal/evaluate` instead.
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.AccountsGetError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   accountsGet(
     request: ThePlaidApiClient.AccountsGetRequestParams,
     options?: RequestOptions,
@@ -2448,8 +2525,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/accounts/get"),
+        urlTemplate: this.#servers.default("/accounts/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: accountsGetRequestSchema },
       },
       {
@@ -2460,6 +2540,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve information about a Plaid application
+   *
+   * @remarks
+   * Allows financial institutions to retrieve information about Plaid clients for the purpose of
+   * building control-tower experiences
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.ApplicationGetError} when the API answers with an error status
+   * — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   applicationGet(
     request: ThePlaidApiClient.ApplicationGetRequestParams,
     options?: RequestOptions,
@@ -2467,8 +2563,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/application/get"),
+        urlTemplate: this.#servers.default("/application/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: applicationGetRequestSchema },
       },
       {
@@ -2479,6 +2578,30 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create Asset Report Audit Copy
+   *
+   * @remarks
+   * Plaid can provide an Audit Copy of any Asset Report directly to a participating third party on
+   * your behalf. For example, Plaid can supply an Audit Copy directly to the GSEs on your behalf if
+   * you participate in Fannie Mae's Day 1 Certainty™ program or utilize Freddie Mac's Loan Product
+   * Advisor® (LPA®) Asset and Income Modeler (AIM). An Audit Copy contains the same underlying data
+   * as the Asset Report.
+   *
+   * To grant access to an Audit Copy, use the `/asset_report/audit_copy/create` endpoint to create
+   * an `audit_copy_token` and then pass that token to the third party who needs access. Each third
+   * party has its own `auditor_id`, for example `fannie_mae`. You'll need to create a separate
+   * Audit Copy for each third party to whom you want to grant access to the Report.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.AssetReportAuditCopyCreateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   assetReportAuditCopyCreate(
     request: ThePlaidApiClient.AssetReportAuditCopyCreateRequestParams,
     options?: RequestOptions,
@@ -2486,8 +2609,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/asset_report/audit_copy/create"),
+        urlTemplate: this.#servers.default("/asset_report/audit_copy/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: assetReportAuditCopyCreateRequestSchema },
       },
       {
@@ -2498,6 +2624,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve an Asset Report Audit Copy
+   *
+   * @remarks
+   * `/asset_report/audit_copy/get` allows auditors to get a copy of an Asset Report that was
+   * previously shared via the `/asset_report/audit_copy/create` endpoint. The caller of
+   * `/asset_report/audit_copy/create` must provide the `audit_copy_token` to the auditor. This
+   * token can then be used to call `/asset_report/audit_copy/get`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.AssetReportAuditCopyGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   assetReportAuditCopyGet(
     request: ThePlaidApiClient.AssetReportAuditCopyGetRequestParams,
     options?: RequestOptions,
@@ -2505,8 +2649,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/asset_report/audit_copy/get"),
+        urlTemplate: this.#servers.default("/asset_report/audit_copy/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: assetReportAuditCopyGetRequestSchema },
       },
       {
@@ -2517,6 +2664,28 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve a PDF Asset Report Audit Copy
+   *
+   * @remarks
+   * The `/asset_report/audit_copy/pdf/get` endpoint retrieves an Asset Report Audit Copy in PDF
+   * format. The caller must provide the `audit_copy_token` that was shared via the
+   * `/asset_report/audit_copy/create` endpoint.
+   *
+   * The response to `/asset_report/audit_copy/pdf/get` is the PDF binary data. The `request_id` is
+   * returned in the `Plaid-Request-ID` header.
+   *
+   * [View a sample PDF Asset Report](https://plaid.com/documents/sample-asset-report.pdf).
+   *
+   * @returns A PDF of the Asset Report Audit Copy
+   *
+   * @throws {@link ThePlaidApiClient.AssetReportAuditCopyPdfGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   assetReportAuditCopyPdfGet(
     request: ThePlaidApiClient.AssetReportAuditCopyPdfGetRequestParams,
     options?: RequestOptions,
@@ -2524,8 +2693,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/asset_report/audit_copy/pdf/get"),
+        urlTemplate: this.#servers.default("/asset_report/audit_copy/pdf/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: assetReportAuditCopyPdfGetRequestSchema },
       },
       {
@@ -2536,6 +2708,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Remove Asset Report Audit Copy
+   *
+   * @remarks
+   * The `/asset_report/audit_copy/remove` endpoint allows you to remove an Audit Copy. Removing an
+   * Audit Copy invalidates the `audit_copy_token` associated with it, meaning both you and any
+   * third parties holding the token will no longer be able to use it to access Report data. Items
+   * associated with the Asset Report, the Asset Report itself and other Audit Copies of it are not
+   * affected and will remain accessible after removing the given Audit Copy.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.AssetReportAuditCopyRemoveError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   assetReportAuditCopyRemove(
     request: ThePlaidApiClient.AssetReportAuditCopyRemoveRequestParams,
     options?: RequestOptions,
@@ -2543,8 +2734,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/asset_report/audit_copy/remove"),
+        urlTemplate: this.#servers.default("/asset_report/audit_copy/remove"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: assetReportAuditCopyRemoveRequestSchema },
       },
       {
@@ -2555,6 +2749,34 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create an Asset Report
+   *
+   * @remarks
+   * The `/asset_report/create` endpoint initiates the process of creating an Asset Report, which
+   * can then be retrieved by passing the `asset_report_token` return value to the
+   * `/asset_report/get` or `/asset_report/pdf/get` endpoints.
+   *
+   * The Asset Report takes some time to be created and is not available immediately after calling
+   * `/asset_report/create`. The exact amount of time to create the report will vary depending on
+   * how many days of history are requested and will typically range from a few seconds to about one
+   * minute. When the Asset Report is ready to be retrieved using `/asset_report/get` or
+   * `/asset_report/pdf/get`, Plaid will fire a `PRODUCT_READY` webhook. For full details of the
+   * webhook schema, see [Asset Report
+   * webhooks](https://plaid.com/docs/api/products/assets/#webhooks).
+   *
+   * The `/asset_report/create` endpoint creates an Asset Report at a moment in time. Asset Reports
+   * are immutable. To get an updated Asset Report, use the `/asset_report/refresh` endpoint.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.AssetReportCreateError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   assetReportCreate(
     request: ThePlaidApiClient.AssetReportCreateRequestParams,
     options?: RequestOptions,
@@ -2562,8 +2784,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/asset_report/create"),
+        urlTemplate: this.#servers.default("/asset_report/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: assetReportCreateRequestSchema },
       },
       {
@@ -2574,6 +2799,39 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Filter Asset Report
+   *
+   * @remarks
+   * By default, an Asset Report will contain all of the accounts on a given Item. In some cases,
+   * you may not want the Asset Report to contain all accounts. For example, you might have the end
+   * user choose which accounts are relevant in Link using the Account Select view, which you can
+   * enable in the dashboard. Or, you might always exclude certain account types or subtypes, which
+   * you can identify by using the `/accounts/get` endpoint. To narrow an Asset Report to only a
+   * subset of accounts, use the `/asset_report/filter` endpoint.
+   *
+   * To exclude certain Accounts from an Asset Report, first use the `/asset_report/create` endpoint
+   * to create the report, then send the `asset_report_token` along with a list of `account_ids` to
+   * exclude to the `/asset_report/filter` endpoint, to create a new Asset Report which contains
+   * only a subset of the original Asset Report's data.
+   *
+   * Because Asset Reports are immutable, calling `/asset_report/filter` does not alter the original
+   * Asset Report in any way; rather, `/asset_report/filter` creates a new Asset Report with a new
+   * token and id. Asset Reports created via `/asset_report/filter` do not contain new Asset data,
+   * and are not billed.
+   *
+   * Plaid will fire a [`PRODUCT_READY`](https://plaid.com/docs/api/products/assets/#product_ready)
+   * webhook once generation of the filtered Asset Report has completed.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.AssetReportFilterError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   assetReportFilter(
     request: ThePlaidApiClient.AssetReportFilterRequestParams,
     options?: RequestOptions,
@@ -2581,8 +2839,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/asset_report/filter"),
+        urlTemplate: this.#servers.default("/asset_report/filter"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: assetReportFilterRequestSchema },
       },
       {
@@ -2593,6 +2854,39 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve an Asset Report
+   *
+   * @remarks
+   * The `/asset_report/get` endpoint retrieves the Asset Report in JSON format. Before calling
+   * `/asset_report/get`, you must first create the Asset Report using `/asset_report/create` (or
+   * filter an Asset Report using `/asset_report/filter`) and then wait for the
+   * [`PRODUCT_READY`](https://plaid.com/docs/api/products/assets/#product_ready) webhook to fire,
+   * indicating that the Report is ready to be retrieved.
+   *
+   * By default, an Asset Report includes transaction descriptions as returned by the bank, as
+   * opposed to parsed and categorized by Plaid. You can also receive cleaned and categorized
+   * transactions, as well as additional insights like merchant name or location information. We
+   * call this an Asset Report with Insights. An Asset Report with Insights provides transaction
+   * category, location, and merchant information in addition to the transaction strings provided in
+   * a standard Asset Report. To retrieve an Asset Report with Insights, call the
+   * `/asset_report/get` endpoint with `include_insights` set to `true`.
+   *
+   * For latency-sensitive applications, you can optionally call `/asset_report/create` with
+   * `options.add_ons` set to `["fast_assets"]`. This will cause Plaid to create two versions of the
+   * Asset Report: one with only current and available balance and identity information, and then
+   * later on the complete Asset Report. You will receive separate webhooks for each version of the
+   * Asset Report.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.AssetReportGetError} when the API answers with an error status
+   * — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   assetReportGet(
     request: ThePlaidApiClient.AssetReportGetRequestParams,
     options?: RequestOptions,
@@ -2600,8 +2894,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/asset_report/get"),
+        urlTemplate: this.#servers.default("/asset_report/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: assetReportGetRequestSchema },
       },
       {
@@ -2612,6 +2909,30 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve a PDF Asset Report
+   *
+   * @remarks
+   * The `/asset_report/pdf/get` endpoint retrieves the Asset Report in PDF format. Before calling
+   * `/asset_report/pdf/get`, you must first create the Asset Report using `/asset_report/create`
+   * (or filter an Asset Report using `/asset_report/filter`) and then wait for the
+   * [`PRODUCT_READY`](https://plaid.com/docs/api/products/assets/#product_ready) webhook to fire,
+   * indicating that the Report is ready to be retrieved.
+   *
+   * The response to `/asset_report/pdf/get` is the PDF binary data. The `request_id` is returned in
+   * the `Plaid-Request-ID` header.
+   *
+   * [View a sample PDF Asset Report](https://plaid.com/documents/sample-asset-report.pdf).
+   *
+   * @returns A PDF of the Asset Report
+   *
+   * @throws {@link ThePlaidApiClient.AssetReportPdfGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   assetReportPdfGet(
     request: ThePlaidApiClient.AssetReportPdfGetRequestParams,
     options?: RequestOptions,
@@ -2619,8 +2940,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/asset_report/pdf/get"),
+        urlTemplate: this.#servers.default("/asset_report/pdf/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: assetReportPdfGetRequestSchema },
       },
       {
@@ -2631,6 +2955,31 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Refresh an Asset Report
+   *
+   * @remarks
+   * An Asset Report is an immutable snapshot of a user's assets. In order to "refresh" an Asset
+   * Report you created previously, you can use the `/asset_report/refresh` endpoint to create a new
+   * Asset Report based on the old one, but with the most recent data available.
+   *
+   * The new Asset Report will contain the same Items as the original Report, as well as the same
+   * filters applied by any call to `/asset_report/filter`. By default, the new Asset Report will
+   * also use the same parameters you submitted with your original `/asset_report/create` request,
+   * but the original `days_requested` value and the values of any parameters in the `options`
+   * object can be overridden with new values. To change these arguments, simply supply new values
+   * for them in your request to `/asset_report/refresh`. Submit an empty string ("") for any
+   * previously-populated fields you would like set as empty.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.AssetReportRefreshError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   assetReportRefresh(
     request: ThePlaidApiClient.AssetReportRefreshRequestParams,
     options?: RequestOptions,
@@ -2638,8 +2987,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/asset_report/refresh"),
+        urlTemplate: this.#servers.default("/asset_report/refresh"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: assetReportRefreshRequestSchema },
       },
       {
@@ -2650,6 +3002,29 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Delete an Asset Report
+   *
+   * @remarks
+   * The `/item/remove` endpoint allows you to invalidate an `access_token`, meaning you will not be
+   * able to create new Asset Reports with it. Removing an Item does not affect any Asset Reports or
+   * Audit Copies you have already created, which will remain accessible until you remove them
+   * specifically.
+   *
+   * The `/asset_report/remove` endpoint allows you to remove access to an Asset Report. Removing an
+   * Asset Report invalidates its `asset_report_token`, meaning you will no longer be able to use it
+   * to access Report data or create new Audit Copies. Removing an Asset Report does not affect the
+   * underlying Items, but does invalidate any `audit_copy_tokens` associated with the Asset Report.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.AssetReportRemoveError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   assetReportRemove(
     request: ThePlaidApiClient.AssetReportRemoveRequestParams,
     options?: RequestOptions,
@@ -2657,8 +3032,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/asset_report/remove"),
+        urlTemplate: this.#servers.default("/asset_report/remove"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: assetReportRemoveRequestSchema },
       },
       {
@@ -2669,6 +3047,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve auth data
+   *
+   * @remarks
+   * The `/auth/get` endpoint returns the bank account and bank identification numbers (such as
+   * routing numbers, for US accounts) associated with an Item's checking, savings, and cash
+   * management accounts, along with high-level account data and balances when available.
+   *
+   * Versioning note: In API version 2017-03-08, the schema of the `numbers` object returned by this
+   * endpoint is substantially different. For details, see [Plaid API
+   * versioning](https://plaid.com/docs/api/versioning/#version-2018-05-22).
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.AuthGetError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   authGet(
     request: ThePlaidApiClient.AuthGetRequestParams,
     options?: RequestOptions,
@@ -2676,8 +3075,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/auth/get"),
+        urlTemplate: this.#servers.default("/auth/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: authGetRequestSchema },
       },
       {
@@ -2688,6 +3090,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Verify auth data
+   *
+   * @remarks
+   * The `/auth/verify` endpoint verifies bank account and routing numbers and (optionally) account
+   * owner names against Plaid's database via [Database
+   * Auth](https://plaid.com/docs/auth/coverage/database-auth/). It can be used to verify account
+   * numbers that were not collected via the Plaid Link flow.
+   *
+   * This endpoint is currently in Early Availability; contact sales or your Plaid account manager
+   * to request access.
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.AuthVerifyError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   authVerify(
     request: ThePlaidApiClient.AuthVerifyRequestParams,
     options?: RequestOptions,
@@ -2695,8 +3118,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/auth/verify"),
+        urlTemplate: this.#servers.default("/auth/verify"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: authVerifyRequestSchema },
       },
       {
@@ -2707,6 +3133,32 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Get balance of your Bank Transfer account
+   *
+   * @remarks
+   * Use the `/bank_transfer/balance/get` endpoint to see the available balance in your bank
+   * transfer account. Debit transfers increase this balance once their status is posted. Credit
+   * transfers decrease this balance when they are created.
+   *
+   * The transactable balance shows the amount in your account that you are able to use for
+   * transfers, and is essentially your available balance minus your minimum balance.
+   *
+   * Note that this endpoint can only be used with FBO accounts, when using Bank Transfers in the
+   * Full Service configuration. It cannot be used on your own account when using Bank Transfers in
+   * the BTS Platform configuration.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.BankTransferBalanceGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   bankTransferBalanceGet(
     request: ThePlaidApiClient.BankTransferBalanceGetRequestParams,
     options?: RequestOptions,
@@ -2714,8 +3166,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/bank_transfer/balance/get"),
+        urlTemplate: this.#servers.default("/bank_transfer/balance/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: bankTransferBalanceGetRequestSchema },
       },
       {
@@ -2726,6 +3181,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Cancel a bank transfer
+   *
+   * @remarks
+   * Use the `/bank_transfer/cancel` endpoint to cancel a bank transfer. A transfer is eligible for
+   * cancelation if the `cancellable` property returned by `/bank_transfer/get` is `true`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.BankTransferCancelError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   bankTransferCancel(
     request: ThePlaidApiClient.BankTransferCancelRequestParams,
     options?: RequestOptions,
@@ -2733,8 +3206,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/bank_transfer/cancel"),
+        urlTemplate: this.#servers.default("/bank_transfer/cancel"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: bankTransferCancelRequestSchema },
       },
       {
@@ -2745,6 +3221,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Create a bank transfer
+   *
+   * @remarks
+   * Use the `/bank_transfer/create` endpoint to initiate a new bank transfer.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.BankTransferCreateError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   bankTransferCreate(
     request: ThePlaidApiClient.BankTransferCreateRequestParams,
     options?: RequestOptions,
@@ -2752,8 +3245,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/bank_transfer/create"),
+        urlTemplate: this.#servers.default("/bank_transfer/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: bankTransferCreateRequestSchema },
       },
       {
@@ -2764,6 +3260,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * List bank transfer events
+   *
+   * @remarks
+   * Use the `/bank_transfer/event/list` endpoint to get a list of Plaid-initiated ACH or bank
+   * transfer events based on specified filter criteria. When using Auth with micro-deposit
+   * verification enabled, this endpoint can be used to fetch status updates on ACH micro-deposits.
+   * For more details, see [micro-deposit
+   * events](https://plaid.com/docs/auth/coverage/microdeposit-events/).
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.BankTransferEventListError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   bankTransferEventList(
     request: ThePlaidApiClient.BankTransferEventListRequestParams,
     options?: RequestOptions,
@@ -2771,8 +3286,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/bank_transfer/event/list"),
+        urlTemplate: this.#servers.default("/bank_transfer/event/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: bankTransferEventListRequestSchema },
       },
       {
@@ -2783,6 +3301,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Sync bank transfer events
+   *
+   * @remarks
+   * `/bank_transfer/event/sync` allows you to request up to the next 25 Plaid-initiated bank
+   * transfer events that happened after a specific `event_id`. When using Auth with micro-deposit
+   * verification enabled, this endpoint can be used to fetch status updates on ACH micro-deposits.
+   * For more details, see [micro-deposit
+   * events](https://plaid.com/docs/auth/coverage/microdeposit-events/).
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.BankTransferEventSyncError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   bankTransferEventSync(
     request: ThePlaidApiClient.BankTransferEventSyncRequestParams,
     options?: RequestOptions,
@@ -2790,8 +3327,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/bank_transfer/event/sync"),
+        urlTemplate: this.#servers.default("/bank_transfer/event/sync"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: bankTransferEventSyncRequestSchema },
       },
       {
@@ -2802,6 +3342,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Retrieve a bank transfer
+   *
+   * @remarks
+   * The `/bank_transfer/get` fetches information about the bank transfer corresponding to the given
+   * `bank_transfer_id`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.BankTransferGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   bankTransferGet(
     request: ThePlaidApiClient.BankTransferGetRequestParams,
     options?: RequestOptions,
@@ -2809,8 +3367,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/bank_transfer/get"),
+        urlTemplate: this.#servers.default("/bank_transfer/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: bankTransferGetRequestSchema },
       },
       {
@@ -2821,6 +3382,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) List bank transfers
+   *
+   * @remarks
+   * Use the `/bank_transfer/list` endpoint to see a list of all your bank transfers and their
+   * statuses. Results are paginated; use the `count` and `offset` query parameters to retrieve the
+   * desired bank transfers.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.BankTransferListError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   bankTransferList(
     request: ThePlaidApiClient.BankTransferListRequestParams,
     options?: RequestOptions,
@@ -2828,8 +3408,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/bank_transfer/list"),
+        urlTemplate: this.#servers.default("/bank_transfer/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: bankTransferListRequestSchema },
       },
       {
@@ -2840,6 +3423,29 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Migrate account into Bank Transfers
+   *
+   * @remarks
+   * As an alternative to adding Items via Link, you can also use the
+   * `/bank_transfer/migrate_account` endpoint to migrate known account and routing numbers to Plaid
+   * Items. Note that Items created in this way are not compatible with endpoints for other
+   * products, such as `/accounts/balance/get`, and can only be used with Bank Transfer endpoints.
+   * If you require access to other endpoints, create the Item through Link instead. Access to
+   * `/bank_transfer/migrate_account` is not enabled by default; to obtain access, contact your
+   * Plaid account manager.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.BankTransferMigrateAccountError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   bankTransferMigrateAccount(
     request: ThePlaidApiClient.BankTransferMigrateAccountRequestParams,
     options?: RequestOptions,
@@ -2847,8 +3453,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/bank_transfer/migrate_account"),
+        urlTemplate: this.#servers.default("/bank_transfer/migrate_account"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: bankTransferMigrateAccountRequestSchema },
       },
       {
@@ -2859,6 +3468,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Retrieve a sweep
+   *
+   * @remarks
+   * The `/bank_transfer/sweep/get` endpoint fetches information about the sweep corresponding to
+   * the given `sweep_id`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.BankTransferSweepGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   bankTransferSweepGet(
     request: ThePlaidApiClient.BankTransferSweepGetRequestParams,
     options?: RequestOptions,
@@ -2866,8 +3493,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/bank_transfer/sweep/get"),
+        urlTemplate: this.#servers.default("/bank_transfer/sweep/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: bankTransferSweepGetRequestSchema },
       },
       {
@@ -2878,6 +3508,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) List sweeps
+   *
+   * @remarks
+   * The `/bank_transfer/sweep/list` endpoint fetches information about the sweeps matching the
+   * given filters.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.BankTransferSweepListError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   bankTransferSweepList(
     request: ThePlaidApiClient.BankTransferSweepListRequestParams,
     options?: RequestOptions,
@@ -2885,8 +3533,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/bank_transfer/sweep/list"),
+        urlTemplate: this.#servers.default("/bank_transfer/sweep/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: bankTransferSweepListRequestSchema },
       },
       {
@@ -2897,6 +3548,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Evaluate risk of a bank account
+   *
+   * @remarks
+   * Use `/beacon/account_risk/v1/evaluate` to get risk insights for a linked account.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.BeaconAccountRiskEvaluateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   beaconAccountRiskEvaluate(
     request: ThePlaidApiClient.BeaconAccountRiskEvaluateRequestParams,
     options?: RequestOptions,
@@ -2904,8 +3572,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beacon/account_risk/v1/evaluate"),
+        urlTemplate: this.#servers.default("/beacon/account_risk/v1/evaluate"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: beaconAccountRiskEvaluateRequestSchema },
       },
       {
@@ -2916,234 +3587,567 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Get a Beacon Duplicate
+   *
+   * @remarks
+   * Returns a Beacon Duplicate for a given Beacon Duplicate id.
+   *
+   * A Beacon Duplicate represents a pair of similar Beacon Users within your organization.
+   *
+   * Two Beacon User revisions are returned for each Duplicate record in either the `beacon_user1`
+   * or `beacon_user2` response fields.
+   *
+   * The `analysis` field in the response indicates which fields matched between `beacon_user1` and
+   * `beacon_user2`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   beaconDuplicateGet(
     request: ThePlaidApiClient.BeaconDuplicateGetRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<BeaconDuplicateGetResponse, ResponseError> {
-    return this.#rawClient.execute<BeaconDuplicateGetResponse, ResponseError>(
+  ): ApiPromise<BeaconDuplicateGetResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beacon/duplicate/get"),
+        urlTemplate: this.#servers.default("/beacon/duplicate/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: beaconDuplicateGetRequestSchema },
       },
       {
         success: { kind: "json", schema: beaconDuplicateGetResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * (Deprecated) Create a Beacon Report
+   *
+   * @remarks
+   * Create a fraud report for a given Beacon User.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   beaconReportCreate(
     request: ThePlaidApiClient.BeaconReportCreateRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<BeaconReportCreateResponse, ResponseError> {
-    return this.#rawClient.execute<BeaconReportCreateResponse, ResponseError>(
+  ): ApiPromise<BeaconReportCreateResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beacon/report/create"),
+        urlTemplate: this.#servers.default("/beacon/report/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: beaconReportCreateRequestSchema },
       },
       {
         success: { kind: "json", schema: beaconReportCreateResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * (Deprecated) Get a Beacon Report
+   *
+   * @remarks
+   * Returns a Beacon Report for a given Beacon Report ID.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   beaconReportGet(
     request: ThePlaidApiClient.BeaconReportGetRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<BeaconReportGetResponse, ResponseError> {
-    return this.#rawClient.execute<BeaconReportGetResponse, ResponseError>(
+  ): ApiPromise<BeaconReportGetResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beacon/report/get"),
+        urlTemplate: this.#servers.default("/beacon/report/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: beaconReportGetRequestSchema },
       },
       {
         success: { kind: "json", schema: beaconReportGetResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * (Deprecated) List Beacon Reports for a Beacon User
+   *
+   * @remarks
+   * Use the `/beacon/report/list` endpoint to view all Beacon Reports you created for a specific
+   * Beacon User. The reports returned by this endpoint are exclusively reports you created for a
+   * specific user. A Beacon User can only have one active report at a time, but a new report can be
+   * created if a previous report has been deleted. The results from this endpoint are paginated;
+   * the `next_cursor` field will be populated if there is another page of results that can be
+   * retrieved. To fetch the next page, pass the `next_cursor` value as the `cursor` parameter in
+   * the next request.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   beaconReportList(
     request: ThePlaidApiClient.BeaconReportListRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<BeaconReportListResponse, ResponseError> {
-    return this.#rawClient.execute<BeaconReportListResponse, ResponseError>(
+  ): ApiPromise<BeaconReportListResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beacon/report/list"),
+        urlTemplate: this.#servers.default("/beacon/report/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: beaconReportListRequestSchema },
       },
       {
         success: { kind: "json", schema: beaconReportListResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * (Deprecated) Get a Beacon Report Syndication
+   *
+   * @remarks
+   * Returns a Beacon Report Syndication for a given Beacon Report Syndication id.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   beaconReportSyndicationGet(
     request: ThePlaidApiClient.BeaconReportSyndicationGetRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<BeaconReportSyndicationGetResponse, ResponseError> {
-    return this.#rawClient.execute<BeaconReportSyndicationGetResponse, ResponseError>(
+  ): ApiPromise<BeaconReportSyndicationGetResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beacon/report_syndication/get"),
+        urlTemplate: this.#servers.default("/beacon/report_syndication/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: beaconReportSyndicationGetRequestSchema },
       },
       {
         success: { kind: "json", schema: beaconReportSyndicationGetResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * (Deprecated) List Beacon Report Syndications for a Beacon User
+   *
+   * @remarks
+   * Use the `/beacon/report_syndication/list` endpoint to view all Beacon Reports that have been
+   * syndicated to a specific Beacon User. This endpoint returns Beacon Report Syndications which
+   * are references to Beacon Reports created either by you, or another Beacon customer, that
+   * matched the specified Beacon User. A Beacon User can have multiple active Beacon Report
+   * Syndications at once. The results from this endpoint are paginated; the `next_cursor` field
+   * will be populated if there is another page of results that can be retrieved. To fetch the next
+   * page, pass the `next_cursor` value as the `cursor` parameter in the next request.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   beaconReportSyndicationList(
     request: ThePlaidApiClient.BeaconReportSyndicationListRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<BeaconReportSyndicationListResponse, ResponseError> {
-    return this.#rawClient.execute<BeaconReportSyndicationListResponse, ResponseError>(
+  ): ApiPromise<BeaconReportSyndicationListResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beacon/report_syndication/list"),
+        urlTemplate: this.#servers.default("/beacon/report_syndication/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: beaconReportSyndicationListRequestSchema },
       },
       {
         success: { kind: "json", schema: beaconReportSyndicationListResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * (Deprecated) Get Account Insights for a Beacon User
+   *
+   * @remarks
+   * Get Account Insights for all Accounts linked to this Beacon User. The insights for each account
+   * are computed based on the information that was last retrieved from the financial institution.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   beaconUserAccountInsightsGet(
     request: ThePlaidApiClient.BeaconUserAccountInsightsGetRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<BeaconUserAccountInsightsGetResponse, ResponseError> {
-    return this.#rawClient.execute<BeaconUserAccountInsightsGetResponse, ResponseError>(
+  ): ApiPromise<BeaconUserAccountInsightsGetResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beacon/user/account_insights/get"),
+        urlTemplate: this.#servers.default("/beacon/user/account_insights/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: beaconUserAccountInsightsGetRequestSchema },
       },
       {
         success: { kind: "json", schema: beaconUserAccountInsightsGetResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * (Deprecated) Create a Beacon User
+   *
+   * @remarks
+   * Create and scan a Beacon User against your Beacon Program, according to your program's
+   * settings.
+   *
+   * When you submit a new user to `/beacon/user/create`, several checks are performed immediately:
+   *
+   *   - The user's PII (provided within the `user` object) is searched against all other users
+   *     within the Beacon Program you specified. If a match is found that violates your program's
+   *     "Duplicate Information Filtering" settings, the user will be returned with a status of
+   *     `pending_review`.
+   *
+   *   - The user's PII is also searched against all fraud reports created by your organization
+   *     across all of your Beacon Programs. If the user's data matches a fraud report that your
+   *     team created, the user will be returned with a status of `rejected`.
+   *
+   *   - Finally, the user's PII is searched against all fraud reports shared with the Beacon
+   *     Network by other companies. If a matching fraud report is found, the user will be returned
+   *     with a `pending_review` status if your program has enabled automatic flagging based on
+   *     network fraud.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   beaconUserCreate(
     request: ThePlaidApiClient.BeaconUserCreateRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<BeaconUserCreateResponse, ResponseError> {
-    return this.#rawClient.execute<BeaconUserCreateResponse, ResponseError>(
+  ): ApiPromise<BeaconUserCreateResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beacon/user/create"),
+        urlTemplate: this.#servers.default("/beacon/user/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: beaconUserCreateRequestSchema },
       },
       {
         success: { kind: "json", schema: beaconUserCreateResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * (Deprecated) Get a Beacon User
+   *
+   * @remarks
+   * Fetch a Beacon User.
+   *
+   * The Beacon User is returned with all of their associated information and a `status` based on
+   * the Beacon Network duplicate record and fraud checks.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   beaconUserGet(
     request: ThePlaidApiClient.BeaconUserGetRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<BeaconUserGetResponse, ResponseError> {
-    return this.#rawClient.execute<BeaconUserGetResponse, ResponseError>(
+  ): ApiPromise<BeaconUserGetResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beacon/user/get"),
+        urlTemplate: this.#servers.default("/beacon/user/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: beaconUserGetRequestSchema },
       },
       {
         success: { kind: "json", schema: beaconUserGetResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * (Deprecated) List a Beacon User's history
+   *
+   * @remarks
+   * List all changes to the Beacon User in reverse-chronological order.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   beaconUserHistoryList(
     request: ThePlaidApiClient.BeaconUserHistoryListRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<BeaconUserHistoryListResponse, ResponseError> {
-    return this.#rawClient.execute<BeaconUserHistoryListResponse, ResponseError>(
+  ): ApiPromise<BeaconUserHistoryListResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beacon/user/history/list"),
+        urlTemplate: this.#servers.default("/beacon/user/history/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: beaconUserHistoryListRequestSchema },
       },
       {
         success: { kind: "json", schema: beaconUserHistoryListResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * (Deprecated) Review a Beacon User
+   *
+   * @remarks
+   * Update the status of a Beacon User.
+   *
+   * When updating a Beacon User's status via this endpoint, Plaid validates that the status change
+   * is consistent with the related state for this Beacon User. Specifically, we will check:
+   *
+   * 1. Whether there are any associated Beacon Reports connected to the Beacon User, and
+   * 2. Whether there are any confirmed Beacon Report Syndications connected to the Beacon User.
+   *
+   * When updating a Beacon User's status to `rejected`, we enforce that either a Beacon Report has
+   * been created for the Beacon User or a Beacon Report Syndication has been confirmed. When
+   * updating a Beacon User's status to `cleared`, we enforce that there are no active Beacon
+   * Reports or confirmed Beacon Report Syndications associated with the user. If you previously
+   * created a Beacon Report for this user, you must delete it before updating the Beacon User's
+   * status to `cleared`. There are no restrictions on updating a Beacon User's status to
+   * `pending_review`.
+   *
+   * If these conditions are not met, the request will be rejected with an error explaining the
+   * issue.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   beaconUserReview(
     request: ThePlaidApiClient.BeaconUserReviewRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<BeaconUserGetResponse, ResponseError> {
-    return this.#rawClient.execute<BeaconUserGetResponse, ResponseError>(
+  ): ApiPromise<BeaconUserGetResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beacon/user/review"),
+        urlTemplate: this.#servers.default("/beacon/user/review"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: beaconUserReviewRequestSchema },
       },
       {
         success: { kind: "json", schema: beaconUserGetResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * (Deprecated) Update the identity data of a Beacon User
+   *
+   * @remarks
+   * Update the identity data for a Beacon User in your Beacon Program or add new accounts to the
+   * Beacon User.
+   *
+   * Similar to `/beacon/user/create`, several checks are performed immediately when you submit an
+   * identity data change to `/beacon/user/update`:
+   *
+   *   - The user's updated PII is searched against all other users within the Beacon Program you
+   *     specified. If a match is found that violates your program's "Duplicate Information
+   *     Filtering" settings, the user will be returned with a status of `pending_review`.
+   *
+   *   - The user's updated PII is also searched against all fraud reports created by your
+   *     organization across all of your Beacon Programs. If the user's data matches a fraud report
+   *     that your team created, the user will be returned with a status of `rejected`.
+   *
+   *   - Finally, the user's PII is searched against all fraud reports shared with the Beacon
+   *     Network by other companies. If a matching fraud report is found, the user will be returned
+   *     with a `pending_review` status if your program has enabled automatic flagging based on
+   *     network fraud.
+   *
+   * Plaid maintains a version history for each Beacon User, so the Beacon User's identity data
+   * before and after the update is retained as separate versions.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   beaconUserUpdate(
     request: ThePlaidApiClient.BeaconUserUpdateRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<BeaconUserUpdateResponse, ResponseError> {
-    return this.#rawClient.execute<BeaconUserUpdateResponse, ResponseError>(
+  ): ApiPromise<BeaconUserUpdateResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beacon/user/update"),
+        urlTemplate: this.#servers.default("/beacon/user/update"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: beaconUserUpdateRequestSchema },
       },
       {
         success: { kind: "json", schema: beaconUserUpdateResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Get EWA Score Report
+   *
+   * @remarks
+   * The `/beta/ewa_report/v1/get` endpoint provides an Earned Wage Access (EWA) score that
+   * quantifies the delinquency risk associated with a given item. The score is derived from a
+   * combination of cashflow patterns and network-based behavioral features.
+   *
+   * The response returns a list of EWA scores, where each score corresponds to a potential advance
+   * amount range. These scores estimate the likelihood of repayment for advances within that range.
+   *
+   * Score range: 1-99
+   *
+   * Interpretation: Higher scores indicate a greater likelihood of repayment.
+   *
+   * This endpoint enables clients to assess repayment risk and make data-driven decisions when
+   * determining eligibility or limits for earned wage advances.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.BetaEwaReportV1GetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   betaEwaReportV1Get(
     request: ThePlaidApiClient.BetaEwaReportV1GetRequestParams,
     options?: RequestOptions,
@@ -3151,8 +4155,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beta/ewa_report/v1/get"),
+        urlTemplate: this.#servers.default("/beta/ewa_report/v1/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: betaEwaReportV1GetRequestSchema },
       },
       {
@@ -3163,6 +4170,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Creates a new end customer for a Plaid reseller.
+   *
+   * @remarks
+   * The `/beta/partner/customer/v1/create` endpoint creates a new end customer record. You can
+   * provide as much information as you have available. If any required information is missing for
+   * the products you intend to use, it will be listed in the `requirements_due` field of the
+   * response.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.BetaPartnerCustomerV1CreateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   betaPartnerCustomerV1Create(
     request: ThePlaidApiClient.BetaPartnerCustomerV1CreateRequestParams,
     options?: RequestOptions,
@@ -3170,8 +4195,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beta/partner/customer/v1/create"),
+        urlTemplate: this.#servers.default("/beta/partner/customer/v1/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: betaPartnerCustomerV1CreateRequestSchema },
       },
       {
@@ -3182,6 +4210,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Enables a Plaid reseller's end customer in the Production environment.
+   *
+   * @remarks
+   * The `/beta/partner/customer/v1/enable` endpoint is used by reseller partners to enable an end
+   * customer in the full Production environment.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.BetaPartnerCustomerV1EnableError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   betaPartnerCustomerV1Enable(
     request: ThePlaidApiClient.BetaPartnerCustomerV1EnableRequestParams,
     options?: RequestOptions,
@@ -3189,8 +4233,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beta/partner/customer/v1/enable"),
+        urlTemplate: this.#servers.default("/beta/partner/customer/v1/enable"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: betaPartnerCustomerV1EnableRequestSchema },
       },
       {
@@ -3201,6 +4248,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieves the details of a Plaid reseller's end customer.
+   *
+   * @remarks
+   * The `/beta/partner/customer/v1/get` endpoint is used by reseller partners to retrieve data
+   * about a single end customer.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.BetaPartnerCustomerV1GetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   betaPartnerCustomerV1Get(
     request: ThePlaidApiClient.BetaPartnerCustomerV1GetRequestParams,
     options?: RequestOptions,
@@ -3208,8 +4271,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beta/partner/customer/v1/get"),
+        urlTemplate: this.#servers.default("/beta/partner/customer/v1/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: betaPartnerCustomerV1GetRequestSchema },
       },
       {
@@ -3220,6 +4286,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Updates an existing end customer.
+   *
+   * @remarks
+   * The `/beta/partner/customer/v1/update` endpoint updates an existing end customer record.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.BetaPartnerCustomerV1UpdateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   betaPartnerCustomerV1Update(
     request: ThePlaidApiClient.BetaPartnerCustomerV1UpdateRequestParams,
     options?: RequestOptions,
@@ -3227,8 +4308,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beta/partner/customer/v1/update"),
+        urlTemplate: this.#servers.default("/beta/partner/customer/v1/update"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: betaPartnerCustomerV1UpdateRequestSchema },
       },
       {
@@ -3239,44 +4323,106 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create a Business Verification
+   *
+   * @remarks
+   * Create a new business verification to check a business's identity and risk profile.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   businessVerificationCreate(
     request: ThePlaidApiClient.BusinessVerificationCreateRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<BusinessVerificationCreateResponse, ResponseError> {
-    return this.#rawClient.execute<BusinessVerificationCreateResponse, ResponseError>(
+  ): ApiPromise<BusinessVerificationCreateResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/business_verification/create"),
+        urlTemplate: this.#servers.default("/business_verification/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: businessVerificationCreateRequestSchema },
       },
       {
         success: { kind: "json", schema: businessVerificationCreateResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Get a Business Verification
+   *
+   * @remarks
+   * Retrieve the current state of a specific business verification.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   businessVerificationGet(
     request: ThePlaidApiClient.BusinessVerificationGetRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<BusinessVerificationGetResponse, ResponseError> {
-    return this.#rawClient.execute<BusinessVerificationGetResponse, ResponseError>(
+  ): ApiPromise<BusinessVerificationGetResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/business_verification/get"),
+        urlTemplate: this.#servers.default("/business_verification/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: businessVerificationGetRequestSchema },
       },
       {
         success: { kind: "json", schema: businessVerificationGetResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Gets transaction data in `cashflow_report`
+   *
+   * @remarks
+   * The `/cashflow_report/get` endpoint retrieves transactions data associated with an Item.
+   * Transactions data is standardized across financial institutions. Transactions are returned in
+   * reverse-chronological order, and the sequence of transaction ordering is stable and will not
+   * shift. Transactions are not immutable and can also be removed altogether by the institution; a
+   * removed transaction will no longer appear in `/cashflow_report/get`. For more details, see
+   * [Pending and posted
+   * transactions](https://plaid.com/docs/transactions/transactions-data/#pending-and-posted-transactions).
+   * Due to the potentially large number of transactions associated with an Item, results are
+   * paginated. Manipulate the `count` and `cursor` parameters in conjunction with the `has_more`
+   * response body field to fetch all available transactions. Note that data isn't likely to be
+   * immediately available to `/cashflow_report/get`. Plaid will begin to prepare transactions data
+   * upon Item link, if Link was initialized with `cashflow_report`, or if it wasn't, upon the first
+   * call to `/cashflow_report/refresh`. To be alerted when transaction data is ready to be fetched,
+   * listen for the `CASHFLOW_REPORT_READY` webhook.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CashflowReportGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   cashflowReportGet(
     request: ThePlaidApiClient.CashflowReportGetRequestParams,
     options?: RequestOptions,
@@ -3284,8 +4430,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cashflow_report/get"),
+        urlTemplate: this.#servers.default("/cashflow_report/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: cashflowReportGetRequestSchema },
       },
       {
@@ -3296,6 +4445,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Gets insights data in Cashflow Report
+   *
+   * @remarks
+   * The `/cashflow_report/insights/get` endpoint retrieves insights data associated with an Item.
+   * Insights are only calculated on credit and depository accounts.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CashflowReportInsightsGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   cashflowReportInsightsGet(
     request: ThePlaidApiClient.CashflowReportInsightsGetRequestParams,
     options?: RequestOptions,
@@ -3303,8 +4468,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cashflow_report/insights/get"),
+        urlTemplate: this.#servers.default("/cashflow_report/insights/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: cashflowReportInsightsGetRequestSchema },
       },
       {
@@ -3315,6 +4483,36 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Refresh transaction data in `cashflow_report`
+   *
+   * @remarks
+   * `/cashflow_report/refresh` is an endpoint that initiates an on-demand extraction to fetch the
+   * newest transactions for an Item (given an `item_id`). The Item must already have Cashflow
+   * Report added as a product in order to call `/cashflow_report/refresh`.
+   *
+   * After calling `/cashflow_report/refresh`, Plaid will fire a webhook `CASHFLOW_REPORT_READY`
+   * alerting clients that new transactions data can then be ingested via `/cashflow_report/get` or
+   * the webhook will contain an error code informing there was an error in refreshing transactions
+   * data.
+   *
+   * Note that the `/cashflow_report/refresh` endpoint is not supported for Capital One
+   * (`ins_128026`) non-depository accounts and will result in a `PRODUCTS_NOT_SUPPORTED` error if
+   * called on an Item that contains only non-depository accounts from that institution.
+   *
+   * As this endpoint triggers a synchronous request for fresh data, latency may be higher than for
+   * other Plaid endpoints (typically less than 10 seconds, but up to 30 seconds or more). If you
+   * encounter errors, you may find it necessary to adjust your timeout period for requests.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CashflowReportRefreshError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   cashflowReportRefresh(
     request: ThePlaidApiClient.CashflowReportRefreshRequestParams,
     options?: RequestOptions,
@@ -3322,8 +4520,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cashflow_report/refresh"),
+        urlTemplate: this.#servers.default("/cashflow_report/refresh"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: cashflowReportRefreshRequestSchema },
       },
       {
@@ -3334,6 +4535,34 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Gets transaction data in `cashflow_report`
+   *
+   * @remarks
+   * The `/cashflow_report/transactions/get` endpoint retrieves transactions data associated with an
+   * Item. Transactions data is standardized across financial institutions. Transactions are
+   * returned in reverse-chronological order, and the sequence of transaction ordering is stable and
+   * will not shift. Transactions are not immutable and can also be removed altogether by the
+   * institution; a removed transaction will no longer appear in
+   * `/cashflow_report/transactions/get`. For more details, see [Pending and posted
+   * transactions](https://plaid.com/docs/transactions/transactions-data/#pending-and-posted-transactions).
+   * Due to the potentially large number of transactions associated with an Item, results are
+   * paginated. Manipulate the `count` and `cursor` parameters in conjunction with the `has_more`
+   * response body field to fetch all available transactions. Note that data isn't likely to be
+   * immediately available to `/cashflow_report/transactions/get`. Plaid will begin to prepare
+   * transactions data upon Item link, if Link was initialized with `cashflow_report`, or if it
+   * wasn't, upon the first call to `/cashflow_report/refresh`. To be alerted when transaction data
+   * is ready to be fetched, listen for the `CASHFLOW_REPORT_READY` webhook.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CashflowReportTransactionsGetError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   cashflowReportTransactionsGet(
     request: ThePlaidApiClient.CashflowReportTransactionsGetRequestParams,
     options?: RequestOptions,
@@ -3341,8 +4570,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cashflow_report/transactions/get"),
+        urlTemplate: this.#servers.default("/cashflow_report/transactions/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: cashflowReportTransactionsGetRequestSchema },
       },
       {
@@ -3353,6 +4585,28 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Get legacy categories
+   *
+   * @remarks
+   * Send a request to the `/categories/get` endpoint to get detailed information on legacy
+   * categories returned by Plaid. This endpoint does not require authentication.
+   *
+   * All implementations are recommended to [use the newer `personal_finance_category`
+   * taxonomy](https://plaid.com/docs/transactions/pfc-migration/) instead of the legacy `category`
+   * taxonomy supported by this endpoint.
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.CategoriesGetError} when the API answers with an error status
+   * — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   categoriesGet(
     request: ThePlaidApiClient.CategoriesGetRequest,
     options?: RequestOptions,
@@ -3360,8 +4614,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/categories/get"),
+        urlTemplate: this.#servers.default("/categories/get"),
         auth: noneAuth,
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: s.record(s.string(), s.unknown()) },
       },
       {
@@ -3372,6 +4629,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * List a historical log of item consent events
+   *
+   * @remarks
+   * List a historical log of Item consent events. Consent logs are only available for events
+   * occurring on or after November 7, 2024. Extremely recent events (occurring within the past 12
+   * hours) may not be available via this endpoint. Up to three years of consent logs will be
+   * available via the endpoint.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ConsentEventsGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   consentEventsGet(
     request: ThePlaidApiClient.ConsentEventsGetRequestParams,
     options?: RequestOptions,
@@ -3379,8 +4654,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/consent/events/get"),
+        urlTemplate: this.#servers.default("/consent/events/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: consentEventsGetRequestSchema },
       },
       {
@@ -3391,6 +4669,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve PDF Reports
+   *
+   * @remarks
+   * Retrieves all existing CRB Bank Income and Base reports for the consumer in PDF format.
+   *
+   * Response is PDF binary data. The `request_id` is returned in the `Plaid-Request-ID` header.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ConsumerReportPdfGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   consumerReportPdfGet(
     request: ThePlaidApiClient.ConsumerReportPdfGetRequestParams,
     options?: RequestOptions,
@@ -3398,8 +4693,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/consumer_report/pdf/get"),
+        urlTemplate: this.#servers.default("/consumer_report/pdf/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: consumerReportPdfGetRequestSchema },
       },
       {
@@ -3410,6 +4708,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve a Base Report
+   *
+   * @remarks
+   * This endpoint allows you to retrieve the Base Report for your user, allowing you to receive
+   * comprehensive bank account and cash flow data. You should call this endpoint after you've
+   * received a `CHECK_REPORT_READY` or a `USER_CHECK_REPORT_READY` webhook, either after the Link
+   * session for the user or after calling `/cra/check_report/create`. If the most recent consumer
+   * report for the user doesn't have sufficient data to generate the base report, or the consumer
+   * report has expired, you will receive an error indicating that you should create a new consumer
+   * report by calling `/cra/check_report/create`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraCheckReportBaseReportGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craCheckReportBaseReportGet(
     request: ThePlaidApiClient.CraCheckReportBaseReportGetRequestParams,
     options?: RequestOptions,
@@ -3417,11 +4736,14 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/check_report/base_report/get"),
+        urlTemplate: this.#servers.default("/cra/check_report/base_report/get"),
         auth: anyAuth(
           allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
           this.#auth.oauth2,
         ),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craCheckReportBaseReportGetRequestSchema },
       },
       {
@@ -3432,6 +4754,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve cash flow insights from your user's banking data
+   *
+   * @remarks
+   * This endpoint allows you to retrieve the Cashflow Insights report for your user. You should
+   * call this endpoint after you've received a `CHECK_REPORT_READY` or a `USER_CHECK_REPORT_READY`
+   * webhook, either after the Link session for the user or after calling
+   * `/cra/check_report/create`. If the most recent consumer report for the user doesn't have
+   * sufficient data to generate the report, or the consumer report has expired, you will receive an
+   * error indicating that you should create a new consumer report by calling
+   * `/cra/check_report/create`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraCheckReportCashflowInsightsGetError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craCheckReportCashflowInsightsGet(
     request: ThePlaidApiClient.CraCheckReportCashflowInsightsGetRequestParams,
     options?: RequestOptions,
@@ -3442,11 +4785,14 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/check_report/cashflow_insights/get"),
+        urlTemplate: this.#servers.default("/cra/check_report/cashflow_insights/get"),
         auth: anyAuth(
           allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
           this.#auth.oauth2,
         ),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craCheckReportCashflowInsightsGetRequestSchema },
       },
       {
@@ -3457,6 +4803,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Refresh or create a Consumer Report
+   *
+   * @remarks
+   * Use `/cra/check_report/create` to refresh data in an existing report. A Consumer Report will
+   * last for 24 hours before expiring; you should call any `/get` endpoints on the report before it
+   * expires. If a report expires, you can call `/cra/check_report/create` again to re-generate it
+   * and refresh the data in the report.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraCheckReportCreateError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craCheckReportCreate(
     request: ThePlaidApiClient.CraCheckReportCreateRequestParams,
     options?: RequestOptions,
@@ -3464,8 +4828,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/check_report/create"),
+        urlTemplate: this.#servers.default("/cra/check_report/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craCheckReportCreateRequestSchema },
       },
       {
@@ -3476,6 +4843,35 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve income insights from your user's banks
+   *
+   * @remarks
+   * This endpoint allows you to retrieve the Income Insights report for your user. You should call
+   * this endpoint after you've received a `CHECK_REPORT_READY` or a `USER_CHECK_REPORT_READY`
+   * webhook, either after the Link session for the user or after calling
+   * `/cra/check_report/create`. If the most recent consumer report for the user doesn't have
+   * sufficient data to generate the report, or the consumer report has expired, you will receive an
+   * error indicating that you should create a new consumer report by calling
+   * `/cra/check_report/create`.
+   *
+   * NOTE: The following schema was updated in April 2026 to reflect the response when the provided
+   * version is "II2". Please see [this
+   * document](https://docs.google.com/document/d/1kQkQ7FOgFaC4n-sUGUk74hoXZNY_L_nJeCuMe7Keip4/edit?tab=t.0#heading=h.rudamzinus2i)
+   * for guidance on migrating to II2 if you are currently using the II1 version, and [this
+   * section](https://docs.google.com/document/d/1kQkQ7FOgFaC4n-sUGUk74hoXZNY_L_nJeCuMe7Keip4/edit?tab=t.0#bookmark=id.tdcc2wpk0h60)
+   * for an example II1 response along with its
+   * [documentation](https://docs.google.com/document/d/1kQkQ7FOgFaC4n-sUGUk74hoXZNY_L_nJeCuMe7Keip4/edit?tab=t.36c85n2ircqk#heading=h.79dwr5c1iszl).
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraCheckReportIncomeInsightsGetError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craCheckReportIncomeInsightsGet(
     request: ThePlaidApiClient.CraCheckReportIncomeInsightsGetRequestParams,
     options?: RequestOptions,
@@ -3486,11 +4882,14 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/check_report/income_insights/get"),
+        urlTemplate: this.#servers.default("/cra/check_report/income_insights/get"),
         auth: anyAuth(
           allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
           this.#auth.oauth2,
         ),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craCheckReportIncomeInsightsGetRequestSchema },
       },
       {
@@ -3501,6 +4900,26 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve the LendScore from your user's banking data
+   *
+   * @remarks
+   * This endpoint allows you to retrieve the LendScore report for your user. You should call this
+   * endpoint after you've received a `CHECK_REPORT_READY` or a `USER_CHECK_REPORT_READY` webhook,
+   * either after the Link session for the user or after calling `/cra/check_report/create`. If the
+   * most recent consumer report for the user doesn't have sufficient data to generate the report,
+   * or the consumer report has expired, you will receive an error indicating that you should create
+   * a new consumer report by calling `/cra/check_report/create`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraCheckReportLendScoreGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craCheckReportLendScoreGet(
     request: ThePlaidApiClient.CraCheckReportLendScoreGetRequestParams,
     options?: RequestOptions,
@@ -3508,11 +4927,14 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/check_report/lend_score/get"),
+        urlTemplate: this.#servers.default("/cra/check_report/lend_score/get"),
         auth: anyAuth(
           allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
           this.#auth.oauth2,
         ),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craCheckReportLendScoreGetRequestSchema },
       },
       {
@@ -3523,6 +4945,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve network attributes for the user
+   *
+   * @remarks
+   * This endpoint allows you to retrieve the Network Insights report for your user. You should call
+   * this endpoint after you've received a `CHECK_REPORT_READY` or a `USER_CHECK_REPORT_READY`
+   * webhook, either after the Link session for the user or after calling
+   * `/cra/check_report/create`. If the most recent consumer report for the user doesn't have
+   * sufficient data to generate the report, or the consumer report has expired, you will receive an
+   * error indicating that you should create a new consumer report by calling
+   * `/cra/check_report/create`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraCheckReportNetworkInsightsGetError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craCheckReportNetworkInsightsGet(
     request: ThePlaidApiClient.CraCheckReportNetworkInsightsGetRequestParams,
     options?: RequestOptions,
@@ -3533,11 +4976,14 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/check_report/network_insights/get"),
+        urlTemplate: this.#servers.default("/cra/check_report/network_insights/get"),
         auth: anyAuth(
           allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
           this.#auth.oauth2,
         ),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craCheckReportNetworkInsightsGetRequestSchema },
       },
       {
@@ -3548,6 +4994,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve cash flow insights from partners
+   *
+   * @remarks
+   * This endpoint allows you to retrieve the Partner Insights report for your user. You should call
+   * this endpoint after you've received a `CHECK_REPORT_READY` or a `USER_CHECK_REPORT_READY`
+   * webhook, either after the Link session for the user or after calling
+   * `/cra/check_report/create`. If the most recent consumer report for the user doesn't have
+   * sufficient data to generate the report, or the consumer report has expired, you will receive an
+   * error indicating that you should create a new consumer report by calling
+   * `/cra/check_report/create`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraCheckReportPartnerInsightsGetError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craCheckReportPartnerInsightsGet(
     request: ThePlaidApiClient.CraCheckReportPartnerInsightsGetRequestParams,
     options?: RequestOptions,
@@ -3558,8 +5025,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/check_report/partner_insights/get"),
+        urlTemplate: this.#servers.default("/cra/check_report/partner_insights/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craCheckReportPartnerInsightsGetRequestSchema },
       },
       {
@@ -3570,6 +5040,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve a Consumer Report as a PDF
+   *
+   * @remarks
+   * `/cra/check_report/pdf/get` retrieves the most recent Consumer Report in PDF format. By
+   * default, the most recent Base Report (if it exists) for the user will be returned. To request
+   * that the most recent Partner Insights or Income Insights report be included in the PDF as well,
+   * use the `add-ons` field.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraCheckReportPdfGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craCheckReportPdfGet(
     request: ThePlaidApiClient.CraCheckReportPdfGetRequestParams,
     options?: RequestOptions,
@@ -3577,8 +5065,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/check_report/pdf/get"),
+        urlTemplate: this.#servers.default("/cra/check_report/pdf/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craCheckReportPdfGetRequestSchema },
       },
       {
@@ -3589,6 +5080,31 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve various home lending reports for a user
+   *
+   * @remarks
+   * This endpoint allows you to retrieve home lending reports for a user. To obtain a VoA or
+   * Employment Refresh report, you need to make sure that `cra_base_report` is included in the
+   * `products` parameter when calling `/link/token/create` or `/cra/check_report/create`.
+   *
+   * You should call this endpoint after you've received a `CHECK_REPORT_READY` or a
+   * `USER_CHECK_REPORT_READY` webhook, either after the Link session for the user or after calling
+   * `/cra/check_report/create`.
+   *
+   * If the most recent consumer report for the user doesn't have sufficient data to generate the
+   * report, or the consumer report has expired, you will receive an error indicating that you
+   * should create a new consumer report by calling `/cra/check_report/create`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraCheckReportVerificationGetError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craCheckReportVerificationGet(
     request: ThePlaidApiClient.CraCheckReportVerificationGetRequestParams,
     options?: RequestOptions,
@@ -3596,8 +5112,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/check_report/verification/get"),
+        urlTemplate: this.#servers.default("/cra/check_report/verification/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craCheckReportVerificationGetRequestSchema },
       },
       {
@@ -3608,6 +5127,28 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve a Consumer Report as a Verification PDF
+   *
+   * @remarks
+   * The `/cra/check_report/verification/pdf/get` endpoint retrieves the most recent Consumer Report
+   * in PDF format, specifically formatted for Home Lending verification use cases. Before calling
+   * this endpoint, ensure that you've created a VOA report through Link or the
+   * `/cra/check_report/create` endpoint, and have received a `CHECK_REPORT_READY` or a
+   * `USER_CHECK_REPORT_READY` webhook.
+   *
+   * The response to `/cra/check_report/verification/pdf/get` is the PDF binary data. The
+   * `request_id` is returned in the `Plaid-Request-ID` header.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraCheckReportVerificationPdfGetError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craCheckReportVerificationPdfGet(
     request: ThePlaidApiClient.CraCheckReportVerificationPdfGetRequestParams,
     options?: RequestOptions,
@@ -3615,8 +5156,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/check_report/verification/pdf/get"),
+        urlTemplate: this.#servers.default("/cra/check_report/verification/pdf/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craCheckReportVerificationPdfGetRequestSchema },
       },
       {
@@ -3627,6 +5171,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve the credit profile report for a user
+   *
+   * @remarks
+   * `/cra/credit_profile/report/get` retrieves a credit profile report for a user.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraCreditProfileReportGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craCreditProfileReportGet(
     request: ThePlaidApiClient.CraCreditProfileReportGetRequestParams,
     options?: RequestOptions,
@@ -3634,8 +5193,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/credit_profile/report/get"),
+        urlTemplate: this.#servers.default("/cra/credit_profile/report/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craCreditProfileReportGetRequestSchema },
       },
       {
@@ -3646,6 +5208,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Register loan applications and decisions
+   *
+   * @remarks
+   * `/cra/loans/applications/register` registers loan applications and decisions.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraLoansApplicationsRegisterError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craLoansApplicationsRegister(
     request: ThePlaidApiClient.CraLoansApplicationsRegisterRequestParams,
     options?: RequestOptions,
@@ -3653,8 +5230,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/loans/applications/register"),
+        urlTemplate: this.#servers.default("/cra/loans/applications/register"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craLoansApplicationsRegisterRequestSchema },
       },
       {
@@ -3665,6 +5245,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Register a list of loans to their applicants
+   *
+   * @remarks
+   * `/cra/loans/register` registers a list of loans to their applicants.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraLoansRegisterError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craLoansRegister(
     request: ThePlaidApiClient.CraLoansRegisterRequestParams,
     options?: RequestOptions,
@@ -3672,8 +5267,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/loans/register"),
+        urlTemplate: this.#servers.default("/cra/loans/register"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craLoansRegisterRequestSchema },
       },
       {
@@ -3684,6 +5282,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Unregister a list of loans
+   *
+   * @remarks
+   * `/cra/loans/unregister` indicates the loans have reached a final status and no further updates
+   * are expected.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraLoansUnregisterError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craLoansUnregister(
     request: ThePlaidApiClient.CraLoansUnregisterRequestParams,
     options?: RequestOptions,
@@ -3691,8 +5305,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/loans/unregister"),
+        urlTemplate: this.#servers.default("/cra/loans/unregister"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craLoansUnregisterRequestSchema },
       },
       {
@@ -3703,6 +5320,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Update loan data
+   *
+   * @remarks
+   * `/cra/loans/update` updates loan information such as the status and payment history.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraLoansUpdateError} when the API answers with an error status
+   * — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craLoansUpdate(
     request: ThePlaidApiClient.CraLoansUpdateRequestParams,
     options?: RequestOptions,
@@ -3710,8 +5342,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/loans/update"),
+        urlTemplate: this.#servers.default("/cra/loans/update"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craLoansUpdateRequestSchema },
       },
       {
@@ -3722,6 +5357,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve a Monitoring Insights Report
+   *
+   * @remarks
+   * This endpoint allows you to retrieve a Cash Flow Updates report by passing in the `user_id`
+   * referred to in the webhook you received.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraMonitoringInsightsGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craMonitoringInsightsGet(
     request: ThePlaidApiClient.CraMonitoringInsightsGetRequestParams,
     options?: RequestOptions,
@@ -3729,8 +5380,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/monitoring_insights/get"),
+        urlTemplate: this.#servers.default("/cra/monitoring_insights/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craMonitoringInsightsGetRequestSchema },
       },
       {
@@ -3741,6 +5395,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Subscribe to Monitoring Insights
+   *
+   * @remarks
+   * This endpoint allows you to subscribe to insights for a user's linked CRA Item, which are
+   * updated between one and four times per day (best-effort). In the current Cash Flow Updates beta
+   * experience, only one Item per user may be subscribed for monitoring updates.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraMonitoringInsightsSubscribeError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craMonitoringInsightsSubscribe(
     request: ThePlaidApiClient.CraMonitoringInsightsSubscribeRequestParams,
     options?: RequestOptions,
@@ -3751,8 +5422,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/monitoring_insights/subscribe"),
+        urlTemplate: this.#servers.default("/cra/monitoring_insights/subscribe"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craMonitoringInsightsSubscribeRequestSchema },
       },
       {
@@ -3763,6 +5437,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Unsubscribe from Monitoring Insights
+   *
+   * @remarks
+   * This endpoint allows you to unsubscribe from previously subscribed Monitoring Insights.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraMonitoringInsightsUnsubscribeError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craMonitoringInsightsUnsubscribe(
     request: ThePlaidApiClient.CraMonitoringInsightsUnsubscribeRequestParams,
     options?: RequestOptions,
@@ -3773,8 +5462,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/monitoring_insights/unsubscribe"),
+        urlTemplate: this.#servers.default("/cra/monitoring_insights/unsubscribe"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craMonitoringInsightsUnsubscribeRequestSchema },
       },
       {
@@ -3785,6 +5477,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve cash flow insights from the bank accounts used for income verification
+   *
+   * @remarks
+   * `/cra/partner_insights/get` returns cash flow insights for a specified user.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraPartnerInsightsGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craPartnerInsightsGet(
     request: ThePlaidApiClient.CraPartnerInsightsGetRequestParams,
     options?: RequestOptions,
@@ -3792,8 +5499,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/partner_insights/get"),
+        urlTemplate: this.#servers.default("/cra/partner_insights/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craPartnerInsightsGetRequestSchema },
       },
       {
@@ -3804,6 +5514,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve a CRA Report for provided user
+   *
+   * @remarks
+   * `/cra/report/get` retrieves a CRA Report for a user.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CraReportGetError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   craReportGet(
     request: ThePlaidApiClient.CraReportGetRequestParams,
     options?: RequestOptions,
@@ -3811,8 +5536,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/cra/report/get"),
+        urlTemplate: this.#servers.default("/cra/report/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: craReportGetRequestSchema },
       },
       {
@@ -3823,6 +5551,32 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create payment token
+   *
+   * @remarks
+   * The `/payment_initiation/payment/token/create` endpoint has been deprecated. New Plaid
+   * customers will be unable to use this endpoint, and existing customers are encouraged to migrate
+   * to the newer, `link_token`-based flow. The recommended flow is to provide the `payment_id` to
+   * `/link/token/create`, which returns a `link_token` used to initialize Link.
+   *
+   * The `/payment_initiation/payment/token/create` endpoint is used to create a `payment_token`,
+   * which can then be used in Link initialization to enter a payment initiation flow. You can only
+   * use a `payment_token` once. If this attempt fails, the end user aborts the flow, or the token
+   * expires, you will need to create a new payment token. Creating a new payment token does not
+   * require end user input.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreatePaymentTokenError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   createPaymentToken(
     request: ThePlaidApiClient.CreatePaymentTokenRequest,
     options?: RequestOptions,
@@ -3830,8 +5584,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/payment_initiation/payment/token/create"),
+        urlTemplate: this.#servers.default("/payment_initiation/payment/token/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: paymentInitiationPaymentTokenCreateRequestSchema },
       },
       {
@@ -3842,6 +5599,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve an Asset Report with Freddie Mac format. Only Freddie Mac can use this endpoint.
+   *
+   * @remarks
+   * The `/credit/asset_report/freddie_mac/get` endpoint retrieves the Asset Report in Freddie Mac's
+   * JSON format.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditAssetReportFreddieMacGetError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditAssetReportFreddieMacGet(
     request: ThePlaidApiClient.CreditAssetReportFreddieMacGetRequest,
     options?: RequestOptions,
@@ -3849,8 +5622,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/asset_report/freddie_mac/get"),
+        urlTemplate: this.#servers.default("/credit/asset_report/freddie_mac/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: assetReportFreddieGetRequestSchema },
       },
       {
@@ -3861,6 +5637,28 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create Asset or Income Report Audit Copy Token
+   *
+   * @remarks
+   * Plaid can create an Audit Copy token of an Asset Report and/or Income Report to share with a
+   * participating Government-Sponsored Enterprise (GSE) if you participate in Fannie Mae's Day 1
+   * Certainty™ program or utilize Freddie Mac's Loan Product Advisor® (LPA®) Asset and Income
+   * Modeler (AIM). An Audit Copy token contains the same underlying data as the Asset Report and/or
+   * Income Report (result of `/credit/payroll_income/get`).
+   *
+   * Use the `/credit/audit_copy_token/create` endpoint to create an `audit_copy_token` and then
+   * pass that token to the GSE who needs access.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditAuditCopyTokenCreateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditAuditCopyTokenCreate(
     request: ThePlaidApiClient.CreditAuditCopyTokenCreateRequestParams,
     options?: RequestOptions,
@@ -3868,8 +5666,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/audit_copy_token/create"),
+        urlTemplate: this.#servers.default("/credit/audit_copy_token/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditAuditCopyTokenCreateRequestSchema },
       },
       {
@@ -3880,6 +5681,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Update an Audit Copy Token
+   *
+   * @remarks
+   * The `/credit/audit_copy_token/update` endpoint updates an existing Audit Copy Token by adding
+   * the report tokens in the `report_tokens` field to the `audit_copy_token`. If the Audit Copy
+   * Token already contains a report of a certain type, it will be replaced with the token provided
+   * in the `report_tokens` field.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditAuditCopyTokenUpdateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditAuditCopyTokenUpdate(
     request: ThePlaidApiClient.CreditAuditCopyTokenUpdateRequestParams,
     options?: RequestOptions,
@@ -3887,8 +5706,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/audit_copy_token/update"),
+        urlTemplate: this.#servers.default("/credit/audit_copy_token/update"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditAuditCopyTokenUpdateRequestSchema },
       },
       {
@@ -3899,6 +5721,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve information from the bank accounts used for employment verification
+   *
+   * @remarks
+   * `/beta/credit/v1/bank_employment/get` returns the employment report(s) derived from bank
+   * transaction data for a specified user.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditBankEmploymentGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditBankEmploymentGet(
     request: ThePlaidApiClient.CreditBankEmploymentGetRequestParams,
     options?: RequestOptions,
@@ -3906,8 +5744,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beta/credit/v1/bank_employment/get"),
+        urlTemplate: this.#servers.default("/beta/credit/v1/bank_employment/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditBankEmploymentGetRequestSchema },
       },
       {
@@ -3918,6 +5759,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve information from the bank accounts used for income verification
+   *
+   * @remarks
+   * `/credit/bank_income/get` returns the bank income report(s) for a specified user. A single
+   * report corresponds to all institutions linked in a single Link session. To include multiple
+   * institutions in a single report, use [Multi-Item
+   * Link](https://plaid.com/docs/link/multi-item-link). To return older reports, use the
+   * `options.count` field.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditBankIncomeGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditBankIncomeGet(
     request: ThePlaidApiClient.CreditBankIncomeGetRequestParams,
     options?: RequestOptions,
@@ -3925,8 +5785,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/bank_income/get"),
+        urlTemplate: this.#servers.default("/credit/bank_income/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditBankIncomeGetRequestSchema },
       },
       {
@@ -3937,6 +5800,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve information from the bank accounts used for income verification in PDF format
+   *
+   * @remarks
+   * `/credit/bank_income/pdf/get` returns the most recent bank income report for a specified user
+   * in PDF format. A single report corresponds to all institutions linked in a single Link session.
+   * To include multiple institutions in a single report, use [Multi-Item
+   * Link](https://plaid.com/docs/link/multi-item-link).
+   *
+   * @returns A PDF of the Bank Income Report
+   *
+   * @throws {@link ThePlaidApiClient.CreditBankIncomePdfGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditBankIncomePdfGet(
     request: ThePlaidApiClient.CreditBankIncomePdfGetRequestParams,
     options?: RequestOptions,
@@ -3944,8 +5825,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/bank_income/pdf/get"),
+        urlTemplate: this.#servers.default("/credit/bank_income/pdf/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditBankIncomePdfGetRequestSchema },
       },
       {
@@ -3956,6 +5840,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Refresh a user's bank income information
+   *
+   * @remarks
+   * `/credit/bank_income/refresh` is deprecated. The backend implementation was removed (returns an
+   * `Unimplemented` error at runtime), and the endpoint is no longer part of the documented API
+   * surface. To refresh Bank Income data for an existing user, send the user through Link's update
+   * mode so they can confirm their income sources. For a fully backend refresh, migrate to CRA
+   * Income Insights and call `/cra/check_report/create`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditBankIncomeRefreshError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   creditBankIncomeRefresh(
     request: ThePlaidApiClient.CreditBankIncomeRefreshRequestParams,
     options?: RequestOptions,
@@ -3963,8 +5868,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/bank_income/refresh"),
+        urlTemplate: this.#servers.default("/credit/bank_income/refresh"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditBankIncomeRefreshRequestSchema },
       },
       {
@@ -3975,6 +5883,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Subscribe and unsubscribe to proactive notifications for a user's income profile
+   *
+   * @remarks
+   * `/credit/bank_income/webhook/update` allows you to subscribe or unsubscribe a user for income
+   * webhook notifications. By default, all users start out unsubscribed.
+   *
+   * If a user is subscribed, on significant changes to the user's income profile, you will receive
+   * a `BANK_INCOME_REFRESH_UPDATE` webhook, prompting you to refresh bank income data for the user.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditBankIncomeWebhookUpdateError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditBankIncomeWebhookUpdate(
     request: ThePlaidApiClient.CreditBankIncomeWebhookUpdateRequestParams,
     options?: RequestOptions,
@@ -3982,8 +5909,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/bank_income/webhook/update"),
+        urlTemplate: this.#servers.default("/credit/bank_income/webhook/update"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditBankIncomeWebhookUpdateRequestSchema },
       },
       {
@@ -3994,6 +5924,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve data for a user's uploaded bank statements
+   *
+   * @remarks
+   * `/credit/bank_statements/uploads/get` returns parsed data from bank statements uploaded by
+   * users as part of the Document Income flow. If your account is not enabled for Document Parsing,
+   * contact your account manager to request access.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditBankStatementsUploadsGetError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditBankStatementsUploadsGet(
     request: ThePlaidApiClient.CreditBankStatementsUploadsGetRequestParams,
     options?: RequestOptions,
@@ -4004,8 +5951,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/bank_statements/uploads/get"),
+        urlTemplate: this.#servers.default("/credit/bank_statements/uploads/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditBankStatementsUploadsGetRequestSchema },
       },
       {
@@ -4016,6 +5966,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve a summary of an individual's employment information
+   *
+   * @remarks
+   * `/credit/employment/get` returns a list of items with employment information from a user's
+   * payroll provider that was verified by an end user.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditEmploymentGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditEmploymentGet(
     request: ThePlaidApiClient.CreditEmploymentGetRequestParams,
     options?: RequestOptions,
@@ -4023,8 +5989,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/employment/get"),
+        urlTemplate: this.#servers.default("/credit/employment/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditEmploymentGetRequestSchema },
       },
       {
@@ -4035,6 +6004,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve an Asset Report with Freddie Mac format (aka VOA - Verification Of Assets), and a
+   * Verification Of Employment (VOE) report if this one is available. Only Freddie Mac can use this
+   * endpoint.
+   *
+   * @remarks
+   * The `/credit/freddie_mac/reports/get` endpoint retrieves the Verification of Assets and
+   * Verification of Employment reports.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditFreddieMacReportsGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditFreddieMacReportsGet(
     request: ThePlaidApiClient.CreditFreddieMacReportsGetRequestParams,
     options?: RequestOptions,
@@ -4042,8 +6029,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/freddie_mac/reports/get"),
+        urlTemplate: this.#servers.default("/credit/freddie_mac/reports/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditFreddieMacReportsGetRequestSchema },
       },
       {
@@ -4054,6 +6044,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve a user's payroll information
+   *
+   * @remarks
+   * This endpoint gets payroll income information for a specific user, either as a result of the
+   * user connecting to their payroll provider or uploading a pay related document.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditPayrollIncomeGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditPayrollIncomeGet(
     request: ThePlaidApiClient.CreditPayrollIncomeGetRequestParams,
     options?: RequestOptions,
@@ -4061,8 +6067,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/payroll_income/get"),
+        urlTemplate: this.#servers.default("/credit/payroll_income/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditPayrollIncomeGetRequestSchema },
       },
       {
@@ -4073,6 +6082,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Update the parsing configuration for a document income verification
+   *
+   * @remarks
+   * `/credit/payroll_income/parsing_config/update` updates the parsing configuration for a document
+   * income verification.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditPayrollIncomeParsingConfigUpdateError} when the API
+   * answers with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditPayrollIncomeParsingConfigUpdate(
     request: ThePlaidApiClient.CreditPayrollIncomeParsingConfigUpdateRequestParams,
     options?: RequestOptions,
@@ -4083,8 +6108,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/payroll_income/parsing_config/update"),
+        urlTemplate: this.#servers.default("/credit/payroll_income/parsing_config/update"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: {
           kind: "json",
           value: request.body,
@@ -4099,6 +6127,39 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Check income verification eligibility and optimize conversion
+   *
+   * @remarks
+   * `/credit/payroll_income/precheck` is an optional endpoint that can be called before
+   * initializing a Link session for income verification. It evaluates whether a given user is
+   * supportable by digital income verification. If the user is eligible for digital verification,
+   * that information will be associated with the user token, and in this way will generate a Link
+   * UI optimized for the end user and their specific employer. If the user cannot be confirmed as
+   * eligible, the user can still use the income verification flow, but they may be required to
+   * manually upload a paystub to verify their income.
+   *
+   * While all request fields are optional, providing `employer` data will increase the chance of
+   * receiving a useful result.
+   *
+   * When testing in Sandbox, you can control the results by providing special test values in the
+   * `employer` and `access_tokens` fields. `employer_good` and `employer_bad` will result in `HIGH`
+   * and `LOW` confidence values, respectively. `employer_multi` will result in a `HIGH` confidence
+   * with multiple payroll options. Likewise, `access_good` and `access_bad` will result in `HIGH`
+   * and `LOW` confidence values, respectively. Any other value for `employer` and `access_tokens`
+   * in Sandbox will result in `UNKNOWN` confidence.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditPayrollIncomePrecheckError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   creditPayrollIncomePrecheck(
     request: ThePlaidApiClient.CreditPayrollIncomePrecheckRequestParams,
     options?: RequestOptions,
@@ -4106,8 +6167,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/payroll_income/precheck"),
+        urlTemplate: this.#servers.default("/credit/payroll_income/precheck"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditPayrollIncomePrecheckRequestSchema },
       },
       {
@@ -4118,6 +6182,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Refresh a digital payroll income verification
+   *
+   * @remarks
+   * `/credit/payroll_income/refresh` refreshes a given digital payroll income verification.
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.CreditPayrollIncomeRefreshError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditPayrollIncomeRefresh(
     request: ThePlaidApiClient.CreditPayrollIncomeRefreshRequestParams,
     options?: RequestOptions,
@@ -4125,8 +6204,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/payroll_income/refresh"),
+        urlTemplate: this.#servers.default("/credit/payroll_income/refresh"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditPayrollIncomeRefreshRequestSchema },
       },
       {
@@ -4137,6 +6219,33 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve fraud insights for a user's manually uploaded document(s).
+   *
+   * @remarks
+   * `/credit/payroll_income/risk_signals/get` can be used as part of the Document Income flow to
+   * assess a user-uploaded document for signs of potential fraud or tampering. It returns a risk
+   * score for each uploaded document that indicates the likelihood of the document being
+   * fraudulent, in addition to details on the individual risk signals contributing to the score.
+   *
+   * To trigger risk signal generation for an Item, call `/link/token/create` with `parsing_config`
+   * set to include `risk_signals`, or call `/credit/payroll_income/parsing_config/update`. Once
+   * risk signal generation has been triggered, `/credit/payroll_income/risk_signals/get` can be
+   * called at any time after the `INCOME_VERIFICATION_RISK_SIGNALS` webhook has been fired.
+   *
+   * `/credit/payroll_income/risk_signals/get` is offered as an add-on to Document Income and is
+   * billed separately. To request access to this endpoint, submit a product access request or
+   * contact your Plaid account manager.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditPayrollIncomeRiskSignalsGetError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditPayrollIncomeRiskSignalsGet(
     request: ThePlaidApiClient.CreditPayrollIncomeRiskSignalsGetRequestParams,
     options?: RequestOptions,
@@ -4147,8 +6256,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/payroll_income/risk_signals/get"),
+        urlTemplate: this.#servers.default("/credit/payroll_income/risk_signals/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditPayrollIncomeRiskSignalsGetRequestSchema },
       },
       {
@@ -4159,6 +6271,28 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create a relay token to share an Asset Report with a partner client
+   *
+   * @remarks
+   * Plaid can share an Asset Report directly with a participating third party on your behalf. The
+   * shared Asset Report is the exact same Asset Report originally created in
+   * `/asset_report/create`.
+   *
+   * To grant a third party access to an Asset Report, use the `/credit/relay/create` endpoint to
+   * create a `relay_token` and then pass that token to your third party. Each third party has its
+   * own `secondary_client_id`; for example, `ce5bd328dcd34123456`. You'll need to create a separate
+   * `relay_token` for each third party that needs access to the report on your behalf.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditRelayCreateError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditRelayCreate(
     request: ThePlaidApiClient.CreditRelayCreateRequestParams,
     options?: RequestOptions,
@@ -4166,8 +6300,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/relay/create"),
+        urlTemplate: this.#servers.default("/credit/relay/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditRelayCreateRequestSchema },
       },
       {
@@ -4178,6 +6315,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve the reports associated with a relay token that was shared with you
+   *
+   * @remarks
+   * `/credit/relay/get` allows third parties to receive a report that was shared with them, using a
+   * `relay_token` that was created by the report owner.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditRelayGetError} when the API answers with an error status
+   * — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditRelayGet(
     request: ThePlaidApiClient.CreditRelayGetRequestParams,
     options?: RequestOptions,
@@ -4185,8 +6338,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/relay/get"),
+        urlTemplate: this.#servers.default("/credit/relay/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditRelayGetRequestSchema },
       },
       {
@@ -4197,6 +6353,33 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve the PDF reports associated with a relay token that was shared with you (beta)
+   *
+   * @remarks
+   * `/credit/relay/pdf/get` allows third parties to receive a PDF report that was shared with them,
+   * using a `relay_token` that was created by the report owner.
+   *
+   * The `/credit/relay/pdf/get` endpoint retrieves the Asset Report in PDF format. Before calling
+   * `/credit/relay/pdf/get`, you must first create the Asset Report using `/credit/relay/create`
+   * and then wait for the
+   * [`PRODUCT_READY`](https://plaid.com/docs/api/products/assets/#product_ready) webhook to fire,
+   * indicating that the Report is ready to be retrieved.
+   *
+   * The response to `/credit/relay/pdf/get` is the PDF binary data. The `request_id` is returned in
+   * the `Plaid-Request-ID` header.
+   *
+   * [View a sample PDF Asset Report](https://plaid.com/documents/sample-asset-report.pdf).
+   *
+   * @returns A PDF of the Asset Report
+   *
+   * @throws {@link ThePlaidApiClient.CreditRelayPdfGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditRelayPdfGet(
     request: ThePlaidApiClient.CreditRelayPdfGetRequestParams,
     options?: RequestOptions,
@@ -4204,8 +6387,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/relay/pdf/get"),
+        urlTemplate: this.#servers.default("/credit/relay/pdf/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditRelayPdfGetRequestSchema },
       },
       {
@@ -4216,6 +6402,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Refresh a report of a relay token
+   *
+   * @remarks
+   * The `/credit/relay/refresh` endpoint allows third parties to refresh a report that was relayed
+   * to them, using a `relay_token` that was created by the report owner. A new report will be
+   * created with the original report parameters, but with the most recent data available based on
+   * the `days_requested` value of the original report.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditRelayRefreshError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditRelayRefresh(
     request: ThePlaidApiClient.CreditRelayRefreshRequestParams,
     options?: RequestOptions,
@@ -4223,8 +6427,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/relay/refresh"),
+        urlTemplate: this.#servers.default("/credit/relay/refresh"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditRelayRefreshRequestSchema },
       },
       {
@@ -4235,6 +6442,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Remove relay token
+   *
+   * @remarks
+   * The `/credit/relay/remove` endpoint allows you to invalidate a `relay_token`. The third party
+   * holding the token will no longer be able to access or refresh the reports which the
+   * `relay_token` gives access to. The original report, associated Items, and other relay tokens
+   * that provide access to the same report are not affected and will remain accessible after
+   * removing the given `relay_token`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditRelayRemoveError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditRelayRemove(
     request: ThePlaidApiClient.CreditRelayRemoveRequestParams,
     options?: RequestOptions,
@@ -4242,8 +6468,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/relay/remove"),
+        urlTemplate: this.#servers.default("/credit/relay/remove"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditRelayRemoveRequestSchema },
       },
       {
@@ -4254,6 +6483,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Remove an Audit Copy token
+   *
+   * @remarks
+   * The `/credit/audit_copy_token/remove` endpoint allows you to remove an Audit Copy. Removing an
+   * Audit Copy invalidates the `audit_copy_token` associated with it, meaning both you and any
+   * third parties holding the token will no longer be able to use it to access Report data. Items
+   * associated with the Report data and other Audit Copies of it are not affected and will remain
+   * accessible after removing the given Audit Copy.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditReportAuditCopyRemoveError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditReportAuditCopyRemove(
     request: ThePlaidApiClient.CreditReportAuditCopyRemoveRequest,
     options?: RequestOptions,
@@ -4261,8 +6509,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/audit_copy_token/remove"),
+        urlTemplate: this.#servers.default("/credit/audit_copy_token/remove"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditAuditCopyTokenRemoveRequestSchema },
       },
       {
@@ -4273,6 +6524,26 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve Link sessions for your user
+   *
+   * @remarks
+   * This endpoint can be used for your end users after they complete the Link flow. This endpoint
+   * returns a list of Link sessions that your user completed, where each session includes the
+   * results from the Link flow.
+   *
+   * These results include details about the Item that was created and some product related metadata
+   * (showing, for example, whether the user finished the bank income verification step).
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.CreditSessionsGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   creditSessionsGet(
     request: ThePlaidApiClient.CreditSessionsGetRequestParams,
     options?: RequestOptions,
@@ -4280,8 +6551,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/credit/sessions/get"),
+        urlTemplate: this.#servers.default("/credit/sessions/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: creditSessionsGetRequestSchema },
       },
       {
@@ -4292,44 +6566,108 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve a Dashboard user
+   *
+   * @remarks
+   * The `/dashboard_user/get` endpoint provides details (such as email address) about a specific
+   * Dashboard user based on the `dashboard_user_id` field, which is returned in the `audit_trail`
+   * object of certain Monitor and Beacon endpoints. This can be used to identify the specific
+   * reviewer who performed a Dashboard action.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   dashboardUserGet(
     request: ThePlaidApiClient.DashboardUserGetRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<DashboardUserGetResponse, ResponseError> {
-    return this.#rawClient.execute<DashboardUserGetResponse, ResponseError>(
+  ): ApiPromise<DashboardUserGetResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/dashboard_user/get"),
+        urlTemplate: this.#servers.default("/dashboard_user/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: dashboardUserGetRequestSchema },
       },
       {
         success: { kind: "json", schema: dashboardUserGetResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * List Dashboard users
+   *
+   * @remarks
+   * The `/dashboard_user/list` endpoint provides details (such as email address) about all
+   * Dashboard users associated with your account. This can be used to audit or track the list of
+   * reviewers for Monitor, Beacon, and Identity Verification products.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   dashboardUserList(
     request: ThePlaidApiClient.DashboardUserListRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<DashboardUserListResponse, ResponseError> {
-    return this.#rawClient.execute<DashboardUserListResponse, ResponseError>(
+  ): ApiPromise<DashboardUserListResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/dashboard_user/list"),
+        urlTemplate: this.#servers.default("/dashboard_user/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: dashboardUserListRequestSchema },
       },
       {
         success: { kind: "json", schema: dashboardUserListResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * (Deprecated) Search employer database
+   *
+   * @remarks
+   * `/employers/search` allows you the ability to search Plaid's database of known employers, for
+   * use with Deposit Switch. You can use this endpoint to look up a user's employer in order to
+   * confirm that they are supported. Users with non-supported employers can then be routed out of
+   * the Deposit Switch flow.
+   *
+   * The data in the employer database is currently limited. As the Deposit Switch and Income
+   * products progress through their respective beta periods, more employers are being regularly
+   * added. Because the employer database is frequently updated, we recommend that you do not cache
+   * or store data from this endpoint for more than a day.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.EmployersSearchError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   employersSearch(
     request: ThePlaidApiClient.EmployersSearchRequestParams,
     options?: RequestOptions,
@@ -4337,8 +6675,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/employers/search"),
+        urlTemplate: this.#servers.default("/employers/search"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: employersSearchRequestSchema },
       },
       {
@@ -4349,6 +6690,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Retrieve a summary of an individual's employment information
+   *
+   * @remarks
+   * `/employment/verification/get` returns a list of employments through a user payroll that was
+   * verified by an end user.
+   *
+   * This endpoint has been deprecated; new integrations should use `/credit/employment/get`
+   * instead.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.EmploymentVerificationGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   employmentVerificationGet(
     request: ThePlaidApiClient.EmploymentVerificationGetRequestParams,
     options?: RequestOptions,
@@ -4356,8 +6718,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/employment/verification/get"),
+        urlTemplate: this.#servers.default("/employment/verification/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: employmentVerificationGetRequestSchema },
       },
       {
@@ -4368,6 +6733,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get FDX Consent Grant
+   *
+   * @remarks
+   * Returns a consent grant by its identifier
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.FdxConsentsGetError} when the API answers with an error status
+   * — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   fdxConsentsGet(
     request: ThePlaidApiClient.FdxConsentsGetRequest,
     options?: RequestOptions,
@@ -4375,9 +6755,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "GET",
-        url: this.#servers.default("/fdx/consents/{consentId}"),
+        urlTemplate: this.#servers.default("/fdx/consents/{consentId}"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
         pathParams: [{ name: "consentId", value: request.consentId, schema: s.string() }],
+        query: [],
+        headers: [],
         body: { kind: "empty" },
       },
       {
@@ -4388,6 +6770,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * List FDX Consent Grants for a customer
+   *
+   * @remarks
+   * Returns zero or more consent grants associated with the given data provider customer,
+   * optionally filtered by status.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.FdxConsentsListError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   fdxConsentsList(
     request: ThePlaidApiClient.FdxConsentsListRequest,
     options?: RequestOptions,
@@ -4395,8 +6793,9 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "GET",
-        url: this.#servers.default("/fdx/consents"),
+        urlTemplate: this.#servers.default("/fdx/consents"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
         query: [
           { name: "customerId", value: request.customerId, schema: s.string() },
           {
@@ -4405,6 +6804,7 @@ export class ThePlaidApiClient {
             schema: s.optional(s.lazy(() => fdxConsentGrantStatusSchema)),
           },
         ],
+        headers: [],
         body: { kind: "empty" },
       },
       {
@@ -4415,6 +6815,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve FDX Consent Grant revocation records
+   *
+   * @remarks
+   * Returns the revocation history of a consent grant
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.FdxConsentsRevocationGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   fdxConsentsRevocationGet(
     request: ThePlaidApiClient.FdxConsentsRevocationGetRequest,
     options?: RequestOptions,
@@ -4422,9 +6837,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "GET",
-        url: this.#servers.default("/fdx/consents/{consentId}/revocation"),
+        urlTemplate: this.#servers.default("/fdx/consents/{consentId}/revocation"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
         pathParams: [{ name: "consentId", value: request.consentId, schema: s.string() }],
+        query: [],
+        headers: [],
         body: { kind: "empty" },
       },
       {
@@ -4435,6 +6852,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Revoke FDX Consent Grant
+   *
+   * @remarks
+   * Appends a REVOKED status record to the named consent grant
+   *
+   * @returns No Content
+   *
+   * @throws {@link ThePlaidApiClient.FdxConsentsRevokeError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   fdxConsentsRevoke(
     request: ThePlaidApiClient.FdxConsentsRevokeRequest,
     options?: RequestOptions,
@@ -4442,9 +6874,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "PUT",
-        url: this.#servers.default("/fdx/consents/{consentId}/revocation"),
+        urlTemplate: this.#servers.default("/fdx/consents/{consentId}/revocation"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
         pathParams: [{ name: "consentId", value: request.consentId, schema: s.string() }],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: fdxConsentRevocationSchema },
       },
       {
@@ -4455,6 +6889,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Webhook receiver for fdx notifications
+   *
+   * @remarks
+   * A generic webhook receiver endpoint for FDX Event Notifications
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.FdxNotificationsError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   fdxNotifications(
     request: ThePlaidApiClient.FdxNotificationsRequest,
     options?: RequestOptions,
@@ -4462,8 +6911,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/fdx/notifications"),
+        urlTemplate: this.#servers.default("/fdx/notifications"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: fdxNotificationEntitySchema },
       },
       {
@@ -4474,6 +6926,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get Recipient
+   *
+   * @remarks
+   * Get a specific recipient
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.GetRecipientError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   getRecipient(
     request: ThePlaidApiClient.GetRecipientRequest,
     options?: RequestOptions,
@@ -4481,9 +6948,10 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "GET",
-        url: this.#servers.default("/fdx/recipient/{recipientId}"),
+        urlTemplate: this.#servers.default("/fdx/recipient/{recipientId}"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
         pathParams: [{ name: "recipientId", value: request.recipientId, schema: s.string() }],
+        query: [],
         headers: [{ name: "OAUTH-STATE-ID", value: request.oauthStateId, schema: s.optional(s.string()) }],
         body: { kind: "empty" },
       },
@@ -4495,14 +6963,32 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get Recipients
+   *
+   * @remarks
+   * Returns a list of Recipients
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.GetRecipientsError} when the API answers with an error status
+   * — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   getRecipients(
     options?: RequestOptions,
   ): ApiPromise<GetRecipientsResponse, ThePlaidApiClient.GetRecipientsError> {
     return this.#rawClient.execute(
       {
         method: "GET",
-        url: this.#servers.default("/fdx/recipients"),
+        urlTemplate: this.#servers.default("/fdx/recipients"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [],
         body: { kind: "empty" },
       },
       {
@@ -4513,6 +6999,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Returns uploaded document identity
+   *
+   * @remarks
+   * Use `/identity/documents/uploads/get` to retrieve identity details when using [Identity
+   * Document Upload](https://plaid.com/docs/identity/identity-document-upload/).
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.IdentityDocumentsUploadsGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   identityDocumentsUploadsGet(
     request: ThePlaidApiClient.IdentityDocumentsUploadsGetRequestParams,
     options?: RequestOptions,
@@ -4520,8 +7022,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/identity/documents/uploads/get"),
+        urlTemplate: this.#servers.default("/identity/documents/uploads/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: identityDocumentsUploadsGetRequestSchema },
       },
       {
@@ -4532,6 +7037,28 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve identity data
+   *
+   * @remarks
+   * The `/identity/get` endpoint allows you to retrieve various account holder information on file
+   * with the financial institution, including names, emails, phone numbers, and addresses. Only
+   * name data is guaranteed to be returned; other fields will be empty arrays if not provided by
+   * the institution.
+   *
+   * Note: In API versions 2018-05-22 and earlier, the `owners` object is not returned, and instead
+   * identity information is returned in the top level `identity` object. For more details, see
+   * [Plaid API versioning](https://plaid.com/docs/api/versioning/#version-2019-05-29).
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.IdentityGetError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   identityGet(
     request: ThePlaidApiClient.IdentityGetRequestParams,
     options?: RequestOptions,
@@ -4539,8 +7066,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/identity/get"),
+        urlTemplate: this.#servers.default("/identity/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: identityGetRequestSchema },
       },
       {
@@ -4551,6 +7081,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve identity match score
+   *
+   * @remarks
+   * The `/identity/match` endpoint generates a match score, which indicates how well the provided
+   * identity data matches the identity information on file with the account holder's financial
+   * institution.
+   *
+   * Fields within the `balances` object will always be null when retrieved by `/identity/match`.
+   * Instead, use the free `/accounts/get` endpoint to request balance cached data, or
+   * `/accounts/balance/get` or `/signal/evaluate` for real-time data.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.IdentityMatchError} when the API answers with an error status
+   * — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   identityMatch(
     request: ThePlaidApiClient.IdentityMatchRequestParams,
     options?: RequestOptions,
@@ -4558,8 +7109,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/identity/match"),
+        urlTemplate: this.#servers.default("/identity/match"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: identityMatchRequestSchema },
       },
       {
@@ -4570,6 +7124,36 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Refresh identity data
+   *
+   * @remarks
+   * `/identity/refresh` is an optional endpoint for users of the Identity product. It initiates an
+   * on-demand extraction to fetch the most up to date Identity information from the Financial
+   * Institution. This on-demand extraction takes place in addition to the periodic extractions that
+   * automatically occur for any Identity-enabled Item. If changes to Identity are discovered after
+   * calling `/identity/refresh`, Plaid will fire a webhook
+   * [`DEFAULT_UPDATE`](https://plaid.com/docs/api/products/identity/#default_update).
+   *
+   * As this endpoint triggers a synchronous request for fresh data, latency may be higher than for
+   * other Plaid endpoints (typically less than 10 seconds, but occasionally up to 30 seconds or
+   * more); if you encounter errors, you may find it necessary to adjust your timeout period when
+   * making requests.
+   *
+   * `/identity/refresh` is offered as an add-on to Identity and has a separate [fee
+   * model](https://plaid.com/docs/account/billing/#per-request-flat-fee). To request access to this
+   * endpoint, submit a [product access request](https://dashboard.plaid.com/team/products) or
+   * contact your Plaid account manager.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.IdentityRefreshError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   identityRefresh(
     request: ThePlaidApiClient.IdentityRefreshRequestParams,
     options?: RequestOptions,
@@ -4577,8 +7161,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/identity/refresh"),
+        urlTemplate: this.#servers.default("/identity/refresh"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: identityRefreshRequestSchema },
       },
       {
@@ -4589,101 +7176,226 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create autofill for an Identity Verification
+   *
+   * @remarks
+   * Try to autofill an Identity Verification based on the provided phone number, date of birth and
+   * country of residence.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   identityVerificationAutofillCreate(
     request: ThePlaidApiClient.IdentityVerificationAutofillCreateRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<IdentityVerificationAutofillCreateResponse, ResponseError> {
-    return this.#rawClient.execute<IdentityVerificationAutofillCreateResponse, ResponseError>(
+  ): ApiPromise<IdentityVerificationAutofillCreateResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/identity_verification/autofill/create"),
+        urlTemplate: this.#servers.default("/identity_verification/autofill/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: identityVerificationAutofillCreateRequestSchema },
       },
       {
         success: { kind: "json", schema: identityVerificationAutofillCreateResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Create a new Identity Verification
+   *
+   * @remarks
+   * Create a new Identity Verification for the user specified by the `client_user_id` and/or
+   * `user_id` field. At least one of these two fields must be provided. The requirements and
+   * behavior of the verification are determined by the `template_id` provided. If `user_id` is
+   * provided, there must be an associated user; otherwise, an error will be returned.
+   *
+   *
+   * If you don't know whether an active Identity Verification exists for a given `client_user_id`
+   * and/or `user_id`, you can specify `"is_idempotent": true` in the request body. With idempotency
+   * enabled, a new Identity Verification will only be created if one does not already exist for the
+   * associated `client_user_id` and/or `user_id`, and `template_id`. If an Identity Verification is
+   * found, it will be returned unmodified with a `200 OK` HTTP status code.
+   *
+   *
+   * If `user_id` is not provided, you can also use this endpoint to supply information you already
+   * have collected about the user; if any of these fields are specified, the screens prompting the
+   * user to enter them will be skipped during the Link flow. If `user_id` is provided, user
+   * information can not be included in the request body. Please use the `/user/update` endpoint to
+   * update user data instead.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   identityVerificationCreate(
     request: ThePlaidApiClient.IdentityVerificationCreateRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<IdentityVerificationCreateResponse, ResponseError> {
-    return this.#rawClient.execute<IdentityVerificationCreateResponse, ResponseError>(
+  ): ApiPromise<IdentityVerificationCreateResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/identity_verification/create"),
+        urlTemplate: this.#servers.default("/identity_verification/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: identityVerificationCreateRequestSchema },
       },
       {
         success: { kind: "json", schema: identityVerificationCreateResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Retrieve Identity Verification
+   *
+   * @remarks
+   * Retrieve a previously created Identity Verification.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   identityVerificationGet(
     request: ThePlaidApiClient.IdentityVerificationGetRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<IdentityVerificationGetResponse, ResponseError> {
-    return this.#rawClient.execute<IdentityVerificationGetResponse, ResponseError>(
+  ): ApiPromise<IdentityVerificationGetResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/identity_verification/get"),
+        urlTemplate: this.#servers.default("/identity_verification/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: identityVerificationGetRequestSchema },
       },
       {
         success: { kind: "json", schema: identityVerificationGetResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * List Identity Verifications
+   *
+   * @remarks
+   * Filter and list Identity Verifications created by your account
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   identityVerificationList(
     request: ThePlaidApiClient.IdentityVerificationListRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<IdentityVerificationListResponse, ResponseError> {
-    return this.#rawClient.execute<IdentityVerificationListResponse, ResponseError>(
+  ): ApiPromise<IdentityVerificationListResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/identity_verification/list"),
+        urlTemplate: this.#servers.default("/identity_verification/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: identityVerificationListRequestSchema },
       },
       {
         success: { kind: "json", schema: identityVerificationListResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Retry an Identity Verification
+   *
+   * @remarks
+   * Allow a customer to retry their Identity Verification
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   identityVerificationRetry(
     request: ThePlaidApiClient.IdentityVerificationRetryRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<IdentityVerificationRetryResponse, ResponseError> {
-    return this.#rawClient.execute<IdentityVerificationRetryResponse, ResponseError>(
+  ): ApiPromise<IdentityVerificationRetryResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/identity_verification/retry"),
+        urlTemplate: this.#servers.default("/identity_verification/retry"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: identityVerificationRetryRequestSchema },
       },
       {
         success: { kind: "json", schema: identityVerificationRetryResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * (Deprecated) Create an income verification instance
+   *
+   * @remarks
+   * `/income/verification/create` begins the income verification process by returning an
+   * `income_verification_id`. You can then provide the `income_verification_id` to
+   * `/link/token/create` under the `income_verification` parameter in order to create a Link
+   * instance that will prompt the user to go through the income verification flow. Plaid will fire
+   * an `INCOME` webhook once the user completes the Payroll Income flow, or when the uploaded
+   * documents in the Document Income flow have finished processing.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.IncomeVerificationCreateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   incomeVerificationCreate(
     request: ThePlaidApiClient.IncomeVerificationCreateRequestParams,
     options?: RequestOptions,
@@ -4691,8 +7403,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/income/verification/create"),
+        urlTemplate: this.#servers.default("/income/verification/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: incomeVerificationCreateRequestSchema },
       },
       {
@@ -4703,6 +7418,34 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Download the original documents used for income verification
+   *
+   * @remarks
+   * `/income/verification/documents/download` provides the ability to download the source documents
+   * associated with the verification.
+   *
+   * If Document Income was used, the documents will be those the user provided in Link. For Payroll
+   * Income, the most recent files available for download from the payroll provider will be
+   * available from this endpoint.
+   *
+   * The response to `/income/verification/documents/download` is a ZIP file in binary data. If a
+   * `document_id` is passed, a single document will be contained in this file. If not, the response
+   * will contain all documents associated with the verification.
+   *
+   * The `request_id` is returned in the `Plaid-Request-ID` header.
+   *
+   * @returns A ZIP file containing source documents(s) used as the basis for income verification.
+   *
+   * @throws {@link ThePlaidApiClient.IncomeVerificationDocumentsDownloadError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   incomeVerificationDocumentsDownload(
     request: ThePlaidApiClient.IncomeVerificationDocumentsDownloadRequestParams,
     options?: RequestOptions,
@@ -4710,8 +7453,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/income/verification/documents/download"),
+        urlTemplate: this.#servers.default("/income/verification/documents/download"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: incomeVerificationDocumentsDownloadRequestSchema },
       },
       {
@@ -4722,6 +7468,30 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Retrieve information from the paystubs used for income verification
+   *
+   * @remarks
+   * `/income/verification/paystubs/get` returns the information collected from the paystubs that
+   * were used to verify an end user's income. It can be called once the status of the verification
+   * has been set to `VERIFICATION_STATUS_PROCESSING_COMPLETE`, as reported by the `INCOME:
+   * verification_status` webhook. Attempting to call the endpoint before verification has been
+   * completed will result in an error.
+   *
+   * This endpoint has been deprecated; new integrations should use `/credit/payroll_income/get`
+   * instead.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.IncomeVerificationPaystubsGetError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   incomeVerificationPaystubsGet(
     request: ThePlaidApiClient.IncomeVerificationPaystubsGetRequestParams,
     options?: RequestOptions,
@@ -4729,8 +7499,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/income/verification/paystubs/get"),
+        urlTemplate: this.#servers.default("/income/verification/paystubs/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: incomeVerificationPaystubsGetRequestSchema },
       },
       {
@@ -4741,6 +7514,36 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Check digital income verification eligibility and optimize conversion
+   *
+   * @remarks
+   * `/income/verification/precheck` is an optional endpoint that can be called before initializing
+   * a Link session for income verification. It evaluates whether a given user is supportable by
+   * digital income verification and returns a `precheck_id` that can be provided to
+   * `/link/token/create`. If the user is eligible for digital verification, providing the
+   * `precheck_id` in this way will generate a Link UI optimized for the end user and their specific
+   * employer. If the user cannot be confirmed as eligible, the `precheck_id` can still be provided
+   * to `/link/token/create` and the user can still use the income verification flow, but they may
+   * be required to manually upload a paystub to verify their income.
+   *
+   * While all request fields are optional, providing either `employer` or
+   * `transactions_access_tokens` data will increase the chance of receiving a useful result.
+   *
+   * This endpoint has been deprecated; new integrations should use
+   * `/credit/payroll_income/precheck` instead.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.IncomeVerificationPrecheckError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   incomeVerificationPrecheck(
     request: ThePlaidApiClient.IncomeVerificationPrecheckRequestParams,
     options?: RequestOptions,
@@ -4748,8 +7551,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/income/verification/precheck"),
+        urlTemplate: this.#servers.default("/income/verification/precheck"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: incomeVerificationPrecheckRequestSchema },
       },
       {
@@ -4760,6 +7566,30 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Retrieve information from the tax documents used for income verification
+   *
+   * @remarks
+   * `/income/verification/taxforms/get` returns the information collected from forms that were used
+   * to verify an end user''s income. It can be called once the status of the verification has been
+   * set to `VERIFICATION_STATUS_PROCESSING_COMPLETE`, as reported by the `INCOME:
+   * verification_status` webhook. Attempting to call the endpoint before verification has been
+   * completed will result in an error.
+   *
+   * This endpoint has been deprecated; new integrations should use `/credit/payroll_income/get`
+   * instead.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.IncomeVerificationTaxformsGetError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   incomeVerificationTaxformsGet(
     request: ThePlaidApiClient.IncomeVerificationTaxformsGetRequestParams,
     options?: RequestOptions,
@@ -4767,8 +7597,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/income/verification/taxforms/get"),
+        urlTemplate: this.#servers.default("/income/verification/taxforms/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: incomeVerificationTaxformsGetRequestSchema },
       },
       {
@@ -4779,6 +7612,26 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get details of all supported institutions
+   *
+   * @remarks
+   * Returns a JSON response containing details on all financial institutions currently supported by
+   * Plaid. Because Plaid supports thousands of institutions, results are paginated.
+   *
+   * If there is no overlap between an institution's enabled products and a client's enabled
+   * products, then the institution will be filtered out from the response. As a result, the number
+   * of institutions returned may not match the count specified in the call.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.InstitutionsGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   institutionsGet(
     request: ThePlaidApiClient.InstitutionsGetRequestParams,
     options?: RequestOptions,
@@ -4786,8 +7639,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/institutions/get"),
+        urlTemplate: this.#servers.default("/institutions/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: institutionsGetRequestSchema },
       },
       {
@@ -4798,6 +7654,26 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get details of an institution
+   *
+   * @remarks
+   * Returns a JSON response containing details on a specified financial institution currently
+   * supported by Plaid.
+   *
+   * Versioning note: API versions 2019-05-29 and earlier allow use of the `public_key` parameter
+   * instead of the `client_id` and `secret` to authenticate to this endpoint. The `public_key` has
+   * been deprecated; all customers are encouraged to use `client_id` and `secret` instead.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.InstitutionsGetByIdError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   institutionsGetById(
     request: ThePlaidApiClient.InstitutionsGetByIdRequestParams,
     options?: RequestOptions,
@@ -4805,8 +7681,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/institutions/get_by_id"),
+        urlTemplate: this.#servers.default("/institutions/get_by_id"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: institutionsGetByIdRequestSchema },
       },
       {
@@ -4817,6 +7696,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Search institutions
+   *
+   * @remarks
+   * Returns a JSON response containing details for institutions that match the query parameters, up
+   * to a maximum of ten institutions per query.
+   *
+   * Versioning note: API versions 2019-05-29 and earlier allow use of the `public_key` parameter
+   * instead of the `client_id` and `secret` parameters to authenticate to this endpoint. The
+   * `public_key` parameter has since been deprecated; all customers are encouraged to use
+   * `client_id` and `secret` instead.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.InstitutionsSearchError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   institutionsSearch(
     request: ThePlaidApiClient.InstitutionsSearchRequestParams,
     options?: RequestOptions,
@@ -4824,8 +7724,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/institutions/search"),
+        urlTemplate: this.#servers.default("/institutions/search"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: institutionsSearchRequestSchema },
       },
       {
@@ -4836,6 +7739,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get data needed to authorize an investments transfer
+   *
+   * @remarks
+   * The `/investments/auth/get` endpoint allows developers to receive user-authorized data to
+   * facilitate the transfer of holdings
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.InvestmentsAuthGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   investmentsAuthGet(
     request: ThePlaidApiClient.InvestmentsAuthGetRequestParams,
     options?: RequestOptions,
@@ -4843,8 +7762,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/investments/auth/get"),
+        urlTemplate: this.#servers.default("/investments/auth/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: investmentsAuthGetRequestSchema },
       },
       {
@@ -4855,6 +7777,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get Investment holdings
+   *
+   * @remarks
+   * The `/investments/holdings/get` endpoint allows developers to receive user-authorized stock
+   * position data for `investment`-type accounts.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.InvestmentsHoldingsGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   investmentsHoldingsGet(
     request: ThePlaidApiClient.InvestmentsHoldingsGetRequestParams,
     options?: RequestOptions,
@@ -4862,8 +7800,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/investments/holdings/get"),
+        urlTemplate: this.#servers.default("/investments/holdings/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: investmentsHoldingsGetRequestSchema },
       },
       {
@@ -4874,6 +7815,46 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Refresh investment data
+   *
+   * @remarks
+   * `/investments/refresh` is an optional endpoint for users of the Investments product. It
+   * initiates an on-demand extraction to fetch the newest investment holdings and transactions for
+   * an Item. This on-demand extraction takes place in addition to the periodic extractions that
+   * automatically occur one or more times per day for any Investments-enabled Item. If changes to
+   * investments are discovered after calling `/investments/refresh`, Plaid will fire webhooks:
+   * [`HOLDINGS:
+   * DEFAULT_UPDATE`](https://plaid.com/docs/api/products/investments/#holdings-default_update) if
+   * any new holdings are detected, and [`INVESTMENTS_TRANSACTIONS:
+   * DEFAULT_UPDATE`](https://plaid.com/docs/api/products/investments/#investments_transactions-default_update)
+   * if any new investment transactions are detected. This webhook will typically not fire in the
+   * Sandbox environment, due to the lack of dynamic investment transactions and holdings data. To
+   * test this webhook in Sandbox, call `/sandbox/item/fire_webhook`. Updated holdings and
+   * investment transactions can be fetched by calling `/investments/holdings/get` and
+   * `/investments/transactions/get`. Note that the `/investments/refresh` endpoint is not supported
+   * by all institutions. If called on an Item from an institution that does not support this
+   * functionality, it will return a `PRODUCT_NOT_SUPPORTED` error.
+   *
+   * As this endpoint triggers a synchronous request for fresh data, latency may be higher than for
+   * other Plaid endpoints (typically less than 10 seconds, but occasionally up to 30 seconds or
+   * more); if you encounter errors, you may find it necessary to adjust your timeout period when
+   * making requests.
+   *
+   * `/investments/refresh` is offered as an add-on to Investments and has a separate [fee
+   * model](https://plaid.com/docs/account/billing/#per-request-flat-fee). To request access to this
+   * endpoint, submit a [product access request](https://dashboard.plaid.com/team/products) or
+   * contact your Plaid account manager.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.InvestmentsRefreshError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   investmentsRefresh(
     request: ThePlaidApiClient.InvestmentsRefreshRequestParams,
     options?: RequestOptions,
@@ -4881,8 +7862,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/investments/refresh"),
+        urlTemplate: this.#servers.default("/investments/refresh"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: investmentsRefreshRequestSchema },
       },
       {
@@ -4893,6 +7877,42 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get investment transactions
+   *
+   * @remarks
+   * The `/investments/transactions/get` endpoint allows developers to retrieve up to 24 months of
+   * user-authorized transaction data for investment accounts.
+   *
+   * Transactions are returned in reverse-chronological order, and the sequence of transaction
+   * ordering is stable and will not shift.
+   *
+   * Due to the potentially large number of investment transactions associated with an Item, results
+   * are paginated. Manipulate the count and offset parameters in conjunction with the
+   * `total_investment_transactions` response body field to fetch all available investment
+   * transactions.
+   *
+   * Note that Investments does not have a webhook to indicate when initial transaction data has
+   * loaded (unless you use the `async_update` option). Instead, if transactions data is not ready
+   * when `/investments/transactions/get` is first called, Plaid will wait for the data. For this
+   * reason, calling `/investments/transactions/get` immediately after Link may take up to one to
+   * two minutes to return.
+   *
+   * Data returned by the asynchronous investments extraction flow (when `async_update` is set to
+   * true) may not be immediately available to `/investments/transactions/get`. To be alerted when
+   * the data is ready to be fetched, listen for the `HISTORICAL_UPDATE` webhook. If no investments
+   * history is ready when `/investments/transactions/get` is called, it will return a
+   * `PRODUCT_NOT_READY` error.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.InvestmentsTransactionsGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   investmentsTransactionsGet(
     request: ThePlaidApiClient.InvestmentsTransactionsGetRequestParams,
     options?: RequestOptions,
@@ -4900,8 +7920,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/investments/transactions/get"),
+        urlTemplate: this.#servers.default("/investments/transactions/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: investmentsTransactionsGetRequestSchema },
       },
       {
@@ -4912,6 +7935,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get an Issue
+   *
+   * @remarks
+   * Retrieve detailed information about a specific `Issue`. This endpoint returns a single `Issue`
+   * object.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.IssuesGetError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   issuesGet(
     request: ThePlaidApiClient.IssuesGetRequestParams,
     options?: RequestOptions,
@@ -4919,8 +7958,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/issues/get"),
+        urlTemplate: this.#servers.default("/issues/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: issuesGetRequestSchema },
       },
       {
@@ -4931,6 +7973,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Search for an Issue
+   *
+   * @remarks
+   * Search for an issue associated with one of the following identifiers: `item_id`,
+   * `link_session_id` or Link session `request_id`. This endpoint returns a list of `Issue`
+   * objects, with an empty list indicating that no issues are associated with the provided
+   * identifier. At least one of the identifiers must be provided to perform the search.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.IssuesSearchError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   issuesSearch(
     request: ThePlaidApiClient.IssuesSearchRequestParams,
     options?: RequestOptions,
@@ -4938,8 +7998,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/issues/search"),
+        urlTemplate: this.#servers.default("/issues/search"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: issuesSearchRequestSchema },
       },
       {
@@ -4950,6 +8013,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Subscribe to an Issue
+   *
+   * @remarks
+   * Allows a user to subscribe to updates on a specific `Issue` using a POST method. Subscribers
+   * will receive webhook notifications when the issue status changes, particularly when resolved.
+   *
+   * @returns Subscription was successful
+   *
+   * @throws {@link ThePlaidApiClient.IssuesSubscribeError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   issuesSubscribe(
     request: ThePlaidApiClient.IssuesSubscribeRequestParams,
     options?: RequestOptions,
@@ -4957,8 +8036,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/issues/subscribe"),
+        urlTemplate: this.#servers.default("/issues/subscribe"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: issuesSubscribeRequestSchema },
       },
       {
@@ -4969,6 +8051,26 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Invalidate access_token
+   *
+   * @remarks
+   * By default, the `access_token` associated with an Item does not expire and should be stored in
+   * a persistent, secure manner.
+   *
+   * You can use the `/item/access_token/invalidate` endpoint to rotate the `access_token`
+   * associated with an Item. The endpoint returns a new `access_token` and immediately invalidates
+   * the previous `access_token`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ItemAccessTokenInvalidateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   itemAccessTokenInvalidate(
     request: ThePlaidApiClient.ItemAccessTokenInvalidateRequestParams,
     options?: RequestOptions,
@@ -4976,8 +8078,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/item/access_token/invalidate"),
+        urlTemplate: this.#servers.default("/item/access_token/invalidate"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: itemAccessTokenInvalidateRequestSchema },
       },
       {
@@ -4988,6 +8093,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * List a historical log of user consent events
+   *
+   * @remarks
+   * List a historical log of user consent events
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ItemActivityListError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   itemActivityList(
     request: ThePlaidApiClient.ItemActivityListRequestParams,
     options?: RequestOptions,
@@ -4995,8 +8115,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/item/activity/list"),
+        urlTemplate: this.#servers.default("/item/activity/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: itemActivityListRequestSchema },
       },
       {
@@ -5007,6 +8130,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * List a user's connected applications
+   *
+   * @remarks
+   * List a user's connected applications
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ItemApplicationListError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   itemApplicationList(
     request: ThePlaidApiClient.ItemApplicationListRequestParams,
     options?: RequestOptions,
@@ -5014,8 +8152,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/item/application/list"),
+        urlTemplate: this.#servers.default("/item/application/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: itemApplicationListRequestSchema },
       },
       {
@@ -5026,6 +8167,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Update the scopes of access for a particular application
+   *
+   * @remarks
+   * Enable consumers to update product access on selected accounts for an application.
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.ItemApplicationScopesUpdateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   itemApplicationScopesUpdate(
     request: ThePlaidApiClient.ItemApplicationScopesUpdateRequestParams,
     options?: RequestOptions,
@@ -5033,8 +8189,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/item/application/scopes/update"),
+        urlTemplate: this.#servers.default("/item/application/scopes/update"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: itemApplicationScopesUpdateRequestSchema },
       },
       {
@@ -5045,6 +8204,30 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Unlink a user's connected application
+   *
+   * @remarks
+   * Unlink a user's connected application. On an unlink request, Plaid will immediately revoke the
+   * Application's access to the User's data. The User will have to redo the OAuth authentication
+   * process in order to restore functionality.
+   *
+   * This endpoint only removes ongoing data access permissions, therefore the User will need to
+   * reach out to the Application itself in order to disable and delete their account and delete any
+   * data that the Application already received (if the Application does not do so by default).
+   *
+   * This endpoint should be called in real time as the User is unlinking an Application, and should
+   * not be batched in order to ensure that the change is reflected as soon as possible.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ItemApplicationUnlinkError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   itemApplicationUnlink(
     request: ThePlaidApiClient.ItemApplicationUnlinkRequestParams,
     options?: RequestOptions,
@@ -5052,8 +8235,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/item/application/unlink"),
+        urlTemplate: this.#servers.default("/item/application/unlink"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: itemApplicationUnlinkRequestSchema },
       },
       {
@@ -5064,6 +8250,39 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Create public token
+   *
+   * @remarks
+   * Note: As of July 2020, the `/item/public_token/create` endpoint is deprecated. Instead, use
+   * `/link/token/create` with an `access_token` to create a Link token for use with [update
+   * mode](https://plaid.com/docs/link/update-mode).
+   *
+   * If you need your user to take action to restore or resolve an error associated with an Item,
+   * generate a public token with the `/item/public_token/create` endpoint and then initialize Link
+   * with that `public_token`.
+   *
+   * A `public_token` is one-time use and expires after 30 minutes. You use a `public_token` to
+   * initialize Link in [update mode](https://plaid.com/docs/link/update-mode) for a particular
+   * Item. You can generate a `public_token` for an Item even if you did not use Link to create the
+   * Item originally.
+   *
+   * The `/item/public_token/create` endpoint is **not** used to create your initial `public_token`.
+   * If you have not already received an `access_token` for a specific Item, use Link to obtain your
+   * `public_token` instead. See the [Quickstart](https://plaid.com/docs/quickstart) for more
+   * information.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ItemCreatePublicTokenError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   itemCreatePublicToken(
     request: ThePlaidApiClient.ItemCreatePublicTokenRequest,
     options?: RequestOptions,
@@ -5071,8 +8290,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/item/public_token/create"),
+        urlTemplate: this.#servers.default("/item/public_token/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: itemPublicTokenCreateRequestSchema },
       },
       {
@@ -5083,6 +8305,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve an Item
+   *
+   * @remarks
+   * Returns information about the status of an Item.
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.ItemGetError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   itemGet(
     request: ThePlaidApiClient.ItemGetRequestParams,
     options?: RequestOptions,
@@ -5090,8 +8327,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/item/get"),
+        urlTemplate: this.#servers.default("/item/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: itemGetRequestSchema },
       },
       {
@@ -5102,6 +8342,28 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Import Item
+   *
+   * @remarks
+   * `/item/import` creates an Item via your Plaid Exchange Integration and returns an
+   * `access_token`. As part of an `/item/import` request, you will include a User ID
+   * (`user_auth.user_id`) and Authentication Token (`user_auth.auth_token`) that enable data
+   * aggregation through your Plaid Exchange API endpoints. These authentication principals are to
+   * be chosen by you.
+   *
+   * Upon creating an Item via `/item/import`, Plaid will automatically begin an extraction of that
+   * Item through the Plaid Exchange infrastructure you have already integrated.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ItemImportError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   itemImport(
     request: ThePlaidApiClient.ItemImportRequestParams,
     options?: RequestOptions,
@@ -5109,8 +8371,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/item/import"),
+        urlTemplate: this.#servers.default("/item/import"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: itemImportRequestSchema },
       },
       {
@@ -5121,6 +8386,26 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Terminate products for an Item
+   *
+   * @remarks
+   * The `/item/products/terminate` endpoint allows you to terminate an Item. Once terminated, the
+   * `access_token` associated with the Item is no longer valid, billing for the Item's products is
+   * ended, and relevant webhooks are fired.
+   *
+   * `/item/products/terminate` is the recommended way to offboard users or disconnect accounts
+   * linked via Plaid.
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.ItemProductsTerminateError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   itemProductsTerminate(
     request: ThePlaidApiClient.ItemProductsTerminateRequestParams,
     options?: RequestOptions,
@@ -5128,8 +8413,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/item/products/terminate"),
+        urlTemplate: this.#servers.default("/item/products/terminate"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: itemProductsTerminateRequestSchema },
       },
       {
@@ -5140,6 +8428,28 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Exchange public token for an access token
+   *
+   * @remarks
+   * Exchange a Link `public_token` for an API `access_token`. Link hands off the `public_token`
+   * client-side via the `onSuccess` callback once a user has successfully created an Item. The
+   * `public_token` is ephemeral and expires after 30 minutes. An `access_token` does not expire,
+   * but can be revoked by calling `/item/remove`.
+   *
+   * The response also includes an `item_id` that should be stored with the `access_token`. The
+   * `item_id` is used to identify an Item in a webhook. The `item_id` can also be retrieved by
+   * making an `/item/get` request.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ItemPublicTokenExchangeError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   itemPublicTokenExchange(
     request: ThePlaidApiClient.ItemPublicTokenExchangeRequestParams,
     options?: RequestOptions,
@@ -5147,8 +8457,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/item/public_token/exchange"),
+        urlTemplate: this.#servers.default("/item/public_token/exchange"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: itemPublicTokenExchangeRequestSchema },
       },
       {
@@ -5159,6 +8472,42 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Remove an Item
+   *
+   * @remarks
+   * The `/item/remove` endpoint allows you to remove an Item. Once removed, the `access_token`, as
+   * well as any processor tokens or bank account tokens associated with the Item, is no longer
+   * valid and cannot be used to access any data that was associated with the Item.
+   *
+   * Calling `/item/remove` is a recommended best practice when offboarding users or if a user
+   * chooses to disconnect an account linked via Plaid. For subscription products, such as
+   * Transactions, Liabilities, and Investments, calling `/item/remove` is required to end
+   * subscription billing for the Item, unless the end user revoked permission (e.g. via
+   * [https://my.plaid.com/](https://my.plaid.com/)). For more details, see [Subscription fee
+   * model](https://plaid.com/docs/account/billing/#subscription-fee).
+   *
+   * On a Trial plan, calling `/item/remove` does not impact the number of remaining Trial Items
+   * (bank connections) you have available.
+   *
+   * Removing an Item does not affect any Asset Reports or Audit Copies you have already created,
+   * which will remain accessible until you remove access to them specifically using the
+   * `/asset_report/remove` endpoint.
+   *
+   * Also note that for certain OAuth-based institutions, an Item removed via `/item/remove` may
+   * still show as an active connection in the institution's OAuth permission manager.
+   *
+   * API versions 2019-05-29 and earlier return a `removed` boolean as part of the response.
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.ItemRemoveError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   itemRemove(
     request: ThePlaidApiClient.ItemRemoveRequestParams,
     options?: RequestOptions,
@@ -5166,8 +8515,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/item/remove"),
+        urlTemplate: this.#servers.default("/item/remove"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: itemRemoveRequestSchema },
       },
       {
@@ -5178,6 +8530,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Update Webhook URL
+   *
+   * @remarks
+   * The POST `/item/webhook/update` allows you to update the webhook URL associated with an Item.
+   * This request triggers a
+   * [`WEBHOOK_UPDATE_ACKNOWLEDGED`](https://plaid.com/docs/api/items/#webhook_update_acknowledged)
+   * webhook to the newly specified webhook URL.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ItemWebhookUpdateError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   itemWebhookUpdate(
     request: ThePlaidApiClient.ItemWebhookUpdateRequestParams,
     options?: RequestOptions,
@@ -5185,8 +8555,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/item/webhook/update"),
+        urlTemplate: this.#servers.default("/item/webhook/update"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: itemWebhookUpdateRequestSchema },
       },
       {
@@ -5197,6 +8570,31 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve Liabilities data
+   *
+   * @remarks
+   * The `/liabilities/get` endpoint returns various details about an Item with loan or credit
+   * accounts. Liabilities data is available primarily for US financial institutions, with some
+   * limited coverage of Canadian institutions. Currently supported account types are account type
+   * `credit` with account subtype `credit card` or `paypal`, and account type `loan` with account
+   * subtype `student` or `mortgage`. To limit accounts listed in Link to types and subtypes
+   * supported by Liabilities, you can use the `account_filters` parameter when [creating a Link
+   * token](https://plaid.com/docs/api/link/#linktokencreate).
+   *
+   * The types of information returned by Liabilities can include balances and due dates, loan
+   * terms, and account details such as original loan amount and guarantor. Data is refreshed
+   * approximately once per day; the latest data can be retrieved by calling `/liabilities/get`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.LiabilitiesGetError} when the API answers with an error status
+   * — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   liabilitiesGet(
     request: ThePlaidApiClient.LiabilitiesGetRequestParams,
     options?: RequestOptions,
@@ -5204,8 +8602,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/liabilities/get"),
+        urlTemplate: this.#servers.default("/liabilities/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: liabilitiesGetRequestSchema },
       },
       {
@@ -5216,6 +8617,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create Hosted Link session
+   *
+   * @remarks
+   * Use the `/link_delivery/create` endpoint to create a Hosted Link session.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.LinkDeliveryCreateError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   linkDeliveryCreate(
     request: ThePlaidApiClient.LinkDeliveryCreateRequestParams,
     options?: RequestOptions,
@@ -5223,8 +8641,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/link_delivery/create"),
+        urlTemplate: this.#servers.default("/link_delivery/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: linkDeliveryCreateRequestSchema },
       },
       {
@@ -5235,6 +8656,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get Hosted Link session
+   *
+   * @remarks
+   * Use the `/link_delivery/get` endpoint to get the status of a Hosted Link session.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.LinkDeliveryGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   linkDeliveryGet(
     request: ThePlaidApiClient.LinkDeliveryGetRequestParams,
     options?: RequestOptions,
@@ -5242,8 +8680,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/link_delivery/get"),
+        urlTemplate: this.#servers.default("/link_delivery/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: linkDeliveryGetRequestSchema },
       },
       {
@@ -5254,6 +8695,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Exchange the Link Correlation ID for a Link Token
+   *
+   * @remarks
+   * Exchange an OAuth `link_correlation_id` for the corresponding `link_token`. The
+   * `link_correlation_id` is only available for `payment_initiation` products and is provided to
+   * the client via the OAuth `redirect_uri` as a query parameter. The `link_correlation_id` is
+   * ephemeral and expires in a brief period, after which it can no longer be exchanged for the
+   * `link_token`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.LinkOauthCorrelationIdExchangeError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   linkOauthCorrelationIdExchange(
     request: ThePlaidApiClient.LinkOauthCorrelationIdExchangeRequest,
     options?: RequestOptions,
@@ -5264,8 +8724,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/link/oauth/correlation_id/exchange"),
+        urlTemplate: this.#servers.default("/link/oauth/correlation_id/exchange"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: linkOAuthCorrelationIdExchangeRequestSchema },
       },
       {
@@ -5276,6 +8739,29 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create Link Token
+   *
+   * @remarks
+   * The `/link/token/create` endpoint creates a `link_token`, which is required as a parameter when
+   * initializing Link. Once Link has been initialized, it returns a `public_token`. For most Plaid
+   * products, the `public_token` is saved and exchanged for an `access_token` via
+   * `/item/public_token/exchange` as part of the main Link flow. For more details, see the [Link
+   * flow overview](https://plaid.com/docs/link/#link-flow-overview).
+   *
+   * A `link_token` generated by `/link/token/create` is also used to initialize other Link flows,
+   * such as the [update mode](https://plaid.com/docs/link/update-mode) flow for tokens with expired
+   * credentials, or the Identity Verification flow.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.LinkTokenCreateError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   linkTokenCreate(
     request: ThePlaidApiClient.LinkTokenCreateRequestParams,
     options?: RequestOptions,
@@ -5283,8 +8769,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/link/token/create"),
+        urlTemplate: this.#servers.default("/link/token/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: linkTokenCreateRequestSchema },
       },
       {
@@ -5295,6 +8784,33 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get Link Token
+   *
+   * @remarks
+   * The `/link/token/get` endpoint gets information about a Link session, including all callbacks
+   * fired during the session along with their metadata, including the public token. This endpoint
+   * is used with Link flows that don't provide a public token via frontend callbacks, such as the
+   * [Hosted Link flow](https://plaid.com/docs/link/hosted-link/) and the [Multi-Item Link
+   * flow](https://plaid.com/docs/link/multi-item-link/). It also can be useful for debugging
+   * purposes.
+   *
+   * By default, this endpoint will only return complete event data for Hosted Link sessions. To use
+   * `/link/token/get` to retrieve event data for non-Hosted-Link sessions, contact your account
+   * manager to request that your account be enabled for Link events. If you do not have an account
+   * manager, you can submit this request via a support ticket. Enablement for Link events will also
+   * cause you to receive additional webhooks related to Link events, such as the `SESSION_FINISHED`
+   * and `EVENTS` webhook.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.LinkTokenGetError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   linkTokenGet(
     request: ThePlaidApiClient.LinkTokenGetRequestParams,
     options?: RequestOptions,
@@ -5302,8 +8818,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/link/token/get"),
+        urlTemplate: this.#servers.default("/link/token/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: linkTokenGetRequestSchema },
       },
       {
@@ -5314,6 +8833,28 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Check a user's Plaid Network status
+   *
+   * @remarks
+   * The `/network/status/get` endpoint can be used to check whether Plaid has a matching profile
+   * for the user. This is useful for determining if a user is eligible for a streamlined
+   * experience, such as Layer. To access this endpoint, contact your Plaid account manager.
+   *
+   * Note: it is strongly recommended to check for Layer eligibility in the frontend.
+   * `/network/status/get` should only be used for checking Layer eligibility if a frontend check is
+   * not possible for your use case. For instructions on performing a frontend eligibility check,
+   * see the [Layer documentation](https://plaid.com/docs/layer/#integration-overview).
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.NetworkStatusGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   networkStatusGet(
     request: ThePlaidApiClient.NetworkStatusGetRequestParams,
     options?: RequestOptions,
@@ -5321,8 +8862,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/network/status/get"),
+        urlTemplate: this.#servers.default("/network/status/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: networkStatusGetRequestSchema },
       },
       {
@@ -5333,6 +8877,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get metadata about an OAuth token
+   *
+   * @remarks
+   * `/oauth/introspect` returns metadata about an access token or refresh token.
+   *
+   * Note: This endpoint supports `Content-Type: application/x-www-form-urlencoded` as well as JSON.
+   * The fields for the form are equivalent to the fields for JSON and conform to the OAuth 2.0
+   * specification.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.OauthIntrospectError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   oauthIntrospect(
     request: ThePlaidApiClient.OauthIntrospectRequest,
     options?: RequestOptions,
@@ -5340,8 +8903,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/oauth/introspect"),
+        urlTemplate: this.#servers.default("/oauth/introspect"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: oAuthIntrospectRequestSchema },
       },
       {
@@ -5352,6 +8918,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Revoke an OAuth token
+   *
+   * @remarks
+   * `/oauth/revoke` revokes an access or refresh token, preventing any further use. If a refresh
+   * token is revoked, all access and refresh tokens derived from it are also revoked, including
+   * exchanged tokens.
+   *
+   * Note: This endpoint supports `Content-Type: application/x-www-form-urlencoded` as well as JSON.
+   * The fields for the form are equivalent to the fields for JSON and conform to the OAuth 2.0
+   * specification.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.OauthRevokeError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   oauthRevoke(
     request: ThePlaidApiClient.OauthRevokeRequest,
     options?: RequestOptions,
@@ -5359,8 +8946,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/oauth/revoke"),
+        urlTemplate: this.#servers.default("/oauth/revoke"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: oAuthRevokeRequestSchema },
       },
       {
@@ -5371,6 +8961,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create or refresh an OAuth access token
+   *
+   * @remarks
+   * `/oauth/token` issues an access token and refresh token depending on the `grant_type` provided.
+   * This endpoint supports `Content-Type: application/x-www-form-urlencoded` as well as JSON. The
+   * fields for the form are equivalent to the fields for JSON and conform to the OAuth 2.0
+   * specification.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.OauthTokenError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   oauthToken(
     request: ThePlaidApiClient.OauthTokenRequest,
     options?: RequestOptions,
@@ -5378,8 +8986,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/oauth/token"),
+        urlTemplate: this.#servers.default("/oauth/token"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: oAuthTokenRequestSchema },
       },
       {
@@ -5390,6 +9001,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Creates a new end customer for a Plaid reseller.
+   *
+   * @remarks
+   * The `/partner/customer/create` endpoint is used by reseller partners to create end customers.
+   * To create end customers, it should be called in the Production environment only, even when
+   * creating Sandbox API keys. If called in the Sandbox environment, it will return a sample
+   * response, but no customer will be created and the API keys will not be valid.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PartnerCustomerCreateError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   partnerCustomerCreate(
     request: ThePlaidApiClient.PartnerCustomerCreateRequestParams,
     options?: RequestOptions,
@@ -5397,8 +9026,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/partner/customer/create"),
+        urlTemplate: this.#servers.default("/partner/customer/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: partnerCustomerCreateRequestSchema },
       },
       {
@@ -5409,6 +9041,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Enables a Plaid reseller's end customer in the Production environment.
+   *
+   * @remarks
+   * The `/partner/customer/enable` endpoint is used by reseller partners to enable an end customer
+   * in the full Production environment.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PartnerCustomerEnableError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   partnerCustomerEnable(
     request: ThePlaidApiClient.PartnerCustomerEnableRequestParams,
     options?: RequestOptions,
@@ -5416,8 +9064,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/partner/customer/enable"),
+        urlTemplate: this.#servers.default("/partner/customer/enable"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: partnerCustomerEnableRequestSchema },
       },
       {
@@ -5428,6 +9079,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Returns a Plaid reseller's end customer.
+   *
+   * @remarks
+   * The `/partner/customer/get` endpoint is used by reseller partners to retrieve data about a
+   * single end customer.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PartnerCustomerGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   partnerCustomerGet(
     request: ThePlaidApiClient.PartnerCustomerGetRequestParams,
     options?: RequestOptions,
@@ -5435,8 +9102,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/partner/customer/get"),
+        urlTemplate: this.#servers.default("/partner/customer/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: partnerCustomerGetRequestSchema },
       },
       {
@@ -5447,6 +9117,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Returns OAuth-institution registration information for a given end customer.
+   *
+   * @remarks
+   * The `/partner/customer/oauth_institutions/get` endpoint is used by reseller partners to
+   * retrieve OAuth-institution registration information about a single end customer. To learn how
+   * to set up a webhook to listen to status update events, visit the [reseller
+   * documentation](https://plaid.com/docs/account/resellers/#enabling-end-customers).
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PartnerCustomerOauthInstitutionsGetError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   partnerCustomerOauthInstitutionsGet(
     request: ThePlaidApiClient.PartnerCustomerOauthInstitutionsGetRequest,
     options?: RequestOptions,
@@ -5457,8 +9145,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/partner/customer/oauth_institutions/get"),
+        urlTemplate: this.#servers.default("/partner/customer/oauth_institutions/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: partnerCustomerOAuthInstitutionsGetRequestSchema },
       },
       {
@@ -5469,6 +9160,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Removes a Plaid reseller's end customer.
+   *
+   * @remarks
+   * The `/partner/customer/remove` endpoint is used by reseller partners to remove an end customer.
+   * Removing an end customer will remove it from view in the Plaid Dashboard and deactivate its API
+   * keys. This endpoint can only be used to remove an end customer that has not yet been enabled in
+   * full Production.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PartnerCustomerRemoveError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   partnerCustomerRemove(
     request: ThePlaidApiClient.PartnerCustomerRemoveRequestParams,
     options?: RequestOptions,
@@ -5476,8 +9185,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/partner/customer/remove"),
+        urlTemplate: this.#servers.default("/partner/customer/remove"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: partnerCustomerRemoveRequestSchema },
       },
       {
@@ -5488,6 +9200,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create payment consent
+   *
+   * @remarks
+   * The `/payment_initiation/consent/create` endpoint is used to create a payment consent, which
+   * can be used to initiate payments on behalf of the user. Payment consents are created with
+   * `UNAUTHORISED` status by default and must be authorised by the user before payments can be
+   * initiated.
+   *
+   * Consents can be limited in time and scope, and have constraints that describe limitations for
+   * payments.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PaymentInitiationConsentCreateError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   paymentInitiationConsentCreate(
     request: ThePlaidApiClient.PaymentInitiationConsentCreateRequestParams,
     options?: RequestOptions,
@@ -5498,8 +9231,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/payment_initiation/consent/create"),
+        urlTemplate: this.#servers.default("/payment_initiation/consent/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: paymentInitiationConsentCreateRequestSchema },
       },
       {
@@ -5510,6 +9246,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get payment consent
+   *
+   * @remarks
+   * The `/payment_initiation/consent/get` endpoint can be used to check the status of a payment
+   * consent, as well as to receive basic information such as recipient and constraints.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PaymentInitiationConsentGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   paymentInitiationConsentGet(
     request: ThePlaidApiClient.PaymentInitiationConsentGetRequestParams,
     options?: RequestOptions,
@@ -5517,8 +9269,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/payment_initiation/consent/get"),
+        urlTemplate: this.#servers.default("/payment_initiation/consent/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: paymentInitiationConsentGetRequestSchema },
       },
       {
@@ -5529,6 +9284,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Execute a single payment using consent
+   *
+   * @remarks
+   * The `/payment_initiation/consent/payment/execute` endpoint can be used to execute payments
+   * using payment consent.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PaymentInitiationConsentPaymentExecuteError} when the API
+   * answers with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   paymentInitiationConsentPaymentExecute(
     request: ThePlaidApiClient.PaymentInitiationConsentPaymentExecuteRequestParams,
     options?: RequestOptions,
@@ -5539,8 +9310,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/payment_initiation/consent/payment/execute"),
+        urlTemplate: this.#servers.default("/payment_initiation/consent/payment/execute"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: {
           kind: "json",
           value: request.body,
@@ -5555,6 +9329,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Revoke payment consent
+   *
+   * @remarks
+   * The `/payment_initiation/consent/revoke` endpoint can be used to revoke the payment consent.
+   * Once the consent is revoked, it is not possible to initiate payments using it.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PaymentInitiationConsentRevokeError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   paymentInitiationConsentRevoke(
     request: ThePlaidApiClient.PaymentInitiationConsentRevokeRequestParams,
     options?: RequestOptions,
@@ -5565,8 +9355,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/payment_initiation/consent/revoke"),
+        urlTemplate: this.#servers.default("/payment_initiation/consent/revoke"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: paymentInitiationConsentRevokeRequestSchema },
       },
       {
@@ -5577,6 +9370,41 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create a payment
+   *
+   * @remarks
+   * After creating a payment recipient, you can use the `/payment_initiation/payment/create`
+   * endpoint to create a payment to that recipient. Payments can be one-time or standing order
+   * (recurring) and can be denominated in EUR, GBP, or another chosen
+   * [currency](https://plaid.com/docs/api/products/payment-initiation/#payment_initiation-payment-create-request-amount-currency).
+   * If making domestic GBP-denominated payments, your recipient must have been created with Bacs
+   * numbers. In general, EUR-denominated payments will be sent via SEPA Credit Transfer,
+   * GBP-denominated payments will be sent via the Faster Payments network and for non-Eurozone
+   * markets typically via the local payment scheme, but the payment network used will be determined
+   * by the institution. Payments sent via Faster Payments will typically arrive immediately, while
+   * payments sent via SEPA Credit Transfer or other local payment schemes will typically arrive in
+   * one business day.
+   *
+   * Standing orders (recurring payments) must be denominated in GBP and can only be sent to
+   * recipients in the UK. Once created, standing order payments cannot be modified or canceled via
+   * the API. An end user can cancel or modify a standing order directly on their banking
+   * application or website, or by contacting the bank. Standing orders will follow the payment
+   * rules of the underlying rails (Faster Payments in UK). Payments can be sent Monday to Friday,
+   * excluding bank holidays. If the pre-arranged date falls on a weekend or bank holiday, the
+   * payment is made on the next working day. It is not possible to guarantee the exact time the
+   * payment will reach the recipient's account, although at least 90% of standing order payments
+   * are sent by 6am.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PaymentInitiationPaymentCreateError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   paymentInitiationPaymentCreate(
     request: ThePlaidApiClient.PaymentInitiationPaymentCreateRequestParams,
     options?: RequestOptions,
@@ -5587,8 +9415,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/payment_initiation/payment/create"),
+        urlTemplate: this.#servers.default("/payment_initiation/payment/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: paymentInitiationPaymentCreateRequestSchema },
       },
       {
@@ -5599,6 +9430,30 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get payment details
+   *
+   * @remarks
+   * The `/payment_initiation/payment/get` endpoint can be used to check the status of a payment, as
+   * well as to receive basic information such as recipient and payment amount. In the case of
+   * standing orders, the `/payment_initiation/payment/get` endpoint will provide information about
+   * the status of the overall standing order itself; the API cannot be used to retrieve payment
+   * status for individual payments within a standing order.
+   *
+   * Polling for status updates in Production is highly discouraged. Repeatedly calling
+   * `/payment_initiation/payment/get` to check a payment's status is unreliable and may trigger API
+   * rate limits. Only the `payment_status_update` webhook should be used to receive real-time
+   * status updates in Production.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PaymentInitiationPaymentGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   paymentInitiationPaymentGet(
     request: ThePlaidApiClient.PaymentInitiationPaymentGetRequestParams,
     options?: RequestOptions,
@@ -5606,8 +9461,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/payment_initiation/payment/get"),
+        urlTemplate: this.#servers.default("/payment_initiation/payment/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: paymentInitiationPaymentGetRequestSchema },
       },
       {
@@ -5618,6 +9476,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * List payments
+   *
+   * @remarks
+   * The `/payment_initiation/payment/list` endpoint can be used to retrieve all created payments.
+   * By default, the 10 most recent payments are returned. You can request more payments and
+   * paginate through the results using the optional `count` and `cursor` parameters.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PaymentInitiationPaymentListError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   paymentInitiationPaymentList(
     request: ThePlaidApiClient.PaymentInitiationPaymentListRequestParams,
     options?: RequestOptions,
@@ -5625,8 +9500,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/payment_initiation/payment/list"),
+        urlTemplate: this.#servers.default("/payment_initiation/payment/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: paymentInitiationPaymentListRequestSchema },
       },
       {
@@ -5637,6 +9515,32 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Reverse an existing payment
+   *
+   * @remarks
+   * Reverse a settled payment from a Plaid virtual account.
+   *
+   * The original payment must be in a settled state to be refunded. To refund partially, specify
+   * the amount as part of the request. If the amount is not specified, the refund amount will be
+   * equal to all of the remaining payment amount that has not been refunded yet.
+   *
+   * The refund will go back to the source account that initiated the payment. The original payment
+   * must have been initiated to a Plaid virtual account so that this account can be used to
+   * initiate the refund.
+   *
+   * Providing counterparty information such as date of birth and address increases the likelihood
+   * of refund being successful without human intervention.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PaymentInitiationPaymentReverseError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   paymentInitiationPaymentReverse(
     request: ThePlaidApiClient.PaymentInitiationPaymentReverseRequestParams,
     options?: RequestOptions,
@@ -5647,8 +9551,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/payment_initiation/payment/reverse"),
+        urlTemplate: this.#servers.default("/payment_initiation/payment/reverse"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: paymentInitiationPaymentReverseRequestSchema },
       },
       {
@@ -5659,6 +9566,29 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create payment recipient
+   *
+   * @remarks
+   * Create a payment recipient for payment initiation. The recipient must be in Europe, within a
+   * country that is a member of the Single Euro Payments Area (SEPA) or a non-Eurozone country
+   * [supported](https://support.plaid.com/hc/en-us/articles/27895826947735-What-Plaid-products-are-supported-in-each-country-and-region)
+   * by Plaid. For a standing order (recurring) payment, the recipient must be in the UK.
+   *
+   * It is recommended to use `bacs` in the UK and `iban` in EU.
+   *
+   * The endpoint is idempotent: if a developer has already made a request with the same payment
+   * details, Plaid will return the same `recipient_id`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PaymentInitiationRecipientCreateError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   paymentInitiationRecipientCreate(
     request: ThePlaidApiClient.PaymentInitiationRecipientCreateRequestParams,
     options?: RequestOptions,
@@ -5669,8 +9599,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/payment_initiation/recipient/create"),
+        urlTemplate: this.#servers.default("/payment_initiation/recipient/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: paymentInitiationRecipientCreateRequestSchema },
       },
       {
@@ -5681,6 +9614,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get payment recipient
+   *
+   * @remarks
+   * Get details about a payment recipient you have previously created.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PaymentInitiationRecipientGetError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   paymentInitiationRecipientGet(
     request: ThePlaidApiClient.PaymentInitiationRecipientGetRequestParams,
     options?: RequestOptions,
@@ -5688,8 +9636,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/payment_initiation/recipient/get"),
+        urlTemplate: this.#servers.default("/payment_initiation/recipient/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: paymentInitiationRecipientGetRequestSchema },
       },
       {
@@ -5700,6 +9651,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * List payment recipients
+   *
+   * @remarks
+   * The `/payment_initiation/recipient/list` endpoint lists the payment recipients that you have
+   * previously created.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PaymentInitiationRecipientListError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   paymentInitiationRecipientList(
     request: ThePlaidApiClient.PaymentInitiationRecipientListRequestParams,
     options?: RequestOptions,
@@ -5710,8 +9677,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/payment_initiation/recipient/list"),
+        urlTemplate: this.#servers.default("/payment_initiation/recipient/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: paymentInitiationRecipientListRequestSchema },
       },
       {
@@ -5722,6 +9692,26 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create payment profile
+   *
+   * @remarks
+   * Use `/payment_profile/create` endpoint to create a new payment profile. To initiate the account
+   * linking experience, call `/link/token/create` and provide the `payment_profile_token` in the
+   * `transfer.payment_profile_token` field. You can then use the `payment_profile_token` when
+   * creating transfers using `/transfer/authorization/create` and `/transfer/create`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PaymentProfileCreateError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   paymentProfileCreate(
     request: ThePlaidApiClient.PaymentProfileCreateRequestParams,
     options?: RequestOptions,
@@ -5729,8 +9719,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/payment_profile/create"),
+        urlTemplate: this.#servers.default("/payment_profile/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: paymentProfileCreateRequestSchema },
       },
       {
@@ -5741,6 +9734,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get payment profile
+   *
+   * @remarks
+   * Use `/payment_profile/get` endpoint to get the status of a given Payment Profile.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PaymentProfileGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   paymentProfileGet(
     request: ThePlaidApiClient.PaymentProfileGetRequestParams,
     options?: RequestOptions,
@@ -5748,8 +9758,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/payment_profile/get"),
+        urlTemplate: this.#servers.default("/payment_profile/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: paymentProfileGetRequestSchema },
       },
       {
@@ -5760,6 +9773,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Remove payment profile
+   *
+   * @remarks
+   * Use the `/payment_profile/remove` endpoint to remove a given Payment Profile. Once it's
+   * removed, it can no longer be used to create transfers.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.PaymentProfileRemoveError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   paymentProfileRemove(
     request: ThePlaidApiClient.PaymentProfileRemoveRequestParams,
     options?: RequestOptions,
@@ -5767,8 +9798,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/payment_profile/remove"),
+        urlTemplate: this.#servers.default("/payment_profile/remove"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: paymentProfileRemoveRequestSchema },
       },
       {
@@ -5779,6 +9813,26 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve the account associated with a processor token
+   *
+   * @remarks
+   * This endpoint returns the account associated with a given processor token.
+   *
+   * This endpoint retrieves cached information, rather than extracting fresh information from the
+   * institution. As a result, the account balance returned may not be up-to-date; for real-time
+   * balance information, use `/processor/balance/get` instead. Note that some information is
+   * nullable.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorAccountGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorAccountGet(
     request: ThePlaidApiClient.ProcessorAccountGetRequestParams,
     options?: RequestOptions,
@@ -5786,8 +9840,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/account/get"),
+        urlTemplate: this.#servers.default("/processor/account/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorAccountGetRequestSchema },
       },
       {
@@ -5798,6 +9855,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create Apex processor token
+   *
+   * @remarks
+   * Used to create a token suitable for sending to Apex to enable Plaid-Apex integrations.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorApexProcessorTokenCreateError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorApexProcessorTokenCreate(
     request: ThePlaidApiClient.ProcessorApexProcessorTokenCreateRequestParams,
     options?: RequestOptions,
@@ -5805,8 +9877,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/apex/processor_token/create"),
+        urlTemplate: this.#servers.default("/processor/apex/processor_token/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorApexProcessorTokenCreateRequestSchema },
       },
       {
@@ -5817,6 +9892,28 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve Auth data
+   *
+   * @remarks
+   * The `/processor/auth/get` endpoint returns the bank account and bank identification number
+   * (such as the routing number, for US accounts), for a checking, savings, or cash management
+   * account that''s associated with a given `processor_token`. The endpoint also returns high-level
+   * account data and balances when available.
+   *
+   * Versioning note: API versions 2019-05-29 and earlier use a different schema for the `numbers`
+   * object returned by this endpoint. For details, see [Plaid API
+   * versioning](https://plaid.com/docs/api/versioning/#version-2020-09-14).
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorAuthGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorAuthGet(
     request: ThePlaidApiClient.ProcessorAuthGetRequestParams,
     options?: RequestOptions,
@@ -5824,8 +9921,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/auth/get"),
+        urlTemplate: this.#servers.default("/processor/auth/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorAuthGetRequestSchema },
       },
       {
@@ -5836,6 +9936,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve Balance data
+   *
+   * @remarks
+   * The `/processor/balance/get` endpoint returns the real-time balance for each of an Item's
+   * accounts. While other endpoints may return a balance object, only `/processor/balance/get`
+   * forces the available and current balance fields to be refreshed rather than cached.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorBalanceGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorBalanceGet(
     request: ThePlaidApiClient.ProcessorBalanceGetRequestParams,
     options?: RequestOptions,
@@ -5843,8 +9960,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/balance/get"),
+        urlTemplate: this.#servers.default("/processor/balance/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorBalanceGetRequestSchema },
       },
       {
@@ -5855,6 +9975,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Create a bank transfer as a processor
+   *
+   * @remarks
+   * Use the `/processor/bank_transfer/create` endpoint to initiate a new bank transfer as a
+   * processor
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorBankTransferCreateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   processorBankTransferCreate(
     request: ThePlaidApiClient.ProcessorBankTransferCreateRequestParams,
     options?: RequestOptions,
@@ -5862,8 +10000,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/bank_transfer/create"),
+        urlTemplate: this.#servers.default("/processor/bank_transfer/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorBankTransferCreateRequestSchema },
       },
       {
@@ -5874,6 +10015,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve Identity data
+   *
+   * @remarks
+   * The `/processor/identity/get` endpoint allows you to retrieve various account holder
+   * information on file with the financial institution, including names, emails, phone numbers, and
+   * addresses.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorIdentityGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorIdentityGet(
     request: ThePlaidApiClient.ProcessorIdentityGetRequestParams,
     options?: RequestOptions,
@@ -5881,8 +10039,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/identity/get"),
+        urlTemplate: this.#servers.default("/processor/identity/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorIdentityGetRequestSchema },
       },
       {
@@ -5893,6 +10054,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve identity match score
+   *
+   * @remarks
+   * The `/processor/identity/match` endpoint generates a match score, which indicates how well the
+   * provided identity data matches the identity information on file with the account holder's
+   * financial institution.
+   *
+   * Fields within the `balances` object will always be null when retrieved by
+   * `/processor/identity/match`. Instead, use the `/processor/balance/get` endpoint to retrieve
+   * balance data.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorIdentityMatchError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorIdentityMatch(
     request: ThePlaidApiClient.ProcessorIdentityMatchRequestParams,
     options?: RequestOptions,
@@ -5900,8 +10082,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/identity/match"),
+        urlTemplate: this.#servers.default("/processor/identity/match"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorIdentityMatchRequestSchema },
       },
       {
@@ -5912,6 +10097,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get investment account authentication data
+   *
+   * @remarks
+   * The `/processor/investments/auth/get` endpoint allows you to retrieve information about the
+   * account authorized by a processor token, including account numbers, account owners, holdings,
+   * and data provenance information.
+   *
+   * To receive Investments Auth webhooks for a processor token, set its webhook URL via the
+   * [`/processor/token/webhook/update`](https://plaid.com/docs/api/processor-partners/#processortokenwebhookupdate)
+   * endpoint.
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorInvestmentsAuthGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorInvestmentsAuthGet(
     request: ThePlaidApiClient.ProcessorInvestmentsAuthGetRequestParams,
     options?: RequestOptions,
@@ -5919,8 +10125,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/investments/auth/get"),
+        urlTemplate: this.#servers.default("/processor/investments/auth/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorInvestmentsAuthGetRequestSchema },
       },
       {
@@ -5931,6 +10140,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve Investment Holdings
+   *
+   * @remarks
+   * This endpoint returns the stock position data of the account associated with a given processor
+   * token.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorInvestmentsHoldingsGetError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorInvestmentsHoldingsGet(
     request: ThePlaidApiClient.ProcessorInvestmentsHoldingsGetRequestParams,
     options?: RequestOptions,
@@ -5941,8 +10166,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/investments/holdings/get"),
+        urlTemplate: this.#servers.default("/processor/investments/holdings/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorInvestmentsHoldingsGetRequestSchema },
       },
       {
@@ -5953,6 +10181,47 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get investment transactions data
+   *
+   * @remarks
+   * The `/processor/investments/transactions/get` endpoint allows developers to retrieve up to 24
+   * months of user-authorized transaction data for the investment account associated with the
+   * processor token.
+   *
+   * Transactions are returned in reverse-chronological order, and the sequence of transaction
+   * ordering is stable and will not shift.
+   *
+   * Due to the potentially large number of investment transactions associated with the account,
+   * results are paginated. Manipulate the count and offset parameters in conjunction with the
+   * `total_investment_transactions` response body field to fetch all available investment
+   * transactions.
+   *
+   * Note that Investments does not have a webhook to indicate when initial transaction data has
+   * loaded (unless you use the `async_update` option). Instead, if transactions data is not ready
+   * when `/processor/investments/transactions/get` is first called, Plaid will wait for the data.
+   * For this reason, calling `/processor/investments/transactions/get` immediately after Link may
+   * take up to one to two minutes to return.
+   *
+   * Data returned by the asynchronous investments extraction flow (when `async_update` is set to
+   * true) may not be immediately available to `/processor/investments/transactions/get`. To be
+   * alerted when the data is ready to be fetched, listen for the `HISTORICAL_UPDATE` webhook. If no
+   * investments history is ready when `/processor/investments/transactions/get` is called, it will
+   * return a `PRODUCT_NOT_READY` error.
+   *
+   * To receive Investments Transactions webhooks for a processor token, set its webhook URL via the
+   * [`/processor/token/webhook/update`](https://plaid.com/docs/api/processor-partners/#processortokenwebhookupdate)
+   * endpoint.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorInvestmentsTransactionsGetError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorInvestmentsTransactionsGet(
     request: ThePlaidApiClient.ProcessorInvestmentsTransactionsGetRequestParams,
     options?: RequestOptions,
@@ -5963,8 +10232,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/investments/transactions/get"),
+        urlTemplate: this.#servers.default("/processor/investments/transactions/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorInvestmentsTransactionsGetRequestSchema },
       },
       {
@@ -5975,6 +10247,34 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve Liabilities data
+   *
+   * @remarks
+   * The `/processor/liabilities/get` endpoint returns various details about a loan or credit
+   * account. Liabilities data is available primarily for US financial institutions, with some
+   * limited coverage of Canadian institutions. Currently supported account types are account type
+   * `credit` with account subtype `credit card` or `paypal`, and account type `loan` with account
+   * subtype `student` or `mortgage`.
+   *
+   * The types of information returned by Liabilities can include balances and due dates, loan
+   * terms, and account details such as original loan amount and guarantor. Data is refreshed
+   * approximately once per day; the latest data can be retrieved by calling
+   * `/processor/liabilities/get`.
+   *
+   * Note: This request may take some time to complete if `liabilities` was not specified as an
+   * initial product when creating the processor token. This is because Plaid must communicate
+   * directly with the institution to retrieve the additional data.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorLiabilitiesGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorLiabilitiesGet(
     request: ThePlaidApiClient.ProcessorLiabilitiesGetRequestParams,
     options?: RequestOptions,
@@ -5982,8 +10282,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/liabilities/get"),
+        urlTemplate: this.#servers.default("/processor/liabilities/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorLiabilitiesGetRequestSchema },
       },
       {
@@ -5994,6 +10297,36 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Report whether you initiated an ACH transaction
+   *
+   * @remarks
+   * After you call `/processor/signal/evaluate`, Plaid will normally infer the outcome from your
+   * Signal Rules. However, if you are not using Signal Rules, if the Signal Rules outcome was
+   * `REVIEW`, or if you take a different action than the one determined by the Signal Rules, you
+   * will need to call `/processor/signal/decision/report`. This helps improve Signal Transaction
+   * Score accuracy for your account and is necessary for proper functioning of the rule performance
+   * and rule tuning capabilities in the Dashboard. If your effective decision changes after calling
+   * `/processor/signal/decision/report` (for example, you indicated that you accepted a
+   * transaction, but later on, your payment processor rejected it, so it was never initiated), call
+   * `/processor/signal/decision/report` again for the transaction to correct Plaid's records.
+   *
+   * If you are using Plaid Transfer as your payment processor, you also do not need to call
+   * `/processor/signal/decision/report`, as Plaid can infer outcomes from your Transfer activity.
+   *
+   * If using a Balance-only ruleset, this endpoint will not impact scores (Balance does not use
+   * scores), but is necessary to view accurate transaction outcomes and tune rule logic in the
+   * Dashboard.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorSignalDecisionReportError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorSignalDecisionReport(
     request: ThePlaidApiClient.ProcessorSignalDecisionReportRequestParams,
     options?: RequestOptions,
@@ -6001,8 +10334,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/signal/decision/report"),
+        urlTemplate: this.#servers.default("/processor/signal/decision/report"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorSignalDecisionReportRequestSchema },
       },
       {
@@ -6013,6 +10349,33 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Evaluate a planned ACH transaction
+   *
+   * @remarks
+   * Use `/processor/signal/evaluate` to evaluate a planned ACH transaction to get a return risk
+   * assessment and additional risk signals.
+   *
+   * `/processor/signal/evaluate` uses Rulesets that are configured on the end customer's Dashboard
+   * and can be used with either the Signal Transaction Scores product or the Balance product. Which
+   * product is used will be determined by the `ruleset_key` that you provide. Note that only
+   * customer-configured rulesets work with this endpoint; as a processor partner, you cannot create
+   * or configure your own rulesets. For more details, see [Signal
+   * Rules](https://plaid.com/docs/signal/signal-rules/).
+   *
+   * Note: This request may have higher latency if Signal Transaction Scores is being added to an
+   * existing Item for the first time, or when using a Balance-only ruleset. This is because Plaid
+   * must communicate directly with the institution to request data.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorSignalEvaluateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorSignalEvaluate(
     request: ThePlaidApiClient.ProcessorSignalEvaluateRequestParams,
     options?: RequestOptions,
@@ -6020,8 +10383,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/signal/evaluate"),
+        urlTemplate: this.#servers.default("/processor/signal/evaluate"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorSignalEvaluateRequestSchema },
       },
       {
@@ -6032,6 +10398,26 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Opt-in a processor token to Signal
+   *
+   * @remarks
+   * When a processor token is not initialized with `signal`, call `/processor/signal/prepare` to
+   * opt-in that processor token to the data collection process, which will improve the accuracy of
+   * the Signal Transaction Score.
+   *
+   * If this endpoint is called with a processor token that is already initialized with `signal`, it
+   * will return a 200 response and will not modify the processor token.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorSignalPrepareError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorSignalPrepare(
     request: ThePlaidApiClient.ProcessorSignalPrepareRequestParams,
     options?: RequestOptions,
@@ -6039,8 +10425,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/signal/prepare"),
+        urlTemplate: this.#servers.default("/processor/signal/prepare"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorSignalPrepareRequestSchema },
       },
       {
@@ -6051,6 +10440,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Report a return for an ACH transaction
+   *
+   * @remarks
+   * Call the `/processor/signal/return/report` endpoint to report a returned transaction that was
+   * previously sent to the `/processor/signal/evaluate` endpoint. Your feedback will be used by the
+   * model to incorporate the latest risk trend in your portfolio.
+   *
+   * If you are using the [Plaid Transfer product](https://plaid.com/docs/transfer) to create
+   * transfers, it is not necessary to use this endpoint, as Plaid already knows whether the
+   * transfer was returned.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorSignalReturnReportError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorSignalReturnReport(
     request: ThePlaidApiClient.ProcessorSignalReturnReportRequestParams,
     options?: RequestOptions,
@@ -6058,8 +10468,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/signal/return/report"),
+        urlTemplate: this.#servers.default("/processor/signal/return/report"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorSignalReturnReportRequestSchema },
       },
       {
@@ -6070,6 +10483,37 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create Stripe bank account token
+   *
+   * @remarks
+   *
+   * Used to create a token suitable for sending to Stripe to enable Plaid-Stripe integrations. For
+   * a detailed guide on integrating Stripe, see [Add Stripe to your
+   * app](https://plaid.com/docs/auth/partnerships/stripe/).
+   *
+   * Note that the Stripe bank account token is a one-time use token. To store bank account
+   * information for later use, you can use a Stripe customer object and create an associated bank
+   * account from the token, or you can use a Stripe Custom account and create an associated
+   * external bank account from the token. This bank account information should work indefinitely,
+   * unless the user's bank account information changes or they revoke Plaid's permissions to access
+   * their account. Stripe bank account information cannot be modified once the bank account token
+   * has been created. If you ever need to change the bank account details used by Stripe for a
+   * specific customer, have the user go through Link again and create a new bank account token from
+   * the new `access_token`.
+   *
+   * To revoke a bank account token, the entire underlying access token must be revoked using
+   * `/item/remove`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorStripeBankAccountTokenCreateError} when the API
+   * answers with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorStripeBankAccountTokenCreate(
     request: ThePlaidApiClient.ProcessorStripeBankAccountTokenCreateRequestParams,
     options?: RequestOptions,
@@ -6080,8 +10524,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/stripe/bank_account_token/create"),
+        urlTemplate: this.#servers.default("/processor/stripe/bank_account_token/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: {
           kind: "json",
           value: request.body,
@@ -6096,6 +10543,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create processor token
+   *
+   * @remarks
+   * Used to create a token suitable for sending to one of Plaid's partners to enable integrations.
+   * Note that Stripe partnerships use bank account tokens instead; see
+   * `/processor/stripe/bank_account_token/create` for creating tokens for use with Stripe
+   * integrations. If using multiple processors, multiple different processor tokens can be created
+   * for a single access token. Once created, a processor token for a given Item can be modified by
+   * calling `/processor/token/permissions/set`. To revoke the processor's access, the entire Item
+   * must be deleted by calling `/item/remove`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorTokenCreateError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorTokenCreate(
     request: ThePlaidApiClient.ProcessorTokenCreateRequestParams,
     options?: RequestOptions,
@@ -6103,8 +10571,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/token/create"),
+        urlTemplate: this.#servers.default("/processor/token/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorTokenCreateRequestSchema },
       },
       {
@@ -6115,6 +10586,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get a processor token's product permissions
+   *
+   * @remarks
+   * Used to get a processor token's product permissions. The `products` field will be an empty list
+   * if the processor can access all available products.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorTokenPermissionsGetError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorTokenPermissionsGet(
     request: ThePlaidApiClient.ProcessorTokenPermissionsGetRequestParams,
     options?: RequestOptions,
@@ -6122,8 +10609,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/token/permissions/get"),
+        urlTemplate: this.#servers.default("/processor/token/permissions/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorTokenPermissionsGetRequestSchema },
       },
       {
@@ -6134,6 +10624,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Control a processor's access to products
+   *
+   * @remarks
+   * Used to control a processor's access to products on the given processor token. By default, a
+   * processor will have access to all available products on the corresponding item. To restrict
+   * access to a particular set of products, call this endpoint with the desired products. To
+   * restore access to all available products, call this endpoint with an empty list. This endpoint
+   * can be called multiple times as your needs and your processor's needs change.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorTokenPermissionsSetError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorTokenPermissionsSet(
     request: ThePlaidApiClient.ProcessorTokenPermissionsSetRequestParams,
     options?: RequestOptions,
@@ -6141,8 +10650,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/token/permissions/set"),
+        urlTemplate: this.#servers.default("/processor/token/permissions/set"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorTokenPermissionsSetRequestSchema },
       },
       {
@@ -6153,6 +10665,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Update a processor token's webhook URL
+   *
+   * @remarks
+   * This endpoint allows you, the processor, to update the webhook URL associated with a processor
+   * token. This request triggers a `WEBHOOK_UPDATE_ACKNOWLEDGED` webhook to the newly specified
+   * webhook URL.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorTokenWebhookUpdateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorTokenWebhookUpdate(
     request: ThePlaidApiClient.ProcessorTokenWebhookUpdateRequestParams,
     options?: RequestOptions,
@@ -6160,8 +10689,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/token/webhook/update"),
+        urlTemplate: this.#servers.default("/processor/token/webhook/update"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorTokenWebhookUpdateRequestSchema },
       },
       {
@@ -6172,6 +10704,52 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get transaction data
+   *
+   * @remarks
+   * The `/processor/transactions/get` endpoint allows developers to receive user-authorized
+   * transaction data for credit, depository, and some loan-type accounts (only those with account
+   * subtype `student` or `mortgage`; coverage may be limited). Transaction data is standardized
+   * across financial institutions, and in many cases transactions are linked to a clean name,
+   * entity type, location, and category. Similarly, account data is standardized and returned with
+   * a clean name, number, balance, and other meta information where available.
+   *
+   * Transactions are returned in reverse-chronological order, and the sequence of transaction
+   * ordering is stable and will not shift. Transactions are not immutable and can also be removed
+   * altogether by the institution; a removed transaction will no longer appear in
+   * `/processor/transactions/get`. For more details, see [Pending and posted
+   * transactions](https://plaid.com/docs/transactions/transactions-data/#pending-and-posted-transactions).
+   *
+   * Due to the potentially large number of transactions associated with a processor token, results
+   * are paginated. Manipulate the `count` and `offset` parameters in conjunction with the
+   * `total_transactions` response body field to fetch all available transactions.
+   *
+   * Data returned by `/processor/transactions/get` will be the data available for the processor
+   * token as of the most recent successful check for new transactions. Plaid typically checks for
+   * new data multiple times a day, but these checks may occur less frequently, such as once a day,
+   * depending on the institution. To force Plaid to check for new transactions, you can use the
+   * `/processor/transactions/refresh` endpoint.
+   *
+   * Note that data may not be immediately available to `/processor/transactions/get`. Plaid will
+   * begin to prepare transactions data upon Item link, if Link was initialized with `transactions`,
+   * or upon the first call to `/processor/transactions/get`, if it wasn't. If no transaction
+   * history is ready when `/processor/transactions/get` is called, it will return a
+   * `PRODUCT_NOT_READY` error.
+   *
+   * To receive Transactions webhooks for a processor token, set its webhook URL via the
+   * [`/processor/token/webhook/update`](https://plaid.com/docs/api/processor-partners/#processortokenwebhookupdate)
+   * endpoint.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorTransactionsGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorTransactionsGet(
     request: ThePlaidApiClient.ProcessorTransactionsGetRequestParams,
     options?: RequestOptions,
@@ -6179,8 +10757,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/transactions/get"),
+        urlTemplate: this.#servers.default("/processor/transactions/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorTransactionsGetRequestSchema },
       },
       {
@@ -6191,6 +10772,53 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Fetch recurring transaction streams
+   *
+   * @remarks
+   * The `/processor/transactions/recurring/get` endpoint allows developers to receive a summary of
+   * the recurring outflow and inflow streams (expenses and deposits) from a user's checking,
+   * savings or credit card accounts. Additionally, Plaid provides key insights about each recurring
+   * stream including the category, merchant, last amount, and more. Developers can use these
+   * insights to build tools and experiences that help their users better manage cash flow, monitor
+   * subscriptions, reduce spend, and stay on track with bill payments.
+   *
+   * This endpoint is offered as an add-on to Transactions. To request access to this endpoint,
+   * submit a [product access request](https://dashboard.plaid.com/team/products) or contact your
+   * Plaid account manager.
+   *
+   * This endpoint can only be called on a processor token that has already been initialized with
+   * Transactions (either during Link, by specifying it in `/link/token/create`; or after Link, by
+   * calling `/processor/transactions/get` or `/processor/transactions/sync`). Once all historical
+   * transactions have been fetched, call `/processor/transactions/recurring/get` to receive the
+   * Recurring Transactions streams and subscribe to the
+   * [`RECURRING_TRANSACTIONS_UPDATE`](https://plaid.com/docs/api/products/transactions/#recurring_transactions_update)
+   * webhook. To know when historical transactions have been fetched, if you are using
+   * `/processor/transactions/sync` listen for the
+   * [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#SyncUpdatesAvailableWebhook-historical-update-complete)
+   * webhook and check that the `historical_update_complete` field in the payload is `true`. If
+   * using `/processor/transactions/get`, listen for the
+   * [`HISTORICAL_UPDATE`](https://plaid.com/docs/api/products/transactions/#historical_update)
+   * webhook.
+   *
+   * After the initial call, you can call the `/processor/transactions/recurring/get` endpoint at
+   * any point in the future to retrieve the latest summary of recurring streams. Listen to the
+   * [`RECURRING_TRANSACTIONS_UPDATE`](https://plaid.com/docs/api/products/transactions/#recurring_transactions_update)
+   * webhook to be notified when new updates are available.
+   *
+   * To receive Transactions webhooks for a processor token, set its webhook URL via the
+   * [`/processor/token/webhook/update`](https://plaid.com/docs/api/processor-partners/#processortokenwebhookupdate)
+   * endpoint.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorTransactionsRecurringGetError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorTransactionsRecurringGet(
     request: ThePlaidApiClient.ProcessorTransactionsRecurringGetRequestParams,
     options?: RequestOptions,
@@ -6201,8 +10829,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/transactions/recurring/get"),
+        urlTemplate: this.#servers.default("/processor/transactions/recurring/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorTransactionsRecurringGetRequestSchema },
       },
       {
@@ -6213,6 +10844,47 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Refresh transaction data
+   *
+   * @remarks
+   * `/processor/transactions/refresh` is an optional endpoint for users of the Transactions
+   * product. It initiates an on-demand extraction to fetch the newest transactions for a processor
+   * token. This on-demand extraction takes place in addition to the periodic extractions that
+   * automatically occur one or more times per day for any Transactions-enabled processor token. If
+   * changes to transactions are discovered after calling `/processor/transactions/refresh`, Plaid
+   * will fire a webhook: for `/processor/transactions/sync` users,
+   * [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#sync_updates_available)
+   * will be fired if there are any transactions updated, added, or removed. For users of both
+   * `/processor/transactions/sync` and `/processor/transactions/get`,
+   * [`TRANSACTIONS_REMOVED`](https://plaid.com/docs/api/products/transactions/#transactions_removed)
+   * will be fired if any removed transactions are detected, and
+   * [`DEFAULT_UPDATE`](https://plaid.com/docs/api/products/transactions/#default_update) will be
+   * fired if any new transactions are detected. New transactions can be fetched by calling
+   * `/processor/transactions/get` or `/processor/transactions/sync`. Note that the
+   * `/processor/transactions/refresh` endpoint is not supported for Capital One (`ins_128026`)
+   * non-depository accounts and will result in a `PRODUCTS_NOT_SUPPORTED` error if called on an
+   * Item that contains only non-depository accounts from that institution.
+   *
+   * As this endpoint triggers a synchronous request for fresh data, latency may be higher than for
+   * other Plaid endpoints (typically less than 10 seconds, but occasionally up to 30 seconds or
+   * more); if you encounter errors, you may find it necessary to adjust your timeout period when
+   * making requests.
+   *
+   * `/processor/transactions/refresh` is offered as an add-on to Transactions and has a separate
+   * [fee model](https://plaid.com/docs/account/billing/#per-request-flat-fee). To request access to
+   * this endpoint, submit a [product access request](https://dashboard.plaid.com/team/products) or
+   * contact your Plaid account manager.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorTransactionsRefreshError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorTransactionsRefresh(
     request: ThePlaidApiClient.ProcessorTransactionsRefreshRequestParams,
     options?: RequestOptions,
@@ -6220,8 +10892,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/transactions/refresh"),
+        urlTemplate: this.#servers.default("/processor/transactions/refresh"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorTransactionsRefreshRequestSchema },
       },
       {
@@ -6232,6 +10907,59 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get incremental transaction updates on a processor token
+   *
+   * @remarks
+   *
+   * The `/processor/transactions/sync` endpoint retrieves transactions associated with an Item and
+   * can fetch updates using a cursor to track which updates have already been seen.
+   *
+   * For important instructions on integrating with `/processor/transactions/sync`, see the
+   * [Transactions integration overview](https://plaid.com/docs/transactions/#integration-overview).
+   * If you are migrating from an existing integration using `/processor/transactions/get`, see the
+   * [Transactions Sync migration guide](https://plaid.com/docs/transactions/sync-migration/).
+   *
+   * This endpoint supports `credit`, `depository`, and some `loan`-type accounts (only those with
+   * account subtype `student` or `mortgage`). For `investments` accounts, use
+   * `/investments/transactions/get` instead.
+   *
+   * When retrieving paginated updates, track both the `next_cursor` from the latest response and
+   * the original cursor from the first call in which `has_more` was `true`; if a call to
+   * `/processor/transactions/sync` fails when retrieving a paginated update (e.g. due to the
+   * [`TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION`](https://plaid.com/docs/errors/transactions/#transactions_sync_mutation_during_pagination)
+   * error), the entire pagination request loop must be restarted beginning with the cursor for the
+   * first page of the update, rather than retrying only the single request that failed.
+   *
+   * If transactions data is not yet available for the Item, which can happen if the Item was not
+   * initialized with transactions during the `/link/token/create` call or if
+   * `/processor/transactions/sync` was called within a few seconds of Item creation,
+   * `/processor/transactions/sync` will return empty transactions arrays.
+   *
+   * Plaid typically checks for new transactions data between one and four times per day, depending
+   * on the institution. To find out when transactions were last updated for an Item, use the [Item
+   * Debugger](https://plaid.com/docs/account/activity/#troubleshooting-with-item-debugger) or call
+   * `/item/get`; the `item.status.transactions.last_successful_update` field will show the
+   * timestamp of the most recent successful update. To force Plaid to check for new transactions,
+   * use the `/processor/transactions/refresh` endpoint.
+   *
+   * To be alerted when new transactions are available, listen for the
+   * [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#sync_updates_available)
+   * webhook.
+   *
+   * To receive Transactions webhooks for a processor token, set its webhook URL via the
+   * [`/processor/token/webhook/update`](https://plaid.com/docs/api/processor-partners/#processortokenwebhookupdate)
+   * endpoint.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.ProcessorTransactionsSyncError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   processorTransactionsSync(
     request: ThePlaidApiClient.ProcessorTransactionsSyncRequestParams,
     options?: RequestOptions,
@@ -6239,8 +10967,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/processor/transactions/sync"),
+        urlTemplate: this.#servers.default("/processor/transactions/sync"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: processorTransactionsSyncRequestSchema },
       },
       {
@@ -6251,6 +10982,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Check a user's Plaid Network status
+   *
+   * @remarks
+   * The `/profile/network_status/get` endpoint can be used to check whether Plaid has a matching
+   * profile for the user.
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.ProfileNetworkStatusGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   profileNetworkStatusGet(
     request: ThePlaidApiClient.ProfileNetworkStatusGetRequestParams,
     options?: RequestOptions,
@@ -6258,8 +11005,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/profile/network_status/get"),
+        urlTemplate: this.#servers.default("/profile/network_status/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: profileNetworkStatusGetRequestSchema },
       },
       {
@@ -6270,101 +11020,230 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Compute Protect Trust Index scores and subscores
+   *
+   * @remarks
+   * Compute a Protect Trust Index score for a user. The model selected determines what is scored
+   * and what additional fields the response contains. For example, `ti-link-session-2.0` scores a
+   * completed Link session for fraud risk; `cash-advance-onboarding-1.0` scores repayment risk for
+   * a first-time cash advance and additionally populates per-amount-bucket subscores. Cash-advance
+   * models require that the user have a Plaid Item with Transactions enabled, or an Assets Report,
+   * before scoring.
+   *
+   * The endpoint returns HTTP 400 with `error_type` = `INVALID_REQUEST` and `error_code` =
+   * `FAILED_PRECONDITION` when a required precondition is not met: for link-session models, when
+   * the Link session has not completed; for cash-advance models, when the user has not successfully
+   * linked any Item.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   protectCompute(
     request: ThePlaidApiClient.ProtectComputeRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<ProtectComputeResponse, ResponseError> {
-    return this.#rawClient.execute<ProtectComputeResponse, ResponseError>(
+  ): ApiPromise<ProtectComputeResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/protect/compute"),
+        urlTemplate: this.#servers.default("/protect/compute"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: protectComputeRequestSchema },
       },
       {
         success: { kind: "json", schema: protectComputeResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Get information about a user event
+   *
+   * @remarks
+   * Get information about a user event including Trust Index score and fraud attributes.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   protectEventGet(
     request: ThePlaidApiClient.ProtectEventGetRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<ProtectEventGetResponse, ResponseError> {
-    return this.#rawClient.execute<ProtectEventGetResponse, ResponseError>(
+  ): ApiPromise<ProtectEventGetResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/protect/event/get"),
+        urlTemplate: this.#servers.default("/protect/event/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: protectEventGetRequestSchema },
       },
       {
         success: { kind: "json", schema: protectEventGetResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Send a new event to enrich user data
+   *
+   * @remarks
+   * Send a new event to enrich user data and optionally get a Trust Index score for the event.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   protectEventSend(
     request: ThePlaidApiClient.ProtectEventSendRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<ProtectEventSendResponse, ResponseError> {
-    return this.#rawClient.execute<ProtectEventSendResponse, ResponseError>(
+  ): ApiPromise<ProtectEventSendResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/protect/event/send"),
+        urlTemplate: this.#servers.default("/protect/event/send"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: protectEventSendRequestSchema },
       },
       {
         success: { kind: "json", schema: protectEventSendResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Create a Protect report
+   *
+   * @remarks
+   * Use this endpoint to create a Protect report to document fraud incidents, investigation
+   * outcomes, or other risk events. This endpoint allows you to report various types of incidents
+   * including account takeovers, identity fraud, unauthorized transactions, and other security
+   * events. The reported data helps improve fraud detection models and provides valuable feedback
+   * to enhance the overall security of the Plaid network. Reports can be created for confirmed
+   * incidents that have been fully investigated, or for suspected incidents that require further
+   * review. You can associate reports with specific users, sessions, or transactions to provide
+   * comprehensive context about the incident. Each report must include `user_id`, or an
+   * `incident_event` with at least one supported identifier: `link_session_id`, `idv_session_id`,
+   * `protect_event_id`, `signal_client_transaction_id`, or `access_token`. Context fields such as
+   * `internal_reference`, `time`, `amount`, and `bank_account` do not satisfy this identifier
+   * requirement.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   protectReportCreate(
     request: ThePlaidApiClient.ProtectReportCreateRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<ProtectReportCreateResponse, ResponseError> {
-    return this.#rawClient.execute<ProtectReportCreateResponse, ResponseError>(
+  ): ApiPromise<ProtectReportCreateResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/protect/report/create"),
+        urlTemplate: this.#servers.default("/protect/report/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: protectReportCreateRequestSchema },
       },
       {
         success: { kind: "json", schema: protectReportCreateResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Get Protect user insights
+   *
+   * @remarks
+   * Use this endpoint to get basic information about a user as it relates to their fraud profile
+   * with Protect.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   protectUserInsightsGet(
     request: ThePlaidApiClient.ProtectUserInsightsGetRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<ProtectUserInsightsGetResponse, ResponseError> {
-    return this.#rawClient.execute<ProtectUserInsightsGetResponse, ResponseError>(
+  ): ApiPromise<ProtectUserInsightsGetResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/protect/user/insights/get"),
+        urlTemplate: this.#servers.default("/protect/user/insights/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: protectUserInsightsGetRequestSchema },
       },
       {
         success: { kind: "json", schema: protectUserInsightsGetResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * (Deprecated) Manually fire a Bank Income webhook in Sandbox
+   *
+   * @remarks
+   * Use the `/sandbox/bank_income/fire_webhook` endpoint to manually trigger a Bank Income webhook
+   * in the Sandbox environment.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxBankIncomeFireWebhookError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   sandboxBankIncomeFireWebhook(
     request: ThePlaidApiClient.SandboxBankIncomeFireWebhookRequestParams,
     options?: RequestOptions,
@@ -6372,8 +11251,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/bank_income/fire_webhook"),
+        urlTemplate: this.#servers.default("/sandbox/bank_income/fire_webhook"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxBankIncomeFireWebhookRequestSchema },
       },
       {
@@ -6384,6 +11266,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Manually fire a Bank Transfer webhook
+   *
+   * @remarks
+   * Use the `/sandbox/bank_transfer/fire_webhook` endpoint to manually trigger a Bank Transfers
+   * webhook in the Sandbox environment.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxBankTransferFireWebhookError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   sandboxBankTransferFireWebhook(
     request: ThePlaidApiClient.SandboxBankTransferFireWebhookRequestParams,
     options?: RequestOptions,
@@ -6394,8 +11294,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/bank_transfer/fire_webhook"),
+        urlTemplate: this.#servers.default("/sandbox/bank_transfer/fire_webhook"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxBankTransferFireWebhookRequestSchema },
       },
       {
@@ -6406,6 +11309,26 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Simulate a bank transfer event in Sandbox
+   *
+   * @remarks
+   * Use the `/sandbox/bank_transfer/simulate` endpoint to simulate a bank transfer event in the
+   * Sandbox environment. Note that while an event will be simulated and will appear when using
+   * endpoints such as `/bank_transfer/event/sync` or `/bank_transfer/event/list`, no transactions
+   * will actually take place and funds will not move between accounts, even within the Sandbox.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxBankTransferSimulateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   sandboxBankTransferSimulate(
     request: ThePlaidApiClient.SandboxBankTransferSimulateRequestParams,
     options?: RequestOptions,
@@ -6413,8 +11336,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/bank_transfer/simulate"),
+        urlTemplate: this.#servers.default("/sandbox/bank_transfer/simulate"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxBankTransferSimulateRequestSchema },
       },
       {
@@ -6425,6 +11351,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Trigger an update for Cash Flow Updates
+   *
+   * @remarks
+   * Use the `/sandbox/cra/cashflow_updates/update` endpoint to manually trigger an update for Cash
+   * Flow Updates (Monitoring) in the Sandbox environment.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxCraCashflowUpdatesUpdateError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxCraCashflowUpdatesUpdate(
     request: ThePlaidApiClient.SandboxCraCashflowUpdatesUpdateRequestParams,
     options?: RequestOptions,
@@ -6435,8 +11377,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/cra/cashflow_updates/update"),
+        urlTemplate: this.#servers.default("/sandbox/cra/cashflow_updates/update"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxCraCashflowUpdatesUpdateRequestSchema },
       },
       {
@@ -6447,6 +11392,29 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Seed an FDX consent grant for a sandbox data partner
+   *
+   * @remarks
+   * `/sandbox/fdx/consent/seed` creates a test FDX consent grant (and a backing Item) for a data
+   * provider's customer in Sandbox, so the FDX Consent API endpoints can be exercised end-to-end
+   * without a live data provider connection.
+   *
+   * `customer_id` is the data provider's identifier for the end user and `application_id`
+   * identifies the data recipient application the consent is granted to; both are required.
+   * Optionally provide `consent_id` (a UUIDv4) to control the seeded grant's identifier; one is
+   * generated when omitted. The seeded grant is returned by `/fdx/consents` and
+   * `/fdx/consents/{consentId}`, and can be revoked via `/fdx/consents/{consentId}/revocation`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxFdxConsentSeedError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxFdxConsentSeed(
     request: ThePlaidApiClient.SandboxFdxConsentSeedRequestParams,
     options?: RequestOptions,
@@ -6454,8 +11422,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/fdx/consent/seed"),
+        urlTemplate: this.#servers.default("/sandbox/fdx/consent/seed"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxFdxConsentSeedRequestSchema },
       },
       {
@@ -6466,6 +11437,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Manually fire an Income webhook
+   *
+   * @remarks
+   * Use the `/sandbox/income/fire_webhook` endpoint to manually trigger a Payroll or Document
+   * Income webhook in the Sandbox environment.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxIncomeFireWebhookError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxIncomeFireWebhook(
     request: ThePlaidApiClient.SandboxIncomeFireWebhookRequestParams,
     options?: RequestOptions,
@@ -6473,8 +11460,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/income/fire_webhook"),
+        urlTemplate: this.#servers.default("/sandbox/income/fire_webhook"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxIncomeFireWebhookRequestSchema },
       },
       {
@@ -6485,6 +11475,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Seed a connected application for a Permissions Manager sandbox item
+   *
+   * @remarks
+   * `/sandbox/item/application/seed` creates a test connected application on an existing
+   * Permissions Manager Item's login. The seeded application will appear in subsequent calls to
+   * `/item/application/list`.
+   *
+   * The `access_token` must belong to a Permissions Manager Item created via `/item/import` in
+   * Sandbox. The `application_id` identifies the application to seed as a connected app. To
+   * disconnect a seeded application, use `/item/application/unlink`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxItemApplicationSeedError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxItemApplicationSeed(
     request: ThePlaidApiClient.SandboxItemApplicationSeedRequestParams,
     options?: RequestOptions,
@@ -6492,8 +11503,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/item/application/seed"),
+        urlTemplate: this.#servers.default("/sandbox/item/application/seed"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxItemApplicationSeedRequestSchema },
       },
       {
@@ -6504,6 +11518,68 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Fire a test webhook
+   *
+   * @remarks
+   * The `/sandbox/item/fire_webhook` endpoint is used to test that code correctly handles webhooks.
+   * This endpoint can trigger the following webhooks:
+   *
+   * `DEFAULT_UPDATE`: Webhook to be fired for a given Sandbox Item simulating a default update
+   * event for the respective product as specified with the `webhook_type` in the request body.
+   * Valid Sandbox `DEFAULT_UPDATE` webhook types include: `AUTH`, `IDENTITY`, `TRANSACTIONS`,
+   * `INVESTMENTS_TRANSACTIONS`, `LIABILITIES`, `HOLDINGS`. If the Item does not support the
+   * product, a `SANDBOX_PRODUCT_NOT_ENABLED` error will result.
+   *
+   * `NEW_ACCOUNTS_AVAILABLE`: Fired to indicate that a new account is available on the Item and you
+   * can launch update mode to request access to it.
+   *
+   * `SMS_MICRODEPOSITS_VERIFICATION`: Fired when a given Same-Day Micro-deposit Item is verified
+   * via SMS verification.
+   *
+   * `LOGIN_REPAIRED`: Fired when an Item recovers from the `ITEM_LOGIN_REQUIRED` without the user
+   * going through update mode in your app.
+   *
+   * `PENDING_DISCONNECT`: Fired when an Item will stop working in the near future (e.g. due to a
+   * planned bank migration) and must be sent through update mode to continue working.
+   *
+   * `RECURRING_TRANSACTIONS_UPDATE`: Recurring Transactions webhook to be fired for a given Sandbox
+   * Item. If the Item does not support Recurring Transactions, a `SANDBOX_PRODUCT_NOT_ENABLED`
+   * error will result.
+   *
+   * `SYNC_UPDATES_AVAILABLE`: Transactions webhook to be fired for a given Sandbox Item. If the
+   * Item does not support Transactions, a `SANDBOX_PRODUCT_NOT_ENABLED` error will result.
+   *
+   * `PRODUCT_READY`: Assets webhook to be fired when a given asset report has been successfully
+   * generated. If the Item does not support Assets, a `SANDBOX_PRODUCT_NOT_ENABLED` error will
+   * result.
+   *
+   * `ERROR`: Assets webhook to be fired when asset report generation has failed. If the Item does
+   * not support Assets, a `SANDBOX_PRODUCT_NOT_ENABLED` error will result.
+   *
+   * `USER_PERMISSION_REVOKED`: Indicates an end user has revoked the permission that they
+   * previously granted to access an Item. May not always fire upon revocation, as some
+   * institutions' consent portals do not trigger this webhook. Upon receiving this webhook, it is
+   * recommended to delete any stored data from Plaid associated with the account or Item.
+   *
+   * `USER_ACCOUNT_REVOKED`: Fired when an end user has revoked access to their account on the Data
+   * Provider's portal. This webhook is currently sent only for PNC Items, but may be sent in the
+   * future for other financial institutions. Upon receiving this webhook, it is recommended to
+   * delete any stored data from Plaid associated with the account or Item.
+   *
+   * Note that this endpoint is provided for developer ease-of-use and is not required for testing
+   * webhooks; webhooks will also fire in Sandbox under the same conditions that they would in
+   * Production (except for webhooks of type `TRANSFER`).
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.SandboxItemFireWebhookError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxItemFireWebhook(
     request: ThePlaidApiClient.SandboxItemFireWebhookRequestParams,
     options?: RequestOptions,
@@ -6511,8 +11587,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/item/fire_webhook"),
+        urlTemplate: this.#servers.default("/sandbox/item/fire_webhook"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxItemFireWebhookRequestSchema },
       },
       {
@@ -6523,6 +11602,28 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Force a Sandbox Item into an error state
+   *
+   * @remarks
+   * `/sandbox/item/reset_login` forces an Item into an `ITEM_LOGIN_REQUIRED` state in order to
+   * simulate an Item whose login is no longer valid. This makes it easy to test Link's [update
+   * mode](https://plaid.com/docs/link/update-mode) flow in the Sandbox environment. After calling
+   * `/sandbox/item/reset_login`, you can then use Plaid Link update mode to restore the Item to a
+   * good state. An `ITEM_LOGIN_REQUIRED` webhook will also be fired after a call to this endpoint,
+   * if one is associated with the Item. In the Sandbox, Items will transition to an
+   * `ITEM_LOGIN_REQUIRED` error state automatically after 30 days, even if this endpoint is not
+   * called.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxItemResetLoginError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxItemResetLogin(
     request: ThePlaidApiClient.SandboxItemResetLoginRequestParams,
     options?: RequestOptions,
@@ -6530,8 +11631,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/item/reset_login"),
+        urlTemplate: this.#servers.default("/sandbox/item/reset_login"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxItemResetLoginRequestSchema },
       },
       {
@@ -6542,6 +11646,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Set verification status for Sandbox account
+   *
+   * @remarks
+   * The `/sandbox/item/set_verification_status` endpoint can be used to change the verification
+   * status of an Item in the Sandbox in order to simulate the Automated Micro-deposit flow.
+   *
+   * For more information on testing Automated Micro-deposits in Sandbox, see [Auth full coverage
+   * testing](https://plaid.com/docs/auth/coverage/testing#).
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxItemSetVerificationStatusError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxItemSetVerificationStatus(
     request: ThePlaidApiClient.SandboxItemSetVerificationStatusRequestParams,
     options?: RequestOptions,
@@ -6552,8 +11675,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/item/set_verification_status"),
+        urlTemplate: this.#servers.default("/sandbox/item/set_verification_status"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxItemSetVerificationStatusRequestSchema },
       },
       {
@@ -6564,6 +11690,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Save the selected accounts when connecting to the Platypus OAuth institution
+   *
+   * @remarks
+   * Save the selected accounts when connecting to the Platypus OAuth institution
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxOauthSelectAccountsError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxOauthSelectAccounts(
     request: ThePlaidApiClient.SandboxOauthSelectAccountsRequestParams,
     options?: RequestOptions,
@@ -6571,8 +11712,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/oauth/select_accounts"),
+        urlTemplate: this.#servers.default("/sandbox/oauth/select_accounts"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxOauthSelectAccountsRequestSchema },
       },
       {
@@ -6583,6 +11727,34 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Reset the login of a Payment Profile
+   *
+   * @remarks
+   * `/sandbox/payment_profile/reset_login` forces a Payment Profile into a state where the login is
+   * no longer valid. This makes it easy to test update mode for Payment Profile in the Sandbox
+   * environment.
+   *
+   * After calling `/sandbox/payment_profile/reset_login`, calls to the
+   * `/transfer/authorization/create` with the Payment Profile will result in a `decision_rationale`
+   * `PAYMENT_PROFILE_LOGIN_REQUIRED`. You can then use update mode for Payment Profile to restore
+   * it into a good state.
+   *
+   * In order to invoke this endpoint, you must first [create a Payment
+   * Profile](https://plaid.com/docs/transfer/add-to-app/#create-a-payment-profile-optional) and [go
+   * through the Link flow](https://plaid.com/docs/transfer/add-to-app/#create-a-link-token).
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxPaymentProfileResetLoginError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   sandboxPaymentProfileResetLogin(
     request: ThePlaidApiClient.SandboxPaymentProfileResetLoginRequestParams,
     options?: RequestOptions,
@@ -6593,8 +11765,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/payment_profile/reset_login"),
+        urlTemplate: this.#servers.default("/sandbox/payment_profile/reset_login"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxPaymentProfileResetLoginRequestSchema },
       },
       {
@@ -6605,6 +11780,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Simulate a payment event in Sandbox
+   *
+   * @remarks
+   * Use the `/sandbox/payment/simulate` endpoint to simulate various payment events in the Sandbox
+   * environment. This endpoint will trigger the corresponding payment status webhook.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxPaymentSimulateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxPaymentSimulate(
     request: ThePlaidApiClient.SandboxPaymentSimulateRequestParams,
     options?: RequestOptions,
@@ -6612,8 +11803,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/payment/simulate"),
+        urlTemplate: this.#servers.default("/sandbox/payment/simulate"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxPaymentSimulateRequestSchema },
       },
       {
@@ -6624,6 +11818,26 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create a test Item and processor token
+   *
+   * @remarks
+   * Use the `/sandbox/processor_token/create` endpoint to create a valid `processor_token` for an
+   * arbitrary institution ID and test credentials. The created `processor_token` corresponds to a
+   * new Sandbox Item. You can then use this `processor_token` with the `/processor/` API endpoints
+   * in Sandbox. You can also use `/sandbox/processor_token/create` with the [`user_custom` test
+   * username](https://plaid.com/docs/sandbox/user-custom) to generate a test account with custom
+   * data.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxProcessorTokenCreateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxProcessorTokenCreate(
     request: ThePlaidApiClient.SandboxProcessorTokenCreateRequestParams,
     options?: RequestOptions,
@@ -6631,8 +11845,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/processor_token/create"),
+        urlTemplate: this.#servers.default("/sandbox/processor_token/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxProcessorTokenCreateRequestSchema },
       },
       {
@@ -6643,6 +11860,28 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create a test Item
+   *
+   * @remarks
+   * Use the `/sandbox/public_token/create` endpoint to create a valid `public_token` for an
+   * arbitrary institution ID, initial products, and test credentials. The created `public_token`
+   * maps to a new Sandbox Item. You can then call `/item/public_token/exchange` to exchange the
+   * `public_token` for an `access_token` and perform all API actions.
+   * `/sandbox/public_token/create` can also be used with the [`user_custom` test
+   * username](https://plaid.com/docs/sandbox/user-custom) to generate a test account with custom
+   * data, or with Plaid's [pre-populated Sandbox test
+   * accounts](https://plaid.com/docs/sandbox/test-credentials/).
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.SandboxPublicTokenCreateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxPublicTokenCreate(
     request: ThePlaidApiClient.SandboxPublicTokenCreateRequestParams,
     options?: RequestOptions,
@@ -6650,8 +11889,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/public_token/create"),
+        urlTemplate: this.#servers.default("/sandbox/public_token/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxPublicTokenCreateRequestSchema },
       },
       {
@@ -6662,6 +11904,29 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create sandbox transactions
+   *
+   * @remarks
+   * Use the `/sandbox/transactions/create` endpoint to create new transactions for an existing
+   * Item. This endpoint can be used to add up to 10 transactions to any Item at a time.
+   *
+   * This endpoint can only be used with Items that were created in the Sandbox environment using
+   * the `user_transactions_dynamic` test user. You can use this to add transactions to test the
+   * `/transactions/get` and `/transactions/sync` endpoints.
+   *
+   * Custom transactions are only applied to the depository account. Support for per-account
+   * targeting may be added in the future.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxTransactionsCreateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxTransactionsCreate(
     request: ThePlaidApiClient.SandboxTransactionsCreateRequestParams,
     options?: RequestOptions,
@@ -6669,8 +11934,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/transactions/create"),
+        urlTemplate: this.#servers.default("/sandbox/transactions/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxTransactionsCreateRequestSchema },
       },
       {
@@ -6681,6 +11949,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Manually fire a Transfer webhook
+   *
+   * @remarks
+   * Use the `/sandbox/transfer/fire_webhook` endpoint to manually trigger a
+   * `TRANSFER_EVENTS_UPDATE` webhook in the Sandbox environment.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxTransferFireWebhookError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxTransferFireWebhook(
     request: ThePlaidApiClient.SandboxTransferFireWebhookRequestParams,
     options?: RequestOptions,
@@ -6688,8 +11972,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/transfer/fire_webhook"),
+        urlTemplate: this.#servers.default("/sandbox/transfer/fire_webhook"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxTransferFireWebhookRequestSchema },
       },
       {
@@ -6700,6 +11987,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Simulate a ledger deposit event in Sandbox
+   *
+   * @remarks
+   * Use the `/sandbox/transfer/ledger/deposit/simulate` endpoint to simulate a ledger deposit event
+   * in the Sandbox environment.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxTransferLedgerDepositSimulateError} when the API
+   * answers with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxTransferLedgerDepositSimulate(
     request: ThePlaidApiClient.SandboxTransferLedgerDepositSimulateRequestParams,
     options?: RequestOptions,
@@ -6710,8 +12013,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/transfer/ledger/deposit/simulate"),
+        urlTemplate: this.#servers.default("/sandbox/transfer/ledger/deposit/simulate"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: {
           kind: "json",
           value: request.body,
@@ -6726,6 +12032,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Simulate converting pending balance to available balance
+   *
+   * @remarks
+   * Use the `/sandbox/transfer/ledger/simulate_available` endpoint to simulate converting pending
+   * balance to available balance for all originators in the Sandbox environment.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxTransferLedgerSimulateAvailableError} when the API
+   * answers with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxTransferLedgerSimulateAvailable(
     request: ThePlaidApiClient.SandboxTransferLedgerSimulateAvailableRequestParams,
     options?: RequestOptions,
@@ -6736,8 +12058,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/transfer/ledger/simulate_available"),
+        urlTemplate: this.#servers.default("/sandbox/transfer/ledger/simulate_available"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: {
           kind: "json",
           value: request.body,
@@ -6752,6 +12077,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Simulate a ledger withdraw event in Sandbox
+   *
+   * @remarks
+   * Use the `/sandbox/transfer/ledger/withdraw/simulate` endpoint to simulate a ledger withdraw
+   * event in the Sandbox environment.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxTransferLedgerWithdrawSimulateError} when the API
+   * answers with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxTransferLedgerWithdrawSimulate(
     request: ThePlaidApiClient.SandboxTransferLedgerWithdrawSimulateRequestParams,
     options?: RequestOptions,
@@ -6762,8 +12103,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/transfer/ledger/withdraw/simulate"),
+        urlTemplate: this.#servers.default("/sandbox/transfer/ledger/withdraw/simulate"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: {
           kind: "json",
           value: request.body,
@@ -6778,6 +12122,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Simulate a refund event in Sandbox
+   *
+   * @remarks
+   * Use the `/sandbox/transfer/refund/simulate` endpoint to simulate a refund event in the Sandbox
+   * environment. Note that while an event will be simulated and will appear when using endpoints
+   * such as `/transfer/event/sync` or `/transfer/event/list`, no transactions will actually take
+   * place and funds will not move between accounts, even within the Sandbox.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxTransferRefundSimulateError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxTransferRefundSimulate(
     request: ThePlaidApiClient.SandboxTransferRefundSimulateRequestParams,
     options?: RequestOptions,
@@ -6785,8 +12147,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/transfer/refund/simulate"),
+        urlTemplate: this.#servers.default("/sandbox/transfer/refund/simulate"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxTransferRefundSimulateRequestSchema },
       },
       {
@@ -6797,6 +12162,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Trigger the creation of a repayment
+   *
+   * @remarks
+   * Use the `/sandbox/transfer/repayment/simulate` endpoint to trigger the creation of a repayment.
+   * As a side effect of calling this route, a repayment is created that includes all unreimbursed
+   * returns of guaranteed transfers. If there are no such returns, a 400 error is returned.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxTransferRepaymentSimulateError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxTransferRepaymentSimulate(
     request: ThePlaidApiClient.SandboxTransferRepaymentSimulateRequestParams,
     options?: RequestOptions,
@@ -6807,8 +12189,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/transfer/repayment/simulate"),
+        urlTemplate: this.#servers.default("/sandbox/transfer/repayment/simulate"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxTransferRepaymentSimulateRequestSchema },
       },
       {
@@ -6819,6 +12204,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Simulate a transfer event in Sandbox
+   *
+   * @remarks
+   * Use the `/sandbox/transfer/simulate` endpoint to simulate a transfer event in the Sandbox
+   * environment. Note that while an event will be simulated and will appear when using endpoints
+   * such as `/transfer/event/sync` or `/transfer/event/list`, no transactions will actually take
+   * place and funds will not move between accounts, even within the Sandbox.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxTransferSimulateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxTransferSimulate(
     request: ThePlaidApiClient.SandboxTransferSimulateRequestParams,
     options?: RequestOptions,
@@ -6826,8 +12229,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/transfer/simulate"),
+        urlTemplate: this.#servers.default("/sandbox/transfer/simulate"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxTransferSimulateRequestSchema },
       },
       {
@@ -6838,6 +12244,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Simulate creating a sweep
+   *
+   * @remarks
+   * Use the `/sandbox/transfer/sweep/simulate` endpoint to create a sweep and associated events in
+   * the Sandbox environment. Upon calling this endpoint, all transfers with a sweep status of
+   * `swept` will become `swept_settled`, all `posted` or `pending` transfers with a sweep status of
+   * `unswept` will become `swept`, and all `returned` transfers with a sweep status of `swept` will
+   * become `return_swept`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxTransferSweepSimulateError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxTransferSweepSimulate(
     request: ThePlaidApiClient.SandboxTransferSweepSimulateRequestParams,
     options?: RequestOptions,
@@ -6845,8 +12270,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/transfer/sweep/simulate"),
+        urlTemplate: this.#servers.default("/sandbox/transfer/sweep/simulate"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxTransferSweepSimulateRequestSchema },
       },
       {
@@ -6857,6 +12285,40 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Advance a test clock
+   *
+   * @remarks
+   * Use the `/sandbox/transfer/test_clock/advance` endpoint to advance a `test_clock` in the
+   * Sandbox environment.
+   *
+   * A test clock object represents an independent timeline and has a `virtual_time` field
+   * indicating the current timestamp of the timeline. A test clock can be advanced by incrementing
+   * `virtual_time`, but may never go back to a lower `virtual_time`.
+   *
+   * If a test clock is advanced, we will simulate the changes that ought to occur during the time
+   * that elapsed.
+   *
+   * For example, a client creates a weekly recurring transfer with a test clock set at t. When the
+   * client advances the test clock by setting `virtual_time` = t + 15 days, 2 new originations
+   * should be created, along with the webhook events.
+   *
+   * The advancement of the test clock from its current `virtual_time` should be limited such that
+   * there are no more than 20 originations resulting from the advance operation on each
+   * `recurring_transfer` associated with the `test_clock`.
+   *
+   * For example, if the recurring transfer associated with this test clock originates once every 4
+   * weeks, you can advance the `virtual_time` up to 80 weeks on each API call.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxTransferTestClockAdvanceError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxTransferTestClockAdvance(
     request: ThePlaidApiClient.SandboxTransferTestClockAdvanceRequestParams,
     options?: RequestOptions,
@@ -6867,8 +12329,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/transfer/test_clock/advance"),
+        urlTemplate: this.#servers.default("/sandbox/transfer/test_clock/advance"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxTransferTestClockAdvanceRequestSchema },
       },
       {
@@ -6879,6 +12344,28 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create a test clock
+   *
+   * @remarks
+   * Use the `/sandbox/transfer/test_clock/create` endpoint to create a `test_clock` in the Sandbox
+   * environment.
+   *
+   * A test clock object represents an independent timeline and has a `virtual_time` field
+   * indicating the current timestamp of the timeline. Test clocks are used for testing recurring
+   * transfers in Sandbox.
+   *
+   * A test clock can be associated with up to 5 recurring transfers.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxTransferTestClockCreateError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxTransferTestClockCreate(
     request: ThePlaidApiClient.SandboxTransferTestClockCreateRequestParams,
     options?: RequestOptions,
@@ -6889,8 +12376,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/transfer/test_clock/create"),
+        urlTemplate: this.#servers.default("/sandbox/transfer/test_clock/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxTransferTestClockCreateRequestSchema },
       },
       {
@@ -6901,6 +12391,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get a test clock
+   *
+   * @remarks
+   * Use the `/sandbox/transfer/test_clock/get` endpoint to get a `test_clock` in the Sandbox
+   * environment.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxTransferTestClockGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxTransferTestClockGet(
     request: ThePlaidApiClient.SandboxTransferTestClockGetRequestParams,
     options?: RequestOptions,
@@ -6908,8 +12414,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/transfer/test_clock/get"),
+        urlTemplate: this.#servers.default("/sandbox/transfer/test_clock/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxTransferTestClockGetRequestSchema },
       },
       {
@@ -6920,6 +12429,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * List test clocks
+   *
+   * @remarks
+   * Use the `/sandbox/transfer/test_clock/list` endpoint to see a list of all your test clocks in
+   * the Sandbox environment, by ascending `virtual_time`. Results are paginated; use the `count`
+   * and `offset` query parameters to retrieve the desired test clocks.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxTransferTestClockListError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxTransferTestClockList(
     request: ThePlaidApiClient.SandboxTransferTestClockListRequestParams,
     options?: RequestOptions,
@@ -6927,8 +12453,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/transfer/test_clock/list"),
+        urlTemplate: this.#servers.default("/sandbox/transfer/test_clock/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxTransferTestClockListRequestSchema },
       },
       {
@@ -6939,6 +12468,29 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Force item(s) for a Sandbox User into an error state
+   *
+   * @remarks
+   * `/sandbox/user/reset_login` functions the same as `/sandbox/item/reset_login`, but will modify
+   * Items related to a User. This endpoint forces each Item into an `ITEM_LOGIN_REQUIRED` state in
+   * order to simulate an Item whose login is no longer valid. This makes it easy to test Link's
+   * [update mode](https://plaid.com/docs/link/update-mode) flow in the Sandbox environment. After
+   * calling `/sandbox/user/reset_login`, you can then use Plaid Link update mode to restore Items
+   * associated with the User to a good state. An `ITEM_LOGIN_REQUIRED` webhook will also be fired
+   * after a call to this endpoint, if one is associated with the Item. In the Sandbox, Items will
+   * transition to an `ITEM_LOGIN_REQUIRED` error state automatically after 30 days, even if this
+   * endpoint is not called.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SandboxUserResetLoginError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sandboxUserResetLogin(
     request: ThePlaidApiClient.SandboxUserResetLoginRequestParams,
     options?: RequestOptions,
@@ -6946,8 +12498,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/sandbox/user/reset_login"),
+        urlTemplate: this.#servers.default("/sandbox/user/reset_login"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sandboxUserResetLoginRequestSchema },
       },
       {
@@ -6958,6 +12513,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create a Link token for Layer
+   *
+   * @remarks
+   * `/session/token/create` is used to create a Link token for Layer. The returned Link token is
+   * used as a parameter when initializing the Link SDK. For more details, see the [Link flow
+   * overview](https://plaid.com/docs/link/#link-flow-overview).
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SessionTokenCreateError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   sessionTokenCreate(
     request: ThePlaidApiClient.SessionTokenCreateRequestParams,
     options?: RequestOptions,
@@ -6965,8 +12537,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/session/token/create"),
+        urlTemplate: this.#servers.default("/session/token/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: sessionTokenCreateRequestSchema },
       },
       {
@@ -6977,6 +12552,36 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Report whether you initiated an ACH transaction
+   *
+   * @remarks
+   * After you call `/signal/evaluate`, Plaid will normally infer the outcome from your Signal
+   * Rules. However, if you are not using Signal Rules, if the Signal Rules outcome was `REVIEW`, or
+   * if you take a different action than the one determined by the Signal Rules, you will need to
+   * call `/signal/decision/report`. This helps improve Signal Transaction Score accuracy for your
+   * account and is necessary for proper functioning of the rule performance and rule tuning
+   * capabilities in the Dashboard. If your effective decision changes after calling
+   * `/signal/decision/report` (for example, you indicated that you accepted a transaction, but
+   * later on, your payment processor rejected it, so it was never initiated), call
+   * `/signal/decision/report` again for the transaction to correct Plaid's records.
+   *
+   * If you are using Plaid Transfer as your payment processor, you also do not need to call
+   * `/signal/decision/report`, as Plaid can infer outcomes from your Transfer activity.
+   *
+   * If using a Balance-only ruleset, this endpoint will not impact scores (Balance does not use
+   * scores), but is necessary to view accurate transaction outcomes and tune rule logic in the
+   * Dashboard.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SignalDecisionReportError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   signalDecisionReport(
     request: ThePlaidApiClient.SignalDecisionReportRequestParams,
     options?: RequestOptions,
@@ -6984,8 +12589,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/signal/decision/report"),
+        urlTemplate: this.#servers.default("/signal/decision/report"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: signalDecisionReportRequestSchema },
       },
       {
@@ -6996,6 +12604,35 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Evaluate a planned ACH transaction
+   *
+   * @remarks
+   * Use `/signal/evaluate` to evaluate a planned ACH transaction to get a return risk assessment
+   * and additional risk signals.
+   *
+   * Before using `/signal/evaluate`, you must first [create a
+   * ruleset](https://plaid.com/docs/signal/signal-rules/) in the Dashboard under
+   * [**Signal->Rules**](https://dashboard.plaid.com/signal/risk-profiles).
+   *
+   * `/signal/evaluate` can be used with either Signal Transaction Scores or the Balance product.
+   * Which product is used will be determined by the `ruleset_key` that you provide. For more
+   * details, see [Signal Rules](https://plaid.com/docs/signal/signal-rules/).
+   *
+   * Note: This request may have higher latency when using a Balance-only ruleset. This is because
+   * Plaid must communicate directly with the institution to request data. Balance-only rulesets may
+   * have latency of up to 30 seconds or more; if you encounter errors, you may find it necessary to
+   * adjust your timeout period when making requests.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SignalEvaluateError} when the API answers with an error status
+   * — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   signalEvaluate(
     request: ThePlaidApiClient.SignalEvaluateRequestParams,
     options?: RequestOptions,
@@ -7003,8 +12640,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/signal/evaluate"),
+        urlTemplate: this.#servers.default("/signal/evaluate"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: signalEvaluateRequestSchema },
       },
       {
@@ -7015,6 +12655,33 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Opt-in an Item to Signal Transaction Scores
+   *
+   * @remarks
+   * When an Item is not initialized with `signal`, call `/signal/prepare` to opt-in that Item to
+   * the data collection process used to develop a Signal Transaction Score. This should be done on
+   * Items where `signal` was added in the `additional_consented_products` array but not in the
+   * `products`, `optional_products`, or `required_if_supported_products` array. If
+   * `/signal/prepare` is skipped on an Item that is not initialized with `signal`, the initial call
+   * to `/signal/evaluate` on that Item will be less accurate, because Plaid will have access to
+   * less data for computing the Signal Transaction Score.
+   *
+   * If your integration is purely Balance-only, this endpoint will have no effect, as Balance-only
+   * rulesets do not calculate a Signal Transaction Score.
+   *
+   * If run on an Item that is already initialized with `signal`, this endpoint will return a 200
+   * response and will not modify the Item.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SignalPrepareError} when the API answers with an error status
+   * — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   signalPrepare(
     request: ThePlaidApiClient.SignalPrepareRequestParams,
     options?: RequestOptions,
@@ -7022,8 +12689,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/signal/prepare"),
+        urlTemplate: this.#servers.default("/signal/prepare"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: signalPrepareRequestSchema },
       },
       {
@@ -7034,6 +12704,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Report a return for an ACH transaction
+   *
+   * @remarks
+   * Call the `/signal/return/report` endpoint to report a returned transaction that was previously
+   * sent to the `/signal/evaluate` endpoint. Your feedback will be used by the model to incorporate
+   * the latest risk trends into your scores and tune rule logic. If using a Balance-only ruleset,
+   * this endpoint will not impact scores (as Balance does not use scores), but is necessary to view
+   * accurate transaction outcomes and tune rule logic in the Dashboard.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SignalReturnReportError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   signalReturnReport(
     request: ThePlaidApiClient.SignalReturnReportRequestParams,
     options?: RequestOptions,
@@ -7041,8 +12730,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/signal/return/report"),
+        urlTemplate: this.#servers.default("/signal/return/report"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: signalReturnReportRequestSchema },
       },
       {
@@ -7053,6 +12745,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Schedule a planned ACH transaction
+   *
+   * @remarks
+   * Use `/signal/schedule` to schedule a planned ACH transaction.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.SignalScheduleError} when the API answers with an error status
+   * — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   signalSchedule(
     request: ThePlaidApiClient.SignalScheduleRequestParams,
     options?: RequestOptions,
@@ -7060,8 +12767,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/signal/schedule"),
+        urlTemplate: this.#servers.default("/signal/schedule"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: signalScheduleRequestSchema },
       },
       {
@@ -7072,6 +12782,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve a single statement.
+   *
+   * @remarks
+   * The `/statements/download` endpoint retrieves a single statement PDF in binary format. The
+   * response will contain a `Plaid-Content-Hash` header containing a SHA 256 checksum of the
+   * statement. This can be used to verify that the file being sent by Plaid is the same file that
+   * was downloaded to your system.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.StatementsDownloadError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   statementsDownload(
     request: ThePlaidApiClient.StatementsDownloadRequestParams,
     options?: RequestOptions,
@@ -7079,8 +12807,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/statements/download"),
+        urlTemplate: this.#servers.default("/statements/download"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: statementsDownloadRequestSchema },
       },
       {
@@ -7091,6 +12822,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve a list of all statements associated with an Item.
+   *
+   * @remarks
+   * The `/statements/list` endpoint retrieves a list of all statements associated with an Item.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.StatementsListError} when the API answers with an error status
+   * — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   statementsList(
     request: ThePlaidApiClient.StatementsListRequestParams,
     options?: RequestOptions,
@@ -7098,8 +12844,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/statements/list"),
+        urlTemplate: this.#servers.default("/statements/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: statementsListRequestSchema },
       },
       {
@@ -7110,6 +12859,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Refresh statements data.
+   *
+   * @remarks
+   * `/statements/refresh` initiates an on-demand extraction to fetch the statements for the
+   * provided dates.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.StatementsRefreshError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   statementsRefresh(
     request: ThePlaidApiClient.StatementsRefreshRequestParams,
     options?: RequestOptions,
@@ -7117,8 +12882,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/statements/refresh"),
+        urlTemplate: this.#servers.default("/statements/refresh"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: statementsRefreshRequestSchema },
       },
       {
@@ -7129,6 +12897,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Enhance locally-held transaction data
+   *
+   * @remarks
+   * The `/beta/transactions/v1/enhance` endpoint enriches raw transaction data provided directly by
+   * clients.
+   *
+   * The product is currently in beta.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransactionsEnhanceError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transactionsEnhance(
     request: ThePlaidApiClient.TransactionsEnhanceRequest,
     options?: RequestOptions,
@@ -7136,8 +12922,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beta/transactions/v1/enhance"),
+        urlTemplate: this.#servers.default("/beta/transactions/v1/enhance"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transactionsEnhanceGetRequestSchema },
       },
       {
@@ -7148,6 +12937,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Enrich locally-held transaction data
+   *
+   * @remarks
+   * The `/transactions/enrich` endpoint enriches raw transaction data generated by your own banking
+   * products or retrieved from other non-Plaid sources.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransactionsEnrichError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transactionsEnrich(
     request: ThePlaidApiClient.TransactionsEnrichRequestParams,
     options?: RequestOptions,
@@ -7155,8 +12960,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transactions/enrich"),
+        urlTemplate: this.#servers.default("/transactions/enrich"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transactionsEnrichRequestSchema },
       },
       {
@@ -7167,6 +12975,56 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get transaction data
+   *
+   * @remarks
+   * Note: All new implementations are encouraged to use `/transactions/sync` rather than
+   * `/transactions/get`. `/transactions/sync` provides the same functionality as
+   * `/transactions/get` and improves developer ease-of-use for handling transactions updates. The
+   * `/transactions/get` endpoint allows developers to receive user-authorized transaction data for
+   * credit, depository, and some loan-type accounts (only those with account subtype `student` or
+   * `mortgage`; coverage may be limited). For transaction history from investment accounts, use the
+   * [Investments endpoint](https://plaid.com/docs/api/products/investments/) instead. Transaction
+   * data is standardized across financial institutions, and in many cases transactions are linked
+   * to a clean name, entity type, location, and category. Similarly, account data is standardized
+   * and returned with a clean name, number, balance, and other meta information where available.
+   * Transactions are returned in reverse-chronological order, and the sequence of transaction
+   * ordering is stable and will not shift. Transactions are not immutable and can also be removed
+   * altogether by the institution; a removed transaction will no longer appear in
+   * `/transactions/get`. For more details, see [Pending and posted
+   * transactions](https://plaid.com/docs/transactions/transactions-data/#pending-and-posted-transactions).
+   * Due to the potentially large number of transactions associated with an Item, results are
+   * paginated. Manipulate the `count` and `offset` parameters in conjunction with the
+   * `total_transactions` response body field to fetch all available transactions. Data returned by
+   * `/transactions/get` will be the data available for the Item as of the most recent successful
+   * check for new transactions. Plaid typically checks for new data multiple times a day, but these
+   * checks may occur less frequently, such as once a day, depending on the institution. To find out
+   * when the Item was last updated, use the [Item
+   * Debugger](https://plaid.com/docs/account/activity/#troubleshooting-with-item-debugger) or call
+   * `/item/get`; the `item.status.transactions.last_successful_update` field will show the
+   * timestamp of the most recent successful update. To force Plaid to check for new transactions,
+   * you can use the `/transactions/refresh` endpoint.
+   *
+   *
+   * Note that data may not be immediately available to `/transactions/get`. Plaid will begin to
+   * prepare transactions data upon Item link, if Link was initialized with `transactions`, or upon
+   * the first call to `/transactions/get`, if it wasn't. To be alerted when transaction data is
+   * ready to be fetched, listen for the
+   * [`INITIAL_UPDATE`](https://plaid.com/docs/api/products/transactions/#initial_update) and
+   * [`HISTORICAL_UPDATE`](https://plaid.com/docs/api/products/transactions/#historical_update)
+   * webhooks. If no transaction history is ready when `/transactions/get` is called, it will return
+   * a `PRODUCT_NOT_READY` error.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransactionsGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transactionsGet(
     request: ThePlaidApiClient.TransactionsGetRequestParams,
     options?: RequestOptions,
@@ -7174,8 +13032,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transactions/get"),
+        urlTemplate: this.#servers.default("/transactions/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transactionsGetRequestSchema },
       },
       {
@@ -7186,6 +13047,53 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Fetch recurring transaction streams
+   *
+   * @remarks
+   * The `/transactions/recurring/get` endpoint allows developers to receive a summary of the
+   * recurring outflow and inflow streams (expenses and deposits) from a user's checking, savings or
+   * credit card accounts. Additionally, Plaid provides key insights about each recurring stream
+   * including the category, merchant, last amount, and more. Developers can use these insights to
+   * build tools and experiences that help their users better manage cash flow, monitor
+   * subscriptions, reduce spend, and stay on track with bill payments.
+   *
+   * This endpoint is offered as an add-on to Transactions. To request access to this endpoint,
+   * submit a [product access request](https://dashboard.plaid.com/team/products) or contact your
+   * Plaid account manager.
+   *
+   * This endpoint can only be called on an Item that has already been initialized with Transactions
+   * (either during Link, by specifying it in `/link/token/create`; or after Link, by calling
+   * `/transactions/get` or `/transactions/sync`).
+   *
+   * When using Recurring Transactions, for best results, make sure to use the
+   * [`days_requested`](https://plaid.com/docs/api/link/#link-token-create-request-transactions-days-requested)
+   * parameter to request at least 180 days of history when initializing Items with Transactions.
+   * Once all historical transactions have been fetched, call `/transactions/recurring/get` to
+   * receive the Recurring Transactions streams and subscribe to the
+   * [`RECURRING_TRANSACTIONS_UPDATE`](https://plaid.com/docs/api/products/transactions/#recurring_transactions_update)
+   * webhook. To know when historical transactions have been fetched, if you are using
+   * `/transactions/sync` listen for the
+   * [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#SyncUpdatesAvailableWebhook-historical-update-complete)
+   * webhook and check that the `historical_update_complete` field in the payload is `true`. If
+   * using `/transactions/get`, listen for the
+   * [`HISTORICAL_UPDATE`](https://plaid.com/docs/api/products/transactions/#historical_update)
+   * webhook.
+   *
+   * After the initial call, you can call the `/transactions/recurring/get` endpoint at any point in
+   * the future to retrieve the latest summary of recurring streams. Listen to the
+   * [`RECURRING_TRANSACTIONS_UPDATE`](https://plaid.com/docs/api/products/transactions/#recurring_transactions_update)
+   * webhook to be notified when new updates are available.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransactionsRecurringGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transactionsRecurringGet(
     request: ThePlaidApiClient.TransactionsRecurringGetRequestParams,
     options?: RequestOptions,
@@ -7193,8 +13101,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transactions/recurring/get"),
+        urlTemplate: this.#servers.default("/transactions/recurring/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transactionsRecurringGetRequestSchema },
       },
       {
@@ -7205,6 +13116,50 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Refresh transaction data
+   *
+   * @remarks
+   * `/transactions/refresh` is an optional endpoint that initiates an on-demand extraction to fetch
+   * the newest transactions for an Item. The on-demand extraction takes place in addition to the
+   * periodic extractions that automatically occur one or more times per day for any
+   * Transactions-enabled Item. The Item must already have Transactions added as a product in order
+   * to call `/transactions/refresh`.
+   *
+   * If changes to transactions are discovered after calling `/transactions/refresh`, Plaid will
+   * fire a webhook: for `/transactions/sync` users,
+   * [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#sync_updates_available)
+   * will be fired if there are any transactions updated, added, or removed. For users of both
+   * `/transactions/sync` and `/transactions/get`,
+   * [`TRANSACTIONS_REMOVED`](https://plaid.com/docs/api/products/transactions/#transactions_removed)
+   * will be fired if any removed transactions are detected, and
+   * [`DEFAULT_UPDATE`](https://plaid.com/docs/api/products/transactions/#default_update) will be
+   * fired if any new transactions are detected. New transactions can be fetched by calling
+   * `/transactions/get` or `/transactions/sync`.
+   *
+   * Note that the `/transactions/refresh` endpoint is not supported for Capital One (`ins_128026`)
+   * non-depository accounts and will result in a `PRODUCTS_NOT_SUPPORTED` error if called on an
+   * Item that contains only non-depository accounts from that institution.
+   *
+   * As this endpoint triggers a synchronous request for fresh data, latency may be higher than for
+   * other Plaid endpoints (typically less than 10 seconds, but occasionally up to 30 seconds or
+   * more); if you encounter errors, you may find it necessary to adjust your timeout period when
+   * making requests.
+   *
+   * `/transactions/refresh` is offered as an optional add-on to Transactions and has a separate
+   * [fee model](https://plaid.com/docs/account/billing/#per-request-flat-fee). To request access to
+   * this endpoint, submit a [product access request](https://dashboard.plaid.com/team/products) or
+   * contact your Plaid account manager.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransactionsRefreshError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transactionsRefresh(
     request: ThePlaidApiClient.TransactionsRefreshRequestParams,
     options?: RequestOptions,
@@ -7212,8 +13167,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transactions/refresh"),
+        urlTemplate: this.#servers.default("/transactions/refresh"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transactionsRefreshRequestSchema },
       },
       {
@@ -7224,6 +13182,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create transaction category rule
+   *
+   * @remarks
+   * The `/beta/transactions/rules/v1/create` endpoint creates transaction categorization rules.
+   *
+   * Rules will be applied on the Item's transactions returned in `/transactions/get` response.
+   *
+   * The product is currently in beta. To request access, contact transactions-feedback@plaid.com.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransactionsRulesCreateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transactionsRulesCreate(
     request: ThePlaidApiClient.TransactionsRulesCreateRequestParams,
     options?: RequestOptions,
@@ -7231,8 +13208,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beta/transactions/rules/v1/create"),
+        urlTemplate: this.#servers.default("/beta/transactions/rules/v1/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transactionsRulesCreateRequestSchema },
       },
       {
@@ -7243,6 +13223,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Return a list of rules created for the Item associated with the access token.
+   *
+   * @remarks
+   * The `/beta/transactions/rules/v1/list` returns a list of transaction rules created for the Item
+   * associated with the access token.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransactionsRulesListError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transactionsRulesList(
     request: ThePlaidApiClient.TransactionsRulesListRequestParams,
     options?: RequestOptions,
@@ -7250,8 +13246,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beta/transactions/rules/v1/list"),
+        urlTemplate: this.#servers.default("/beta/transactions/rules/v1/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transactionsRulesListRequestSchema },
       },
       {
@@ -7262,6 +13261,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Remove transaction rule
+   *
+   * @remarks
+   * The `/beta/transactions/rules/v1/remove` endpoint is used to remove a transaction rule.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransactionsRulesRemoveError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transactionsRulesRemove(
     request: ThePlaidApiClient.TransactionsRulesRemoveRequestParams,
     options?: RequestOptions,
@@ -7269,8 +13283,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beta/transactions/rules/v1/remove"),
+        urlTemplate: this.#servers.default("/beta/transactions/rules/v1/remove"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transactionsRulesRemoveRequestSchema },
       },
       {
@@ -7281,6 +13298,54 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get incremental transaction updates on an Item
+   *
+   * @remarks
+   * The `/transactions/sync` endpoint retrieves transactions associated with an Item and can fetch
+   * updates using a cursor to track which updates have already been seen.
+   *
+   * For important instructions on integrating with `/transactions/sync`, see the [Transactions
+   * integration overview](https://plaid.com/docs/transactions/#integration-overview). If you are
+   * migrating from an existing integration using `/transactions/get`, see the [Transactions Sync
+   * migration guide](https://plaid.com/docs/transactions/sync-migration/).
+   *
+   * This endpoint supports `credit`, `depository`, and some `loan`-type accounts (only those with
+   * account subtype `student` or `mortgage`). For `investments` accounts, use
+   * `/investments/transactions/get` instead.
+   *
+   * When retrieving paginated updates, track both the `next_cursor` from the latest response and
+   * the original cursor from the first call in which `has_more` was `true`; if a call to
+   * `/transactions/sync` fails when retrieving a paginated update (e.g. due to the
+   * [`TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION`](https://plaid.com/docs/errors/transactions/#transactions_sync_mutation_during_pagination)
+   * error), the entire pagination request loop must be restarted beginning with the cursor for the
+   * first page of the update, rather than retrying only the single request that failed.
+   *
+   * If transactions data is not yet available for the Item, which can happen if the Item was not
+   * initialized with transactions during the `/link/token/create` call or if `/transactions/sync`
+   * was called within a few seconds of Item creation, `/transactions/sync` will return empty
+   * transactions arrays.
+   *
+   * Plaid typically checks for new transactions data between one and four times per day, depending
+   * on the institution. To find out when transactions were last updated for an Item, use the [Item
+   * Debugger](https://plaid.com/docs/account/activity/#troubleshooting-with-item-debugger) or call
+   * `/item/get`; the `item.status.transactions.last_successful_update` field will show the
+   * timestamp of the most recent successful update. To force Plaid to check for new transactions,
+   * use the `/transactions/refresh` endpoint.
+   *
+   * To be alerted when new transactions are available, listen for the
+   * [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#sync_updates_available)
+   * webhook.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransactionsSyncError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transactionsSync(
     request: ThePlaidApiClient.TransactionsSyncRequestParams,
     options?: RequestOptions,
@@ -7288,8 +13353,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transactions/sync"),
+        urlTemplate: this.#servers.default("/transactions/sync"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transactionsSyncRequestSchema },
       },
       {
@@ -7300,6 +13368,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Obtain user insights based on transactions sent through the transactions enrich endpoint
+   *
+   * @remarks
+   * The `/beta/transactions/user_insights/v1/get` gets user insights for clients who have enriched
+   * data with `/transactions/enrich`.
+   *
+   * The product is currently in beta.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransactionsUserInsightsGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transactionsUserInsightsGet(
     request: ThePlaidApiClient.TransactionsUserInsightsGetRequestParams,
     options?: RequestOptions,
@@ -7307,8 +13393,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/beta/transactions/user_insights/v1/get"),
+        urlTemplate: this.#servers.default("/beta/transactions/user_insights/v1/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transactionsUserInsightsGetRequestSchema },
       },
       {
@@ -7319,6 +13408,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Cancel a transfer authorization
+   *
+   * @remarks
+   * Use the `/transfer/authorization/cancel` endpoint to cancel a transfer authorization. A
+   * transfer authorization is eligible for cancellation if it has not yet been used to create a
+   * transfer.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferAuthorizationCancelError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferAuthorizationCancel(
     request: ThePlaidApiClient.TransferAuthorizationCancelRequestParams,
     options?: RequestOptions,
@@ -7326,8 +13432,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/authorization/cancel"),
+        urlTemplate: this.#servers.default("/transfer/authorization/cancel"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferAuthorizationCancelRequestSchema },
       },
       {
@@ -7338,6 +13447,69 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create a transfer authorization
+   *
+   * @remarks
+   * Use the `/transfer/authorization/create` endpoint to authorize a transfer. This endpoint must
+   * be called prior to calling `/transfer/create`. The transfer authorization will expire if not
+   * used after one hour. (You can contact your account manager to change the default authorization
+   * lifetime.)
+   *
+   * There are four possible outcomes to calling this endpoint:
+   *
+   *   - If the `authorization.decision` in the response is `declined`, the proposed transfer has
+   *     failed the risk check and you cannot proceed with the transfer.
+   *
+   *   - If the `authorization.decision` is `user_action_required`, additional user input is needed,
+   *     usually to fix a broken bank connection, before Plaid can properly assess the risk. You
+   *     need to launch Link in update mode to complete the required user action. When calling
+   *     `/link/token/create` to get a new Link token, instead of providing `access_token` in the
+   *     request, you should set
+   *     [`transfer.authorization_id`](https://plaid.com/docs/api/link/#link-token-create-request-transfer-authorization-id)
+   *     as the `authorization.id`. After the Link flow is completed, you may re-attempt the
+   *     authorization.
+   *
+   *   - If the `authorization.decision` is `approved`, and the
+   *     `authorization.decision_rationale.code` is `null`, the transfer has passed the risk check
+   *     and you can proceed to call `/transfer/create`.
+   *
+   *   - If the `authorization.decision` is `approved` and the
+   *     `authorization.decision_rationale.code` is non-`null`, the risk check could not be run: you
+   *     may proceed with the transfer, but should perform your own risk evaluation. For more
+   *     details, see the response schema.
+   *
+   * In Plaid's Sandbox environment the decisions will be returned as follows:
+   *
+   *   - To approve a transfer with `null` rationale code, make an authorization request with an
+   *     `amount` less than the available balance in the account.
+   *
+   *   - To approve a transfer with the rationale code `MANUALLY_VERIFIED_ITEM`, create an Item in
+   *     Link through the [Same-Day Micro-deposits
+   *     flow](https://plaid.com/docs/auth/coverage/testing/#testing-same-day-micro-deposits).
+   *
+   *   - To get an authorization decision of `user_action_required`, [reset the login for an
+   *     Item](https://plaid.com/docs/sandbox/#item_login_required).
+   *
+   *   - To decline a transfer with the rationale code `NSF`, the available balance on the account
+   *     must be less than the authorization `amount`. See [Create Sandbox test
+   *     data](https://plaid.com/docs/sandbox/user-custom/) for details on how to customize data in
+   *     Sandbox.
+   *
+   *   - To decline a transfer with the rationale code `RISK`, the available balance on the account
+   *     must be exactly $0. See [Create Sandbox test
+   *     data](https://plaid.com/docs/sandbox/user-custom/) for details on how to customize data in
+   *     Sandbox.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferAuthorizationCreateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferAuthorizationCreate(
     request: ThePlaidApiClient.TransferAuthorizationCreateRequestParams,
     options?: RequestOptions,
@@ -7345,8 +13517,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/authorization/create"),
+        urlTemplate: this.#servers.default("/transfer/authorization/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferAuthorizationCreateRequestSchema },
       },
       {
@@ -7357,6 +13532,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * (Deprecated) Retrieve a balance held with Plaid
+   *
+   * @remarks
+   * (Deprecated) Use the `/transfer/ledger/get` endpoint to view a balance held with Plaid.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferBalanceGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   *
+   * @deprecated
+   */
   transferBalanceGet(
     request: ThePlaidApiClient.TransferBalanceGetRequestParams,
     options?: RequestOptions,
@@ -7364,8 +13556,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/balance/get"),
+        urlTemplate: this.#servers.default("/transfer/balance/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferBalanceGetRequestSchema },
       },
       {
@@ -7376,6 +13571,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Cancel a transfer
+   *
+   * @remarks
+   * Use the `/transfer/cancel` endpoint to cancel a transfer. A transfer is eligible for
+   * cancellation if the `cancellable` property returned by `/transfer/get` is `true`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferCancelError} when the API answers with an error status
+   * — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferCancel(
     request: ThePlaidApiClient.TransferCancelRequestParams,
     options?: RequestOptions,
@@ -7383,8 +13594,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/cancel"),
+        urlTemplate: this.#servers.default("/transfer/cancel"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferCancelRequestSchema },
       },
       {
@@ -7395,6 +13609,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get RTP eligibility information of a transfer
+   *
+   * @remarks
+   * Use the `/transfer/capabilities/get` endpoint to determine the RTP eligibility information of
+   * an account to be used with Transfer. This endpoint works on all Transfer-capable Items,
+   * including those created by `/transfer/migrate_account`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferCapabilitiesGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferCapabilitiesGet(
     request: ThePlaidApiClient.TransferCapabilitiesGetRequestParams,
     options?: RequestOptions,
@@ -7402,8 +13633,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/capabilities/get"),
+        urlTemplate: this.#servers.default("/transfer/capabilities/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferCapabilitiesGetRequestSchema },
       },
       {
@@ -7414,6 +13648,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get transfer product configuration
+   *
+   * @remarks
+   * Use the `/transfer/configuration/get` endpoint to view your transfer product configurations.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferConfigurationGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferConfigurationGet(
     request: ThePlaidApiClient.TransferConfigurationGetRequestParams,
     options?: RequestOptions,
@@ -7421,8 +13670,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/configuration/get"),
+        urlTemplate: this.#servers.default("/transfer/configuration/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferConfigurationGetRequestSchema },
       },
       {
@@ -7433,6 +13685,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create a transfer
+   *
+   * @remarks
+   * Use the `/transfer/create` endpoint to initiate a new transfer. This endpoint is retryable and
+   * idempotent; if a transfer with the provided `transfer_id` has already been created, it will
+   * return the transfer details without creating a new transfer. A transfer may still be created if
+   * a 500 error is returned; to detect this scenario, use [Transfer
+   * events](https://plaid.com/docs/transfer/reconciling-transfers/).
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferCreateError} when the API answers with an error status
+   * — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferCreate(
     request: ThePlaidApiClient.TransferCreateRequestParams,
     options?: RequestOptions,
@@ -7440,8 +13711,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/create"),
+        urlTemplate: this.#servers.default("/transfer/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferCreateRequestSchema },
       },
       {
@@ -7452,6 +13726,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Upload transfer diligence document on behalf of the originator
+   *
+   * @remarks
+   * Third-party sender customers can use the `/transfer/diligence/document/upload` endpoint to
+   * upload a document on behalf of their end customer (i.e. originator) to Plaid. You'll need to
+   * send a request of type `multipart/form-data`. You must provide the `client_id` in the
+   * `PLAID-CLIENT-ID` header and `secret` in the `PLAID-SECRET` header.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferDiligenceDocumentUploadError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferDiligenceDocumentUpload(
     request: ThePlaidApiClient.TransferDiligenceDocumentUploadRequestParams,
     options?: RequestOptions,
@@ -7462,8 +13754,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/diligence/document/upload"),
+        urlTemplate: this.#servers.default("/transfer/diligence/document/upload"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferDiligenceDocumentUploadRequestSchema },
       },
       {
@@ -7474,6 +13769,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Submit transfer diligence on behalf of the originator
+   *
+   * @remarks
+   * Use the `/transfer/diligence/submit` endpoint to submit transfer diligence on behalf of the
+   * originator (i.e., the end customer).
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferDiligenceSubmitError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferDiligenceSubmit(
     request: ThePlaidApiClient.TransferDiligenceSubmitRequestParams,
     options?: RequestOptions,
@@ -7481,8 +13792,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/diligence/submit"),
+        urlTemplate: this.#servers.default("/transfer/diligence/submit"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferDiligenceSubmitRequestSchema },
       },
       {
@@ -7493,6 +13807,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * List transfer events
+   *
+   * @remarks
+   * Use the `/transfer/event/list` endpoint to get a list of transfer events based on specified
+   * filter criteria.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferEventListError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferEventList(
     request: ThePlaidApiClient.TransferEventListRequestParams,
     options?: RequestOptions,
@@ -7500,8 +13830,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/event/list"),
+        urlTemplate: this.#servers.default("/transfer/event/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferEventListRequestSchema },
       },
       {
@@ -7512,6 +13845,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Sync transfer events
+   *
+   * @remarks
+   * `/transfer/event/sync` allows you to request up to the next 500 transfer events that happened
+   * after a specific `event_id`. Use the `/transfer/event/sync` endpoint to guarantee you have seen
+   * all transfer events.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferEventSyncError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferEventSync(
     request: ThePlaidApiClient.TransferEventSyncRequestParams,
     options?: RequestOptions,
@@ -7519,8 +13869,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/event/sync"),
+        urlTemplate: this.#servers.default("/transfer/event/sync"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferEventSyncRequestSchema },
       },
       {
@@ -7531,6 +13884,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve a transfer
+   *
+   * @remarks
+   * The `/transfer/get` endpoint fetches information about the transfer corresponding to the given
+   * `transfer_id` or `authorization_id`. One of `transfer_id` or `authorization_id` must be
+   * populated but not both.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferGetError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferGet(
     request: ThePlaidApiClient.TransferGetRequestParams,
     options?: RequestOptions,
@@ -7538,8 +13908,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/get"),
+        urlTemplate: this.#servers.default("/transfer/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferGetRequestSchema },
       },
       {
@@ -7550,6 +13923,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create a transfer intent object to invoke the Transfer UI
+   *
+   * @remarks
+   * Use the `/transfer/intent/create` endpoint to generate a transfer intent object and invoke the
+   * Transfer UI.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferIntentCreateError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferIntentCreate(
     request: ThePlaidApiClient.TransferIntentCreateRequestParams,
     options?: RequestOptions,
@@ -7557,8 +13946,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/intent/create"),
+        urlTemplate: this.#servers.default("/transfer/intent/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferIntentCreateRequestSchema },
       },
       {
@@ -7569,6 +13961,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve more information about a transfer intent
+   *
+   * @remarks
+   * Use the `/transfer/intent/get` endpoint to retrieve more information about a transfer intent.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferIntentGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferIntentGet(
     request: ThePlaidApiClient.TransferIntentGetRequestParams,
     options?: RequestOptions,
@@ -7576,8 +13983,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/intent/get"),
+        urlTemplate: this.#servers.default("/transfer/intent/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferIntentGetRequestSchema },
       },
       {
@@ -7588,6 +13998,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Deposit funds into a Plaid Ledger balance
+   *
+   * @remarks
+   * Use the `/transfer/ledger/deposit` endpoint to deposit funds into Plaid Ledger.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferLedgerDepositError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferLedgerDeposit(
     request: ThePlaidApiClient.TransferLedgerDepositRequestParams,
     options?: RequestOptions,
@@ -7595,8 +14020,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/ledger/deposit"),
+        urlTemplate: this.#servers.default("/transfer/ledger/deposit"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferLedgerDepositRequestSchema },
       },
       {
@@ -7607,6 +14035,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Move available balance between ledgers
+   *
+   * @remarks
+   * Use the `/transfer/ledger/distribute` endpoint to move available balance between ledgers, if
+   * you have multiple. If you're a platform, you can move funds between one of your ledgers and one
+   * of your customer's ledgers.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferLedgerDistributeError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferLedgerDistribute(
     request: ThePlaidApiClient.TransferLedgerDistributeRequestParams,
     options?: RequestOptions,
@@ -7614,8 +14059,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/ledger/distribute"),
+        urlTemplate: this.#servers.default("/transfer/ledger/distribute"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferLedgerDistributeRequestSchema },
       },
       {
@@ -7626,6 +14074,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * List transfer ledger events
+   *
+   * @remarks
+   * Use the `/transfer/ledger/event/list` endpoint to get a list of ledger events for a specific
+   * ledger based on specified filter criteria.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferLedgerEventListError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferLedgerEventList(
     request: ThePlaidApiClient.TransferLedgerEventListRequestParams,
     options?: RequestOptions,
@@ -7633,8 +14097,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/ledger/event/list"),
+        urlTemplate: this.#servers.default("/transfer/ledger/event/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferLedgerEventListRequestSchema },
       },
       {
@@ -7645,6 +14112,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve Plaid Ledger balance
+   *
+   * @remarks
+   * Use the `/transfer/ledger/get` endpoint to view a balance on the ledger held with Plaid.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferLedgerGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferLedgerGet(
     request: ThePlaidApiClient.TransferLedgerGetRequestParams,
     options?: RequestOptions,
@@ -7652,8 +14134,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/ledger/get"),
+        urlTemplate: this.#servers.default("/transfer/ledger/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferLedgerGetRequestSchema },
       },
       {
@@ -7664,6 +14149,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Withdraw funds from a Plaid Ledger balance
+   *
+   * @remarks
+   * Use the `/transfer/ledger/withdraw` endpoint to withdraw funds from a Plaid Ledger balance.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferLedgerWithdrawError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferLedgerWithdraw(
     request: ThePlaidApiClient.TransferLedgerWithdrawRequestParams,
     options?: RequestOptions,
@@ -7671,8 +14171,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/ledger/withdraw"),
+        urlTemplate: this.#servers.default("/transfer/ledger/withdraw"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferLedgerWithdrawRequestSchema },
       },
       {
@@ -7683,6 +14186,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * List transfers
+   *
+   * @remarks
+   * Use the `/transfer/list` endpoint to see a list of all your transfers and their statuses.
+   * Results are paginated; use the `count` and `offset` query parameters to retrieve the desired
+   * transfers.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferListError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferList(
     request: ThePlaidApiClient.TransferListRequestParams,
     options?: RequestOptions,
@@ -7690,8 +14210,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/list"),
+        urlTemplate: this.#servers.default("/transfer/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferListRequestSchema },
       },
       {
@@ -7702,6 +14225,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get transfer product usage metrics
+   *
+   * @remarks
+   * Use the `/transfer/metrics/get` endpoint to view your transfer product usage metrics.
+   *
+   * In the Sandbox environment, this endpoint returns static placeholder values rather than metrics
+   * computed from your Sandbox transfer activity.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferMetricsGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferMetricsGet(
     request: ThePlaidApiClient.TransferMetricsGetRequestParams,
     options?: RequestOptions,
@@ -7709,8 +14250,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/metrics/get"),
+        urlTemplate: this.#servers.default("/transfer/metrics/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferMetricsGetRequestSchema },
       },
       {
@@ -7721,6 +14265,29 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Migrate account into Transfers
+   *
+   * @remarks
+   * As an alternative to adding Items via Link, you can also use the `/transfer/migrate_account`
+   * endpoint to migrate previously-verified account and routing numbers to Plaid Items. This
+   * endpoint is also required when adding an Item for use with wire transfers; if you intend to
+   * create wire transfers on this account, you must provide `wire_routing_number`. Note that Items
+   * created in this way are not compatible with endpoints for other products, such as
+   * `/accounts/balance/get`, and can only be used with Transfer endpoints. If you require access to
+   * other endpoints, create the Item through Link instead. Access to `/transfer/migrate_account` is
+   * not enabled by default; to obtain access, contact your Plaid account manager or
+   * [support](https://dashboard.plaid.com/support).
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferMigrateAccountError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferMigrateAccount(
     request: ThePlaidApiClient.TransferMigrateAccountRequestParams,
     options?: RequestOptions,
@@ -7728,8 +14295,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/migrate_account"),
+        urlTemplate: this.#servers.default("/transfer/migrate_account"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferMigrateAccountRequestSchema },
       },
       {
@@ -7740,6 +14310,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create a new originator
+   *
+   * @remarks
+   * Use the `/transfer/originator/create` endpoint to create a new originator and return an
+   * `originator_client_id`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferOriginatorCreateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferOriginatorCreate(
     request: ThePlaidApiClient.TransferOriginatorCreateRequestParams,
     options?: RequestOptions,
@@ -7747,8 +14333,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/originator/create"),
+        urlTemplate: this.#servers.default("/transfer/originator/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferOriginatorCreateRequestSchema },
       },
       {
@@ -7759,6 +14348,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create a new funding account for an originator
+   *
+   * @remarks
+   * Use the `/transfer/originator/funding_account/create` endpoint to create a new funding account
+   * for the originator.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferOriginatorFundingAccountCreateError} when the API
+   * answers with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferOriginatorFundingAccountCreate(
     request: ThePlaidApiClient.TransferOriginatorFundingAccountCreateRequestParams,
     options?: RequestOptions,
@@ -7769,8 +14374,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/originator/funding_account/create"),
+        urlTemplate: this.#servers.default("/transfer/originator/funding_account/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: {
           kind: "json",
           value: request.body,
@@ -7785,6 +14393,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Update the funding account associated with the originator
+   *
+   * @remarks
+   * Use the `/transfer/originator/funding_account/update` endpoint to update the funding account
+   * associated with the originator.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferOriginatorFundingAccountUpdateError} when the API
+   * answers with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferOriginatorFundingAccountUpdate(
     request: ThePlaidApiClient.TransferOriginatorFundingAccountUpdateRequestParams,
     options?: RequestOptions,
@@ -7795,8 +14419,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/originator/funding_account/update"),
+        urlTemplate: this.#servers.default("/transfer/originator/funding_account/update"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: {
           kind: "json",
           value: request.body,
@@ -7811,6 +14438,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get status of an originator's onboarding
+   *
+   * @remarks
+   * The `/transfer/originator/get` endpoint gets status updates for an originator's onboarding
+   * process. This information is also available via the Transfer page on the Plaid dashboard.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferOriginatorGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferOriginatorGet(
     request: ThePlaidApiClient.TransferOriginatorGetRequestParams,
     options?: RequestOptions,
@@ -7818,8 +14461,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/originator/get"),
+        urlTemplate: this.#servers.default("/transfer/originator/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferOriginatorGetRequestSchema },
       },
       {
@@ -7830,6 +14476,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get status of all originators' onboarding
+   *
+   * @remarks
+   * The `/transfer/originator/list` endpoint gets status updates for all of your originators'
+   * onboarding. This information is also available via the Plaid dashboard.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferOriginatorListError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferOriginatorList(
     request: ThePlaidApiClient.TransferOriginatorListRequestParams,
     options?: RequestOptions,
@@ -7837,8 +14499,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/originator/list"),
+        urlTemplate: this.#servers.default("/transfer/originator/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferOriginatorListRequestSchema },
       },
       {
@@ -7849,6 +14514,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create an originator for Transfer for Platforms customers
+   *
+   * @remarks
+   * Use the `/transfer/platform/originator/create` endpoint to submit information about the
+   * originator you are onboarding, including the originator's agreement to the required legal
+   * terms.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferPlatformOriginatorCreateError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferPlatformOriginatorCreate(
     request: ThePlaidApiClient.TransferPlatformOriginatorCreateRequestParams,
     options?: RequestOptions,
@@ -7859,8 +14541,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/platform/originator/create"),
+        urlTemplate: this.#servers.default("/transfer/platform/originator/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferPlatformOriginatorCreateRequestSchema },
       },
       {
@@ -7871,6 +14556,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create a person associated with an originator
+   *
+   * @remarks
+   * Use the `/transfer/platform/person/create` endpoint to create a person associated with an
+   * originator (e.g. beneficial owner or control person) and optionally submit personal
+   * identification information for them.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferPlatformPersonCreateError} when the API answers with
+   * an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferPlatformPersonCreate(
     request: ThePlaidApiClient.TransferPlatformPersonCreateRequestParams,
     options?: RequestOptions,
@@ -7878,8 +14580,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/platform/person/create"),
+        urlTemplate: this.#servers.default("/transfer/platform/person/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferPlatformPersonCreateRequestSchema },
       },
       {
@@ -7890,6 +14595,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Submit additional onboarding information on behalf of an originator
+   *
+   * @remarks
+   * Use the `/transfer/platform/requirement/submit` endpoint to submit additional onboarding
+   * information that is needed by Plaid to approve or decline the originator. See [Requirement type
+   * schema
+   * documentation](https://docs.google.com/document/d/1NEQkTD0sVK50iAQi6xHigrexDUxZ4QxXqSEfV_FFTiU/)
+   * for a list of requirement types and possible values.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferPlatformRequirementSubmitError} when the API answers
+   * with an error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferPlatformRequirementSubmit(
     request: ThePlaidApiClient.TransferPlatformRequirementSubmitRequestParams,
     options?: RequestOptions,
@@ -7900,8 +14624,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/platform/requirement/submit"),
+        urlTemplate: this.#servers.default("/transfer/platform/requirement/submit"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferPlatformRequirementSubmitRequestSchema },
       },
       {
@@ -7912,6 +14639,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Generate a Plaid-hosted onboarding UI URL.
+   *
+   * @remarks
+   * The `/transfer/questionnaire/create` endpoint generates a Plaid-hosted onboarding UI URL.
+   * Redirect the originator to this URL to provide their due diligence information and agree to
+   * Plaid's terms for ACH money movement.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferQuestionnaireCreateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferQuestionnaireCreate(
     request: ThePlaidApiClient.TransferQuestionnaireCreateRequestParams,
     options?: RequestOptions,
@@ -7919,8 +14663,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/questionnaire/create"),
+        urlTemplate: this.#servers.default("/transfer/questionnaire/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferQuestionnaireCreateRequestSchema },
       },
       {
@@ -7931,6 +14678,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Cancel a recurring transfer.
+   *
+   * @remarks
+   * Use the `/transfer/recurring/cancel` endpoint to cancel a recurring transfer. A scheduled
+   * transfer that hasn't been submitted to the bank will be cancelled.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferRecurringCancelError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferRecurringCancel(
     request: ThePlaidApiClient.TransferRecurringCancelRequestParams,
     options?: RequestOptions,
@@ -7938,8 +14701,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/recurring/cancel"),
+        urlTemplate: this.#servers.default("/transfer/recurring/cancel"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferRecurringCancelRequestSchema },
       },
       {
@@ -7950,6 +14716,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create a recurring transfer
+   *
+   * @remarks
+   * Use the `/transfer/recurring/create` endpoint to initiate a new recurring transfer. This
+   * capability is not currently supported for Transfer UI or Transfer for Platforms (beta)
+   * customers.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferRecurringCreateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferRecurringCreate(
     request: ThePlaidApiClient.TransferRecurringCreateRequestParams,
     options?: RequestOptions,
@@ -7957,8 +14740,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/recurring/create"),
+        urlTemplate: this.#servers.default("/transfer/recurring/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferRecurringCreateRequestSchema },
       },
       {
@@ -7969,6 +14755,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve a recurring transfer
+   *
+   * @remarks
+   * The `/transfer/recurring/get` fetches information about the recurring transfer corresponding to
+   * the given `recurring_transfer_id`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferRecurringGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferRecurringGet(
     request: ThePlaidApiClient.TransferRecurringGetRequestParams,
     options?: RequestOptions,
@@ -7976,8 +14778,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/recurring/get"),
+        urlTemplate: this.#servers.default("/transfer/recurring/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferRecurringGetRequestSchema },
       },
       {
@@ -7988,6 +14793,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * List recurring transfers
+   *
+   * @remarks
+   * Use the `/transfer/recurring/list` endpoint to see a list of all your recurring transfers and
+   * their statuses. Results are paginated; use the `count` and `offset` query parameters to
+   * retrieve the desired recurring transfers.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferRecurringListError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferRecurringList(
     request: ThePlaidApiClient.TransferRecurringListRequestParams,
     options?: RequestOptions,
@@ -7995,8 +14817,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/recurring/list"),
+        urlTemplate: this.#servers.default("/transfer/recurring/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferRecurringListRequestSchema },
       },
       {
@@ -8007,6 +14832,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Cancel a refund
+   *
+   * @remarks
+   * Use the `/transfer/refund/cancel` endpoint to cancel a refund. A refund is eligible for
+   * cancellation if it has not yet been submitted to the payment network.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferRefundCancelError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferRefundCancel(
     request: ThePlaidApiClient.TransferRefundCancelRequestParams,
     options?: RequestOptions,
@@ -8014,8 +14855,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/refund/cancel"),
+        urlTemplate: this.#servers.default("/transfer/refund/cancel"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferRefundCancelRequestSchema },
       },
       {
@@ -8026,6 +14870,33 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create a refund
+   *
+   * @remarks
+   * Use the `/transfer/refund/create` endpoint to create a refund for a transfer. A transfer can be
+   * refunded if the transfer was initiated in the past 180 days.
+   *
+   * Refunds come out of the available balance of the ledger used for the original debit transfer.
+   * If there are not enough funds in the available balance to cover the refund amount, the refund
+   * will be rejected. You can create a refund at any time. Plaid does not impose any hold time on
+   * refunds.
+   *
+   * A refund can still be issued even if the Item's `access_token` is no longer valid (e.g. if the
+   * user revoked OAuth consent or the Item was deleted via `/item/remove`), as long as the account
+   * and routing number pair used to make the original transaction is still valid. A refund cannot
+   * be issued if the Item has an [invalidated
+   * TAN](https://plaid.com/docs/auth/#tokenized-account-numbers), which can occur at Chase or PNC.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferRefundCreateError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferRefundCreate(
     request: ThePlaidApiClient.TransferRefundCreateRequestParams,
     options?: RequestOptions,
@@ -8033,8 +14904,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/refund/create"),
+        urlTemplate: this.#servers.default("/transfer/refund/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferRefundCreateRequestSchema },
       },
       {
@@ -8045,6 +14919,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve a refund
+   *
+   * @remarks
+   * The `/transfer/refund/get` endpoint fetches information about the refund corresponding to the
+   * given `refund_id`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferRefundGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferRefundGet(
     request: ThePlaidApiClient.TransferRefundGetRequestParams,
     options?: RequestOptions,
@@ -8052,8 +14942,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/refund/get"),
+        urlTemplate: this.#servers.default("/transfer/refund/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferRefundGetRequestSchema },
       },
       {
@@ -8064,6 +14957,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Lists historical repayments
+   *
+   * @remarks
+   * The `/transfer/repayment/list` endpoint fetches repayments matching the given filters.
+   * Repayments are returned in reverse-chronological order (most recent first) starting at the
+   * given `start_time`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferRepaymentListError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferRepaymentList(
     request: ThePlaidApiClient.TransferRepaymentListRequestParams,
     options?: RequestOptions,
@@ -8071,8 +14981,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/repayment/list"),
+        urlTemplate: this.#servers.default("/transfer/repayment/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferRepaymentListRequestSchema },
       },
       {
@@ -8083,6 +14996,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * List the returns included in a repayment
+   *
+   * @remarks
+   * The `/transfer/repayment/return/list` endpoint retrieves the set of returns that were batched
+   * together into the specified repayment. The sum of amounts of returns retrieved by this request
+   * equals the amount of the repayment.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferRepaymentReturnListError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferRepaymentReturnList(
     request: ThePlaidApiClient.TransferRepaymentReturnListRequestParams,
     options?: RequestOptions,
@@ -8090,8 +15020,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/repayment/return/list"),
+        urlTemplate: this.#servers.default("/transfer/repayment/return/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferRepaymentReturnListRequestSchema },
       },
       {
@@ -8102,6 +15035,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Report a return recovery
+   *
+   * @remarks
+   * Use the `/transfer/return/recover` endpoint to notify Plaid that you have recovered some or all
+   * of the loss on a returned guaranteed transfer.
+   *
+   * Recovery can be reported in full or in parts; the sum of recovered amounts across calls cannot
+   * exceed the original transfer's amount.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferReturnRecoverError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferReturnRecover(
     request: ThePlaidApiClient.TransferReturnRecoverRequestParams,
     options?: RequestOptions,
@@ -8109,8 +15061,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/return/recover"),
+        urlTemplate: this.#servers.default("/transfer/return/recover"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferReturnRecoverRequestSchema },
       },
       {
@@ -8121,6 +15076,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve a sweep
+   *
+   * @remarks
+   * The `/transfer/sweep/get` endpoint fetches a sweep corresponding to the given `sweep_id`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferSweepGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferSweepGet(
     request: ThePlaidApiClient.TransferSweepGetRequestParams,
     options?: RequestOptions,
@@ -8128,8 +15098,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/sweep/get"),
+        urlTemplate: this.#servers.default("/transfer/sweep/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferSweepGetRequestSchema },
       },
       {
@@ -8140,6 +15113,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * List sweeps
+   *
+   * @remarks
+   * The `/transfer/sweep/list` endpoint fetches sweeps matching the given filters.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.TransferSweepListError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   transferSweepList(
     request: ThePlaidApiClient.TransferSweepListRequestParams,
     options?: RequestOptions,
@@ -8147,8 +15135,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/transfer/sweep/list"),
+        urlTemplate: this.#servers.default("/transfer/sweep/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: transferSweepListRequestSchema },
       },
       {
@@ -8159,6 +15150,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Send User Account Session Event
+   *
+   * @remarks
+   * This endpoint allows sending client-specific events related to Layer sessions for analytics and
+   * tracking purposes.
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.UserAccountSessionEventSendError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   userAccountSessionEventSend(
     request: ThePlaidApiClient.UserAccountSessionEventSendRequestParams,
     options?: RequestOptions,
@@ -8166,8 +15173,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/user_account/session/event/send"),
+        urlTemplate: this.#servers.default("/user_account/session/event/send"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: userAccountSessionEventSendRequestSchema },
       },
       {
@@ -8178,6 +15188,28 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve User Account
+   *
+   * @remarks
+   * This endpoint returns user permissioned account data, including identity and Item access
+   * tokens, for use with [Plaid Layer](https://plaid.com/docs/layer). Note that end users are
+   * permitted to edit the prefilled identity data in the Link flow before sharing it with you; you
+   * should treat any identity data returned by this endpoint as user-submitted, unverified data.
+   * For a verification layer, you can add [Identity
+   * Verification](https://plaid.com/docs/identity-verification/) to your flow, or check the
+   * submitted identity data against bank account data from linked accounts using [Identity
+   * Match](https://plaid.com/docs/identity/#identity-match).
+   *
+   * @returns success
+   *
+   * @throws {@link ThePlaidApiClient.UserAccountSessionGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   userAccountSessionGet(
     request: ThePlaidApiClient.UserAccountSessionGetRequestParams,
     options?: RequestOptions,
@@ -8185,8 +15217,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/user_account/session/get"),
+        urlTemplate: this.#servers.default("/user_account/session/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: userAccountSessionGetRequestSchema },
       },
       {
@@ -8197,6 +15232,53 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create user
+   *
+   * @remarks
+   * For Plaid products and flows that use the user object, `/user/create` provides you a single
+   * token to access all data associated with the user. You must call this endpoint before calling
+   * `/link/token/create` if you are using any of the following: Plaid Check, Income Verification,
+   * Multi-Item Link, or Plaid Protect (Identity). If you are using Plaid Protect Link session
+   * scoring, you do not need to call `/user/create` first; Plaid will resolve or create the user
+   * when `user.client_user_id` is provided in `/link/token/create`. For customers who began using
+   * this endpoint on or after December 10, 2025, this endpoint takes a `client_user_id` and an
+   * `identity` object and will return a `user_id`. For customers who began using it before that
+   * date, the endpoint takes a `client_user_id` and a `consumer_report_user_identity` object and
+   * will return a `user_token` and `user_id`. For more details, see [New User
+   * APIs](https://plaid.com/docs/api/users/user-apis). In order to create a Plaid Check Consumer
+   * Report for a user, the `identity` (new) or `consumer_report_user_identity` (legacy) object must
+   * be present. If it is not provided during the `/user/create` call, it can be added later by
+   * calling `/user/update`.
+   *
+   *
+   * In order to generate a Plaid Check Consumer Report, the following `identity` fields, at
+   * minimum, are required and must be non-empty: `name`, `date_of_birth`, `emails`,
+   * `phone_numbers`, and `addresses` (with at least one email, phone number, and address designated
+   * as `primary`). Plaid Check Consumer Reports can only be created for US-based users; the user's
+   * address country must be `US`. If creating a report for sharing with a GSE such as Fannie or
+   * Freddie, the user's full SSN must be provided via the `id_numbers` field. Providing at least a
+   * partial SSN is also strongly recommended for all use cases, since it improves the accuracy of
+   * matching user records during compliance processes such as file disclosure, dispute, or security
+   * freeze requests.
+   *
+   *
+   * When using Plaid Protect, it is highly recommended that you provide an `identity` object to
+   * better identify and block fraud across your Link sessions.
+   *
+   *
+   * Plaid will normalize identity fields before storing them and utilize the same identity across
+   * different user-based products.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.UserCreateError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   userCreate(
     request: ThePlaidApiClient.UserCreateRequestParams,
     options?: RequestOptions,
@@ -8204,17 +15286,20 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/user/create"),
+        urlTemplate: this.#servers.default("/user/create"),
         auth: anyAuth(
           allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
           this.#auth.oauth2,
         ),
+        pathParams: [],
+        query: [],
         headers: [
           {
             name: "Plaid-New-User-API-Enabled",
             value: request.plaidNewUserApiEnabled,
             schema: s.defaulted(s.boolean(), false),
           },
+          { name: "Idempotency-Key", value: uuid(), schema: s.string() },
         ],
         body: { kind: "json", value: request.body, schema: userCreateRequestSchema },
       },
@@ -8226,6 +15311,29 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Refresh user items for Financial-Insights bundle
+   *
+   * @remarks
+   * `/user/financial_data/refresh` is an optional endpoint that initiates an on-demand extraction
+   * to fetch the newest transactions for a User using the Financial Insights bundle. This bundle
+   * refreshes the Transactions, Investments, and Liabilities product data. This endpoint is for
+   * clients who use the Financial Insights bundle and want to proactively update all linked Items
+   * under a user. The refresh may succeed or fail on a per-Item basis. Use the `results` array in
+   * the response to understand the outcome for each Item.
+   *
+   * This endpoint is distinct from `/transactions/refresh`, which triggers a refresh for a single
+   * Item. Use `/user/financial_data/refresh` to target all Items for a user instead.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.UserFinancialDataRefreshError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   userFinancialDataRefresh(
     request: ThePlaidApiClient.UserFinancialDataRefreshRequestParams,
     options?: RequestOptions,
@@ -8233,8 +15341,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/user/financial_data/refresh"),
+        urlTemplate: this.#servers.default("/user/financial_data/refresh"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: userFinancialDataRefreshRequestSchema },
       },
       {
@@ -8245,6 +15356,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Retrieve user identity and information
+   *
+   * @remarks
+   * Get user details using a `user_id`. This endpoint only supports users that were created on the
+   * new user API flow, without a `user_token`. For more details, see [New User
+   * APIs](https://plaid.com/docs/api/users/user-apis).
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.UserGetError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   userGet(
     request: ThePlaidApiClient.UserGetRequestParams,
     options?: RequestOptions,
@@ -8252,14 +15380,17 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/user/get"),
+        urlTemplate: this.#servers.default("/user/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
         headers: [
           {
             name: "Plaid-New-User-API-Enabled",
             value: request.plaidNewUserApiEnabled,
             schema: s.defaulted(s.boolean(), false),
           },
+          { name: "Idempotency-Key", value: uuid(), schema: s.string() },
         ],
         body: { kind: "json", value: request.body, schema: userGetRequestSchema },
       },
@@ -8271,6 +15402,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Remove user identity data
+   *
+   * @remarks
+   * This endpoint allows customers to explicitly purge identity/PII data provided to Plaid for a
+   * given user. This is not exposed to customers by default, as it is meant for special scenarios
+   * or requests, but Plaid is obligated to enable customers to delete PII provided to us.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.UserIdentityRemoveError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   userIdentityRemove(
     request: ThePlaidApiClient.UserIdentityRemoveRequestParams,
     options?: RequestOptions,
@@ -8278,14 +15426,17 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/user/identity/remove"),
+        urlTemplate: this.#servers.default("/user/identity/remove"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
         headers: [
           {
             name: "Plaid-New-User-API-Enabled",
             value: request.plaidNewUserApiEnabled,
             schema: s.defaulted(s.boolean(), false),
           },
+          { name: "Idempotency-Key", value: uuid(), schema: s.string() },
         ],
         body: { kind: "json", value: request.body, schema: userIdentityRemoveRequestSchema },
       },
@@ -8297,6 +15448,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Associate Items to a User
+   *
+   * @remarks
+   * Associates Items to the target user. If an Item is already associated to another user, the Item
+   * will be disassociated with the existing user and associated to the target user. This operation
+   * supports a max of 100 Items.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.UserItemsAssociateError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   userItemsAssociate(
     request: ThePlaidApiClient.UserItemsAssociateRequestParams,
     options?: RequestOptions,
@@ -8304,8 +15472,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/user/items/associate"),
+        urlTemplate: this.#servers.default("/user/items/associate"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: userItemsAssociateRequestSchema },
       },
       {
@@ -8316,6 +15487,23 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Get Items associated with a User
+   *
+   * @remarks
+   * Returns Items associated with a `user_id`, along with their corresponding statuses. Plaid
+   * associates an Item with a User when it has been successfully connected within a Link session
+   * initialized with that `user_id`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.UserItemsGetError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   userItemsGet(
     request: ThePlaidApiClient.UserItemsGetRequestParams,
     options?: RequestOptions,
@@ -8323,8 +15511,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/user/items/get"),
+        urlTemplate: this.#servers.default("/user/items/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: userItemsGetRequestSchema },
       },
       {
@@ -8335,6 +15526,32 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Remove Items from a User
+   *
+   * @remarks
+   * Removes specific Items associated with a user. It is equivalent to calling `/item/remove` on
+   * each Item individually, but supports use cases (such as Plaid Check) where access tokens are
+   * not available. All specified Items must belong to the user or the entire operation fails.
+   * Similar to `/item/remove`, this deletes Item product data and terminates billing on the Item's
+   * products. Once removed, Items cannot be reconnected without going through Link again. This
+   * endpoint is not intended to remove all data for a user, as it will only remove Items and no
+   * other data for the user. If the user has any user-based recurring subscription products
+   * (Financial Management, Plaid Protect, or CRA Cash Flow Updates) and is deleting their account
+   * with your product, also call `/user/products/terminate` to end those subscriptions; per-Item
+   * billing is already terminated by this endpoint. For a user initiated data deletion request, see
+   * the [Consumer Service Center](https://plaid.com/check/consumer-service-center/) to revoke
+   * access to data.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.UserItemsRemoveError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   userItemsRemove(
     request: ThePlaidApiClient.UserItemsRemoveRequestParams,
     options?: RequestOptions,
@@ -8342,8 +15559,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/user/items/remove"),
+        urlTemplate: this.#servers.default("/user/items/remove"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: userItemsRemoveRequestSchema },
       },
       {
@@ -8354,6 +15574,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Terminate user-based products
+   *
+   * @remarks
+   * Terminates user-based recurring subscription bundles or products (Financial Management, Plaid
+   * Protect, and CRA Cash Flow Updates) associated with a `user_id`. After you call this endpoint,
+   * the user will no longer be billed for these products. For CRA Monitoring, the subscription is
+   * canceled but historical data remains available for future report requests.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.UserProductsTerminateError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   userProductsTerminate(
     request: ThePlaidApiClient.UserProductsTerminateRequestParams,
     options?: RequestOptions,
@@ -8361,8 +15599,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/user/products/terminate"),
+        urlTemplate: this.#servers.default("/user/products/terminate"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: userProductsTerminateRequestSchema },
       },
       {
@@ -8373,6 +15614,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Remove user
+   *
+   * @remarks
+   * `/user/remove` deletes a `user_id` or `user_token` and associated information, including any
+   * Items associated with the user.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.UserRemoveError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   userRemove(
     request: ThePlaidApiClient.UserRemoveRequestParams,
     options?: RequestOptions,
@@ -8380,14 +15637,17 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/user/remove"),
+        urlTemplate: this.#servers.default("/user/remove"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
         headers: [
           {
             name: "Plaid-New-User-API-Enabled",
             value: request.plaidNewUserApiEnabled,
             schema: s.defaulted(s.boolean(), false),
           },
+          { name: "Idempotency-Key", value: uuid(), schema: s.string() },
         ],
         body: { kind: "json", value: request.body, schema: userRemoveRequestSchema },
       },
@@ -8399,6 +15659,27 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create a third-party user token
+   *
+   * @remarks
+   * This endpoint is used to create a third-party user token. This token can be shared with and
+   * used by a specified third-party client to access data associated with the user through
+   * supported endpoints.
+   *
+   * Ensure you store the `third_party_user_token` along with the `user_token` and
+   * `third_party_client_id`, as it is not possible to retrieve a previously created
+   * `third_party_user_token`.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.UserThirdPartyTokenCreateError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   userThirdPartyTokenCreate(
     request: ThePlaidApiClient.UserThirdPartyTokenCreateRequestParams,
     options?: RequestOptions,
@@ -8406,8 +15687,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/user/third_party_token/create"),
+        urlTemplate: this.#servers.default("/user/third_party_token/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: userThirdPartyTokenCreateRequestSchema },
       },
       {
@@ -8418,6 +15702,25 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Remove a third-party user token
+   *
+   * @remarks
+   * This endpoint is used to delete a third-party user token. Once removed, the token can no longer
+   * be used to access data associated with the user.
+   *
+   * Any subsequent calls to retrieve information using the same third-party user token will result
+   * in an error stating the third-party user token does not exist.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.UserThirdPartyTokenRemoveError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   userThirdPartyTokenRemove(
     request: ThePlaidApiClient.UserThirdPartyTokenRemoveRequestParams,
     options?: RequestOptions,
@@ -8425,8 +15728,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/user/third_party_token/remove"),
+        urlTemplate: this.#servers.default("/user/third_party_token/remove"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: userThirdPartyTokenRemoveRequestSchema },
       },
       {
@@ -8437,6 +15743,29 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Refresh user items for Transactions bundle
+   *
+   * @remarks
+   * `/user/transactions/refresh` is an optional endpoint that initiates an on-demand extraction to
+   * fetch the newest transactions for a User using the Transactions bundle. This bundle refreshes
+   * only the Transactions product data. This endpoint is for clients who use the Transactions
+   * Insights bundle and want to proactively update all linked Items under a user. The refresh may
+   * succeed or fail on a per-Item basis. Use the `results` array in the response to understand the
+   * outcome for each Item.
+   *
+   * This endpoint is distinct from `/transactions/refresh`, which triggers a refresh for a single
+   * Item. Use `/user/transactions/refresh` to target all Items for a user instead.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.UserTransactionsRefreshError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   userTransactionsRefresh(
     request: ThePlaidApiClient.UserTransactionsRefreshRequestParams,
     options?: RequestOptions,
@@ -8444,8 +15773,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/user/transactions/refresh"),
+        urlTemplate: this.#servers.default("/user/transactions/refresh"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: userTransactionsRefreshRequestSchema },
       },
       {
@@ -8456,6 +15788,26 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Update user information
+   *
+   * @remarks
+   * This endpoint updates user information for an existing `user_id` or `user_token`. If an
+   * existing `user_id` or `user_token` is missing fields required for a given use case (e.g.
+   * creating a Consumer Report) use `/user/update` to add values for those fields.
+   *
+   * Identity updates use merge semantics: provided fields overwrite existing ones; omitted fields
+   * remain unchanged.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.UserUpdateError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   userUpdate(
     request: ThePlaidApiClient.UserUpdateRequestParams,
     options?: RequestOptions,
@@ -8463,14 +15815,17 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/user/update"),
+        urlTemplate: this.#servers.default("/user/update"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
         headers: [
           {
             name: "Plaid-New-User-API-Enabled",
             value: request.plaidNewUserApiEnabled,
             schema: s.defaulted(s.boolean(), false),
           },
+          { name: "Idempotency-Key", value: uuid(), schema: s.string() },
         ],
         body: { kind: "json", value: request.body, schema: userUpdateRequestSchema },
       },
@@ -8482,6 +15837,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create an e-wallet
+   *
+   * @remarks
+   * Create an e-wallet. The response is the newly created e-wallet object.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.WalletCreateError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   walletCreate(
     request: ThePlaidApiClient.WalletCreateRequestParams,
     options?: RequestOptions,
@@ -8489,8 +15859,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/wallet/create"),
+        urlTemplate: this.#servers.default("/wallet/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: walletCreateRequestSchema },
       },
       {
@@ -8501,6 +15874,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Fetch an e-wallet
+   *
+   * @remarks
+   * Fetch an e-wallet. The response includes the current balance.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.WalletGetError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   walletGet(
     request: ThePlaidApiClient.WalletGetRequestParams,
     options?: RequestOptions,
@@ -8508,8 +15896,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/wallet/get"),
+        urlTemplate: this.#servers.default("/wallet/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: walletGetRequestSchema },
       },
       {
@@ -8520,6 +15911,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Fetch a list of e-wallets
+   *
+   * @remarks
+   * This endpoint lists all e-wallets in descending order of creation.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.WalletListError} when the API answers with an error status —
+   * narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   walletList(
     request: ThePlaidApiClient.WalletListRequestParams,
     options?: RequestOptions,
@@ -8527,8 +15933,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/wallet/list"),
+        urlTemplate: this.#servers.default("/wallet/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: walletListRequestSchema },
       },
       {
@@ -8539,6 +15948,24 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Execute a transaction using an e-wallet
+   *
+   * @remarks
+   * Execute a transaction using the specified e-wallet. Specify the e-wallet to debit from, the
+   * counterparty to credit to, the idempotency key to prevent duplicate transactions, the amount
+   * and reference for the transaction. Transactions will settle in seconds to several days,
+   * depending on the underlying payment rail.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.WalletTransactionExecuteError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   walletTransactionExecute(
     request: ThePlaidApiClient.WalletTransactionExecuteRequestParams,
     options?: RequestOptions,
@@ -8546,8 +15973,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/wallet/transaction/execute"),
+        urlTemplate: this.#servers.default("/wallet/transaction/execute"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: walletTransactionExecuteRequestSchema },
       },
       {
@@ -8558,6 +15988,21 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Fetch an e-wallet transaction
+   *
+   * @remarks
+   * Fetch a specific e-wallet transaction
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.WalletTransactionGetError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   walletTransactionGet(
     request: ThePlaidApiClient.WalletTransactionGetRequestParams,
     options?: RequestOptions,
@@ -8565,8 +16010,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/wallet/transaction/get"),
+        urlTemplate: this.#servers.default("/wallet/transaction/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: walletTransactionGetRequestSchema },
       },
       {
@@ -8577,6 +16025,22 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * List e-wallet transactions
+   *
+   * @remarks
+   * This endpoint lists the latest transactions of the specified e-wallet. Transactions are
+   * returned in descending order by the `created_at` time.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.WalletTransactionListError} when the API answers with an error
+   * status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   walletTransactionList(
     request: ThePlaidApiClient.WalletTransactionListRequestParams,
     options?: RequestOptions,
@@ -8584,8 +16048,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/wallet/transaction/list"),
+        urlTemplate: this.#servers.default("/wallet/transaction/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: walletTransactionListRequestSchema },
       },
       {
@@ -8596,148 +16063,288 @@ export class ThePlaidApiClient {
     );
   }
 
+  /**
+   * Create a watchlist screening for an entity
+   *
+   * @remarks
+   * Create a new entity watchlist screening to check your customer against watchlists defined in
+   * the associated entity watchlist program. If your associated program has ongoing screening
+   * enabled, this is the profile information that will be used to monitor your customer over time.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningEntityCreate(
     request: ThePlaidApiClient.WatchlistScreeningEntityCreateRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningEntityCreateResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningEntityCreateResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningEntityCreateResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/entity/create"),
+        urlTemplate: this.#servers.default("/watchlist_screening/entity/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: watchlistScreeningEntityCreateRequestSchema },
       },
       {
         success: { kind: "json", schema: watchlistScreeningEntityCreateResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Get an entity screening
+   *
+   * @remarks
+   * Retrieve an entity watchlist screening.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningEntityGet(
     request: ThePlaidApiClient.WatchlistScreeningEntityGetRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningEntityGetResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningEntityGetResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningEntityGetResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/entity/get"),
+        urlTemplate: this.#servers.default("/watchlist_screening/entity/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: watchlistScreeningEntityGetRequestSchema },
       },
       {
         success: { kind: "json", schema: watchlistScreeningEntityGetResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * List history for entity watchlist screenings
+   *
+   * @remarks
+   * List all changes to the entity watchlist screening in reverse-chronological order. If the
+   * watchlist screening has not been edited, no history will be returned.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningEntityHistoryList(
     request: ThePlaidApiClient.WatchlistScreeningEntityHistoryListRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningEntityHistoryListResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningEntityHistoryListResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningEntityHistoryListResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/entity/history/list"),
+        urlTemplate: this.#servers.default("/watchlist_screening/entity/history/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: watchlistScreeningEntityHistoryListRequestSchema },
       },
       {
         success: { kind: "json", schema: watchlistScreeningEntityHistoryListResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * List hits for entity watchlist screenings
+   *
+   * @remarks
+   * List all hits for the entity watchlist screening.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningEntityHitList(
     request: ThePlaidApiClient.WatchlistScreeningEntityHitListRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningEntityHitListResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningEntityHitListResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningEntityHitListResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/entity/hit/list"),
+        urlTemplate: this.#servers.default("/watchlist_screening/entity/hit/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: watchlistScreeningEntityHitListRequestSchema },
       },
       {
         success: { kind: "json", schema: watchlistScreeningEntityHitListResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * List entity watchlist screenings
+   *
+   * @remarks
+   * List all entity screenings.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningEntityList(
     request: ThePlaidApiClient.WatchlistScreeningEntityListRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningEntityListResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningEntityListResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningEntityListResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/entity/list"),
+        urlTemplate: this.#servers.default("/watchlist_screening/entity/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: watchlistScreeningEntityListRequestSchema },
       },
       {
         success: { kind: "json", schema: watchlistScreeningEntityListResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Get entity watchlist screening program
+   *
+   * @remarks
+   * Get an entity watchlist screening program
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningEntityProgramGet(
     request: ThePlaidApiClient.WatchlistScreeningEntityProgramGetRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningEntityProgramGetResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningEntityProgramGetResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningEntityProgramGetResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/entity/program/get"),
+        urlTemplate: this.#servers.default("/watchlist_screening/entity/program/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: watchlistScreeningEntityProgramGetRequestSchema },
       },
       {
         success: { kind: "json", schema: watchlistScreeningEntityProgramGetResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * List entity watchlist screening programs
+   *
+   * @remarks
+   * List all entity watchlist screening programs
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningEntityProgramList(
     request: ThePlaidApiClient.WatchlistScreeningEntityProgramListRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningEntityProgramListResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningEntityProgramListResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningEntityProgramListResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/entity/program/list"),
+        urlTemplate: this.#servers.default("/watchlist_screening/entity/program/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: watchlistScreeningEntityProgramListRequestSchema },
       },
       {
         success: { kind: "json", schema: watchlistScreeningEntityProgramListResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Create a review for an entity watchlist screening
+   *
+   * @remarks
+   * Create a review for an entity watchlist screening. Reviews are compliance reports created by
+   * users in your organization regarding the relevance of potential hits found by Plaid.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningEntityReviewCreate(
     request: ThePlaidApiClient.WatchlistScreeningEntityReviewCreateRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningEntityReviewCreateResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningEntityReviewCreateResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningEntityReviewCreateResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/entity/review/create"),
+        urlTemplate: this.#servers.default("/watchlist_screening/entity/review/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: {
           kind: "json",
           value: request.body,
@@ -8746,97 +16353,186 @@ export class ThePlaidApiClient {
       },
       {
         success: { kind: "json", schema: watchlistScreeningEntityReviewCreateResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * List reviews for entity watchlist screenings
+   *
+   * @remarks
+   * List all reviews for a particular entity watchlist screening. Reviews are compliance reports
+   * created by users in your organization regarding the relevance of potential hits found by Plaid.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningEntityReviewList(
     request: ThePlaidApiClient.WatchlistScreeningEntityReviewListRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningEntityReviewListResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningEntityReviewListResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningEntityReviewListResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/entity/review/list"),
+        urlTemplate: this.#servers.default("/watchlist_screening/entity/review/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: watchlistScreeningEntityReviewListRequestSchema },
       },
       {
         success: { kind: "json", schema: watchlistScreeningEntityReviewListResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Update an entity screening
+   *
+   * @remarks
+   * Update an entity watchlist screening.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningEntityUpdate(
     request: ThePlaidApiClient.WatchlistScreeningEntityUpdateRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningEntityUpdateResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningEntityUpdateResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningEntityUpdateResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/entity/update"),
+        urlTemplate: this.#servers.default("/watchlist_screening/entity/update"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: watchlistScreeningEntityUpdateRequestSchema },
       },
       {
         success: { kind: "json", schema: watchlistScreeningEntityUpdateResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Create a watchlist screening for a person
+   *
+   * @remarks
+   * Create a new Watchlist Screening to check your customer against watchlists defined in the
+   * associated Watchlist Program. If your associated program has ongoing screening enabled, this is
+   * the profile information that will be used to monitor your customer over time.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningIndividualCreate(
     request: ThePlaidApiClient.WatchlistScreeningIndividualCreateRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningIndividualCreateResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningIndividualCreateResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningIndividualCreateResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/individual/create"),
+        urlTemplate: this.#servers.default("/watchlist_screening/individual/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: watchlistScreeningIndividualCreateRequestSchema },
       },
       {
         success: { kind: "json", schema: watchlistScreeningIndividualCreateResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Retrieve an individual watchlist screening
+   *
+   * @remarks
+   * Retrieve a previously created individual watchlist screening
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningIndividualGet(
     request: ThePlaidApiClient.WatchlistScreeningIndividualGetRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningIndividualGetResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningIndividualGetResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningIndividualGetResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/individual/get"),
+        urlTemplate: this.#servers.default("/watchlist_screening/individual/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: watchlistScreeningIndividualGetRequestSchema },
       },
       {
         success: { kind: "json", schema: watchlistScreeningIndividualGetResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * List history for individual watchlist screenings
+   *
+   * @remarks
+   * List all changes to the individual watchlist screening in reverse-chronological order. If the
+   * watchlist screening has not been edited, no history will be returned.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningIndividualHistoryList(
     request: ThePlaidApiClient.WatchlistScreeningIndividualHistoryListRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningIndividualHistoryListResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningIndividualHistoryListResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningIndividualHistoryListResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/individual/history/list"),
+        urlTemplate: this.#servers.default("/watchlist_screening/individual/history/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: {
           kind: "json",
           value: request.body,
@@ -8845,59 +16541,110 @@ export class ThePlaidApiClient {
       },
       {
         success: { kind: "json", schema: watchlistScreeningIndividualHistoryListResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * List hits for individual watchlist screening
+   *
+   * @remarks
+   * List all hits found by Plaid for a particular individual watchlist screening.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningIndividualHitList(
     request: ThePlaidApiClient.WatchlistScreeningIndividualHitListRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningIndividualHitListResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningIndividualHitListResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningIndividualHitListResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/individual/hit/list"),
+        urlTemplate: this.#servers.default("/watchlist_screening/individual/hit/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: watchlistScreeningIndividualHitListRequestSchema },
       },
       {
         success: { kind: "json", schema: watchlistScreeningIndividualHitListResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * List Individual Watchlist Screenings
+   *
+   * @remarks
+   * List previously created watchlist screenings for individuals
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningIndividualList(
     request: ThePlaidApiClient.WatchlistScreeningIndividualListRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningIndividualListResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningIndividualListResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningIndividualListResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/individual/list"),
+        urlTemplate: this.#servers.default("/watchlist_screening/individual/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: watchlistScreeningIndividualListRequestSchema },
       },
       {
         success: { kind: "json", schema: watchlistScreeningIndividualListResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Get individual watchlist screening program
+   *
+   * @remarks
+   * Get an individual watchlist screening program
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningIndividualProgramGet(
     request: ThePlaidApiClient.WatchlistScreeningIndividualProgramGetRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningIndividualProgramGetResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningIndividualProgramGetResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningIndividualProgramGetResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/individual/program/get"),
+        urlTemplate: this.#servers.default("/watchlist_screening/individual/program/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: {
           kind: "json",
           value: request.body,
@@ -8906,21 +16653,38 @@ export class ThePlaidApiClient {
       },
       {
         success: { kind: "json", schema: watchlistScreeningIndividualProgramGetResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * List individual watchlist screening programs
+   *
+   * @remarks
+   * List all individual watchlist screening programs
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningIndividualProgramList(
     request: ThePlaidApiClient.WatchlistScreeningIndividualProgramListRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningIndividualProgramListResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningIndividualProgramListResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningIndividualProgramListResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/individual/program/list"),
+        urlTemplate: this.#servers.default("/watchlist_screening/individual/program/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: {
           kind: "json",
           value: request.body,
@@ -8929,21 +16693,39 @@ export class ThePlaidApiClient {
       },
       {
         success: { kind: "json", schema: watchlistScreeningIndividualProgramListResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Create a review for an individual watchlist screening
+   *
+   * @remarks
+   * Create a review for the individual watchlist screening. Reviews are compliance reports created
+   * by users in your organization regarding the relevance of potential hits found by Plaid.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningIndividualReviewCreate(
     request: ThePlaidApiClient.WatchlistScreeningIndividualReviewCreateRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningIndividualReviewCreateResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningIndividualReviewCreateResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningIndividualReviewCreateResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/individual/review/create"),
+        urlTemplate: this.#servers.default("/watchlist_screening/individual/review/create"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: {
           kind: "json",
           value: request.body,
@@ -8952,21 +16734,38 @@ export class ThePlaidApiClient {
       },
       {
         success: { kind: "json", schema: watchlistScreeningIndividualReviewCreateResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * List reviews for individual watchlist screenings
+   *
+   * @remarks
+   * List all reviews for the individual watchlist screening.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningIndividualReviewList(
     request: ThePlaidApiClient.WatchlistScreeningIndividualReviewListRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningIndividualReviewListResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningIndividualReviewListResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningIndividualReviewListResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/individual/review/list"),
+        urlTemplate: this.#servers.default("/watchlist_screening/individual/review/list"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: {
           kind: "json",
           value: request.body,
@@ -8975,31 +16774,72 @@ export class ThePlaidApiClient {
       },
       {
         success: { kind: "json", schema: watchlistScreeningIndividualReviewListResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Update individual watchlist screening
+   *
+   * @remarks
+   * Update a specific individual watchlist screening. This endpoint can be used to add additional
+   * customer information, correct outdated information, add a reference id, assign the individual
+   * to a reviewer, and update which program it is associated with. Please note that you may not
+   * update `search_terms` and `status` at the same time since editing `search_terms` may trigger an
+   * automatic `status` change.
+   *
+   * @returns OK
+   *
+   * @throws {@link ApiError} when the API answers with an error status
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   watchlistScreeningIndividualUpdate(
     request: ThePlaidApiClient.WatchlistScreeningIndividualUpdateRequestParams,
     options?: RequestOptions,
-  ): ApiPromise<WatchlistScreeningIndividualUpdateResponse, ResponseError> {
-    return this.#rawClient.execute<WatchlistScreeningIndividualUpdateResponse, ResponseError>(
+  ): ApiPromise<WatchlistScreeningIndividualUpdateResponse, ApiError> {
+    return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/watchlist_screening/individual/update"),
+        urlTemplate: this.#servers.default("/watchlist_screening/individual/update"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: watchlistScreeningIndividualUpdateRequestSchema },
       },
       {
         success: { kind: "json", schema: watchlistScreeningIndividualUpdateResponseSchema },
-        errorFactory: ResponseError,
+        errorFactory: ApiError,
       },
       options,
     );
   }
 
+  /**
+   * Get webhook verification key
+   *
+   * @remarks
+   * Plaid signs all outgoing webhooks and provides JSON Web Tokens (JWTs) so that you can verify
+   * the authenticity of any incoming webhooks to your application. A message signature is included
+   * in the `Plaid-Verification` header.
+   *
+   * The `/webhook_verification_key/get` endpoint provides a JSON Web Key (JWK) that can be used to
+   * verify a JWT.
+   *
+   * @returns OK
+   *
+   * @throws {@link ThePlaidApiClient.WebhookVerificationKeyGetError} when the API answers with an
+   * error status — narrow on `err.payload.kind`
+   *
+   * @throws {@link ThePlaidApiError} when no usable response was produced: a connection failure, a
+   * timeout, a body that would not decode, a value that would not encode, or a credential that
+   * could not be obtained
+   */
   webhookVerificationKeyGet(
     request: ThePlaidApiClient.WebhookVerificationKeyGetRequestParams,
     options?: RequestOptions,
@@ -9007,8 +16847,11 @@ export class ThePlaidApiClient {
     return this.#rawClient.execute(
       {
         method: "POST",
-        url: this.#servers.default("/webhook_verification_key/get"),
+        urlTemplate: this.#servers.default("/webhook_verification_key/get"),
         auth: allAuth(this.#auth.clientId, this.#auth.secret, this.#auth.plaidVersion),
+        pathParams: [],
+        query: [],
+        headers: [{ name: "Idempotency-Key", value: uuid(), schema: s.string() }],
         body: { kind: "json", value: request.body, schema: webhookVerificationKeyGetRequestSchema },
       },
       {
@@ -9025,10 +16868,12 @@ export namespace ThePlaidApiClient {
     body: AccountsBalanceGetRequest;
   };
 
-  export class AccountsBalanceGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class AccountsBalanceGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<AccountsBalanceGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9039,10 +16884,12 @@ export namespace ThePlaidApiClient {
     body: AccountsGetRequest;
   };
 
-  export class AccountsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class AccountsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<AccountsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9053,10 +16900,12 @@ export namespace ThePlaidApiClient {
     body: ApplicationGetRequest;
   };
 
-  export class ApplicationGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class ApplicationGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ApplicationGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9067,10 +16916,12 @@ export namespace ThePlaidApiClient {
     body: AssetReportAuditCopyCreateRequest;
   };
 
-  export class AssetReportAuditCopyCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class AssetReportAuditCopyCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<AssetReportAuditCopyCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9081,10 +16932,12 @@ export namespace ThePlaidApiClient {
     body: AssetReportAuditCopyGetRequest;
   };
 
-  export class AssetReportAuditCopyGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class AssetReportAuditCopyGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<AssetReportAuditCopyGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9095,10 +16948,12 @@ export namespace ThePlaidApiClient {
     body: AssetReportAuditCopyPdfGetRequest;
   };
 
-  export class AssetReportAuditCopyPdfGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class AssetReportAuditCopyPdfGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<AssetReportAuditCopyPdfGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9109,10 +16964,12 @@ export namespace ThePlaidApiClient {
     body: AssetReportAuditCopyRemoveRequest;
   };
 
-  export class AssetReportAuditCopyRemoveError extends ResponseError<Declared<"error", Error | null>> {
+  export class AssetReportAuditCopyRemoveError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<AssetReportAuditCopyRemoveError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9123,10 +16980,12 @@ export namespace ThePlaidApiClient {
     body: AssetReportCreateRequest;
   };
 
-  export class AssetReportCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class AssetReportCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<AssetReportCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9137,10 +16996,12 @@ export namespace ThePlaidApiClient {
     body: AssetReportFilterRequest;
   };
 
-  export class AssetReportFilterError extends ResponseError<Declared<"error", Error | null>> {
+  export class AssetReportFilterError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<AssetReportFilterError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9151,10 +17012,12 @@ export namespace ThePlaidApiClient {
     body: AssetReportGetRequest;
   };
 
-  export class AssetReportGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class AssetReportGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<AssetReportGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9165,10 +17028,12 @@ export namespace ThePlaidApiClient {
     body: AssetReportPdfGetRequest;
   };
 
-  export class AssetReportPdfGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class AssetReportPdfGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<AssetReportPdfGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9179,10 +17044,12 @@ export namespace ThePlaidApiClient {
     body: AssetReportRefreshRequest;
   };
 
-  export class AssetReportRefreshError extends ResponseError<Declared<"error", Error | null>> {
+  export class AssetReportRefreshError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<AssetReportRefreshError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9193,10 +17060,12 @@ export namespace ThePlaidApiClient {
     body: AssetReportRemoveRequest;
   };
 
-  export class AssetReportRemoveError extends ResponseError<Declared<"error", Error | null>> {
+  export class AssetReportRemoveError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<AssetReportRemoveError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9207,10 +17076,12 @@ export namespace ThePlaidApiClient {
     body: AuthGetRequest;
   };
 
-  export class AuthGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class AuthGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<AuthGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9221,10 +17092,12 @@ export namespace ThePlaidApiClient {
     body: AuthVerifyRequest;
   };
 
-  export class AuthVerifyError extends ResponseError<Declared<"error", Error | null>> {
+  export class AuthVerifyError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<AuthVerifyError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9235,10 +17108,12 @@ export namespace ThePlaidApiClient {
     body: BankTransferBalanceGetRequest;
   };
 
-  export class BankTransferBalanceGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class BankTransferBalanceGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<BankTransferBalanceGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9249,10 +17124,12 @@ export namespace ThePlaidApiClient {
     body: BankTransferCancelRequest;
   };
 
-  export class BankTransferCancelError extends ResponseError<Declared<"error", Error | null>> {
+  export class BankTransferCancelError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<BankTransferCancelError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9263,10 +17140,12 @@ export namespace ThePlaidApiClient {
     body: BankTransferCreateRequest;
   };
 
-  export class BankTransferCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class BankTransferCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<BankTransferCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9277,10 +17156,12 @@ export namespace ThePlaidApiClient {
     body: BankTransferEventListRequest;
   };
 
-  export class BankTransferEventListError extends ResponseError<Declared<"error", Error | null>> {
+  export class BankTransferEventListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<BankTransferEventListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9291,10 +17172,12 @@ export namespace ThePlaidApiClient {
     body: BankTransferEventSyncRequest;
   };
 
-  export class BankTransferEventSyncError extends ResponseError<Declared<"error", Error | null>> {
+  export class BankTransferEventSyncError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<BankTransferEventSyncError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9305,10 +17188,12 @@ export namespace ThePlaidApiClient {
     body: BankTransferGetRequest;
   };
 
-  export class BankTransferGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class BankTransferGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<BankTransferGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9319,10 +17204,12 @@ export namespace ThePlaidApiClient {
     body: BankTransferListRequest;
   };
 
-  export class BankTransferListError extends ResponseError<Declared<"error", Error | null>> {
+  export class BankTransferListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<BankTransferListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9333,10 +17220,12 @@ export namespace ThePlaidApiClient {
     body: BankTransferMigrateAccountRequest;
   };
 
-  export class BankTransferMigrateAccountError extends ResponseError<Declared<"error", Error | null>> {
+  export class BankTransferMigrateAccountError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<BankTransferMigrateAccountError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9347,10 +17236,12 @@ export namespace ThePlaidApiClient {
     body: BankTransferSweepGetRequest;
   };
 
-  export class BankTransferSweepGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class BankTransferSweepGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<BankTransferSweepGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9361,10 +17252,12 @@ export namespace ThePlaidApiClient {
     body: BankTransferSweepListRequest;
   };
 
-  export class BankTransferSweepListError extends ResponseError<Declared<"error", Error | null>> {
+  export class BankTransferSweepListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<BankTransferSweepListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9375,10 +17268,12 @@ export namespace ThePlaidApiClient {
     body: BeaconAccountRiskEvaluateRequest;
   };
 
-  export class BeaconAccountRiskEvaluateError extends ResponseError<Declared<"error", Error | null>> {
+  export class BeaconAccountRiskEvaluateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<BeaconAccountRiskEvaluateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9437,10 +17332,12 @@ export namespace ThePlaidApiClient {
     body: BetaEwaReportV1GetRequest;
   };
 
-  export class BetaEwaReportV1GetError extends ResponseError<Declared<"error", Error | null>> {
+  export class BetaEwaReportV1GetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<BetaEwaReportV1GetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9451,10 +17348,12 @@ export namespace ThePlaidApiClient {
     body: BetaPartnerCustomerV1CreateRequest;
   };
 
-  export class BetaPartnerCustomerV1CreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class BetaPartnerCustomerV1CreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<BetaPartnerCustomerV1CreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9465,10 +17364,12 @@ export namespace ThePlaidApiClient {
     body: BetaPartnerCustomerV1EnableRequest;
   };
 
-  export class BetaPartnerCustomerV1EnableError extends ResponseError<Declared<"error", Error | null>> {
+  export class BetaPartnerCustomerV1EnableError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<BetaPartnerCustomerV1EnableError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9479,10 +17380,12 @@ export namespace ThePlaidApiClient {
     body: BetaPartnerCustomerV1GetRequest;
   };
 
-  export class BetaPartnerCustomerV1GetError extends ResponseError<Declared<"error", Error | null>> {
+  export class BetaPartnerCustomerV1GetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<BetaPartnerCustomerV1GetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9493,10 +17396,12 @@ export namespace ThePlaidApiClient {
     body: BetaPartnerCustomerV1UpdateRequest;
   };
 
-  export class BetaPartnerCustomerV1UpdateError extends ResponseError<Declared<"error", Error | null>> {
+  export class BetaPartnerCustomerV1UpdateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<BetaPartnerCustomerV1UpdateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9515,10 +17420,12 @@ export namespace ThePlaidApiClient {
     body: CashflowReportGetRequest;
   };
 
-  export class CashflowReportGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CashflowReportGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CashflowReportGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9529,10 +17436,12 @@ export namespace ThePlaidApiClient {
     body: CashflowReportInsightsGetRequest;
   };
 
-  export class CashflowReportInsightsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CashflowReportInsightsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CashflowReportInsightsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9543,10 +17452,12 @@ export namespace ThePlaidApiClient {
     body: CashflowReportRefreshRequest;
   };
 
-  export class CashflowReportRefreshError extends ResponseError<Declared<"error", Error | null>> {
+  export class CashflowReportRefreshError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CashflowReportRefreshError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9557,10 +17468,12 @@ export namespace ThePlaidApiClient {
     body: CashflowReportTransactionsGetRequest;
   };
 
-  export class CashflowReportTransactionsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CashflowReportTransactionsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CashflowReportTransactionsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9571,10 +17484,12 @@ export namespace ThePlaidApiClient {
     body: Record<string, unknown>;
   };
 
-  export class CategoriesGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CategoriesGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CategoriesGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9585,10 +17500,12 @@ export namespace ThePlaidApiClient {
     body: ConsentEventsGetRequest;
   };
 
-  export class ConsentEventsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class ConsentEventsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ConsentEventsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9599,10 +17516,12 @@ export namespace ThePlaidApiClient {
     body: ConsumerReportPdfGetRequest;
   };
 
-  export class ConsumerReportPdfGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class ConsumerReportPdfGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ConsumerReportPdfGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9613,10 +17532,12 @@ export namespace ThePlaidApiClient {
     body: CraCheckReportBaseReportGetRequest;
   };
 
-  export class CraCheckReportBaseReportGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraCheckReportBaseReportGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraCheckReportBaseReportGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9627,10 +17548,12 @@ export namespace ThePlaidApiClient {
     body: CraCheckReportCashflowInsightsGetRequest;
   };
 
-  export class CraCheckReportCashflowInsightsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraCheckReportCashflowInsightsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraCheckReportCashflowInsightsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9641,10 +17564,12 @@ export namespace ThePlaidApiClient {
     body: CraCheckReportCreateRequest;
   };
 
-  export class CraCheckReportCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraCheckReportCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraCheckReportCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9655,10 +17580,12 @@ export namespace ThePlaidApiClient {
     body: CraCheckReportIncomeInsightsGetRequest;
   };
 
-  export class CraCheckReportIncomeInsightsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraCheckReportIncomeInsightsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraCheckReportIncomeInsightsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9669,10 +17596,12 @@ export namespace ThePlaidApiClient {
     body: CraCheckReportLendScoreGetRequest;
   };
 
-  export class CraCheckReportLendScoreGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraCheckReportLendScoreGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraCheckReportLendScoreGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9683,10 +17612,12 @@ export namespace ThePlaidApiClient {
     body: CraCheckReportNetworkInsightsGetRequest;
   };
 
-  export class CraCheckReportNetworkInsightsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraCheckReportNetworkInsightsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraCheckReportNetworkInsightsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9697,10 +17628,12 @@ export namespace ThePlaidApiClient {
     body: CraCheckReportPartnerInsightsGetRequest;
   };
 
-  export class CraCheckReportPartnerInsightsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraCheckReportPartnerInsightsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraCheckReportPartnerInsightsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9711,10 +17644,12 @@ export namespace ThePlaidApiClient {
     body: CraCheckReportPdfGetRequest;
   };
 
-  export class CraCheckReportPdfGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraCheckReportPdfGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraCheckReportPdfGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9725,10 +17660,12 @@ export namespace ThePlaidApiClient {
     body: CraCheckReportVerificationGetRequest;
   };
 
-  export class CraCheckReportVerificationGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraCheckReportVerificationGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraCheckReportVerificationGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9739,10 +17676,12 @@ export namespace ThePlaidApiClient {
     body: CraCheckReportVerificationPdfGetRequest;
   };
 
-  export class CraCheckReportVerificationPdfGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraCheckReportVerificationPdfGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraCheckReportVerificationPdfGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9753,10 +17692,12 @@ export namespace ThePlaidApiClient {
     body: CraCreditProfileReportGetRequest;
   };
 
-  export class CraCreditProfileReportGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraCreditProfileReportGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraCreditProfileReportGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9767,10 +17708,12 @@ export namespace ThePlaidApiClient {
     body: CraLoansApplicationsRegisterRequest;
   };
 
-  export class CraLoansApplicationsRegisterError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraLoansApplicationsRegisterError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraLoansApplicationsRegisterError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9781,10 +17724,12 @@ export namespace ThePlaidApiClient {
     body: CraLoansRegisterRequest;
   };
 
-  export class CraLoansRegisterError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraLoansRegisterError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraLoansRegisterError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9795,10 +17740,12 @@ export namespace ThePlaidApiClient {
     body: CraLoansUnregisterRequest;
   };
 
-  export class CraLoansUnregisterError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraLoansUnregisterError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraLoansUnregisterError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9809,10 +17756,12 @@ export namespace ThePlaidApiClient {
     body: CraLoansUpdateRequest;
   };
 
-  export class CraLoansUpdateError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraLoansUpdateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraLoansUpdateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9823,10 +17772,12 @@ export namespace ThePlaidApiClient {
     body: CraMonitoringInsightsGetRequest;
   };
 
-  export class CraMonitoringInsightsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraMonitoringInsightsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraMonitoringInsightsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9837,10 +17788,12 @@ export namespace ThePlaidApiClient {
     body: CraMonitoringInsightsSubscribeRequest;
   };
 
-  export class CraMonitoringInsightsSubscribeError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraMonitoringInsightsSubscribeError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraMonitoringInsightsSubscribeError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9851,10 +17804,12 @@ export namespace ThePlaidApiClient {
     body: CraMonitoringInsightsUnsubscribeRequest;
   };
 
-  export class CraMonitoringInsightsUnsubscribeError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraMonitoringInsightsUnsubscribeError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraMonitoringInsightsUnsubscribeError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9865,10 +17820,12 @@ export namespace ThePlaidApiClient {
     body: CraPartnerInsightsGetRequest;
   };
 
-  export class CraPartnerInsightsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraPartnerInsightsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraPartnerInsightsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9879,10 +17836,12 @@ export namespace ThePlaidApiClient {
     body: CraReportGetRequest;
   };
 
-  export class CraReportGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CraReportGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CraReportGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9893,10 +17852,12 @@ export namespace ThePlaidApiClient {
     body: PaymentInitiationPaymentTokenCreateRequest;
   };
 
-  export class CreatePaymentTokenError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreatePaymentTokenError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreatePaymentTokenError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9907,10 +17868,12 @@ export namespace ThePlaidApiClient {
     body: AssetReportFreddieGetRequest;
   };
 
-  export class CreditAssetReportFreddieMacGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditAssetReportFreddieMacGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditAssetReportFreddieMacGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9921,10 +17884,12 @@ export namespace ThePlaidApiClient {
     body: CreditAuditCopyTokenCreateRequest;
   };
 
-  export class CreditAuditCopyTokenCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditAuditCopyTokenCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditAuditCopyTokenCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9935,10 +17900,12 @@ export namespace ThePlaidApiClient {
     body: CreditAuditCopyTokenUpdateRequest;
   };
 
-  export class CreditAuditCopyTokenUpdateError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditAuditCopyTokenUpdateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditAuditCopyTokenUpdateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9949,10 +17916,12 @@ export namespace ThePlaidApiClient {
     body: CreditBankEmploymentGetRequest;
   };
 
-  export class CreditBankEmploymentGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditBankEmploymentGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditBankEmploymentGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9963,10 +17932,12 @@ export namespace ThePlaidApiClient {
     body: CreditBankIncomeGetRequest;
   };
 
-  export class CreditBankIncomeGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditBankIncomeGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditBankIncomeGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9977,10 +17948,12 @@ export namespace ThePlaidApiClient {
     body: CreditBankIncomePdfGetRequest;
   };
 
-  export class CreditBankIncomePdfGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditBankIncomePdfGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditBankIncomePdfGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -9991,10 +17964,12 @@ export namespace ThePlaidApiClient {
     body: CreditBankIncomeRefreshRequest;
   };
 
-  export class CreditBankIncomeRefreshError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditBankIncomeRefreshError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditBankIncomeRefreshError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10005,10 +17980,12 @@ export namespace ThePlaidApiClient {
     body: CreditBankIncomeWebhookUpdateRequest;
   };
 
-  export class CreditBankIncomeWebhookUpdateError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditBankIncomeWebhookUpdateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditBankIncomeWebhookUpdateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10019,10 +17996,12 @@ export namespace ThePlaidApiClient {
     body: CreditBankStatementsUploadsGetRequest;
   };
 
-  export class CreditBankStatementsUploadsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditBankStatementsUploadsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditBankStatementsUploadsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10033,10 +18012,12 @@ export namespace ThePlaidApiClient {
     body: CreditEmploymentGetRequest;
   };
 
-  export class CreditEmploymentGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditEmploymentGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditEmploymentGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10047,10 +18028,12 @@ export namespace ThePlaidApiClient {
     body: CreditFreddieMacReportsGetRequest;
   };
 
-  export class CreditFreddieMacReportsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditFreddieMacReportsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditFreddieMacReportsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10061,10 +18044,12 @@ export namespace ThePlaidApiClient {
     body: CreditPayrollIncomeGetRequest;
   };
 
-  export class CreditPayrollIncomeGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditPayrollIncomeGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditPayrollIncomeGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10075,12 +18060,12 @@ export namespace ThePlaidApiClient {
     body: CreditPayrollIncomeParsingConfigUpdateRequest;
   };
 
-  export class CreditPayrollIncomeParsingConfigUpdateError extends ResponseError<
-    Declared<"error", Error | null>
-  > {
+  export class CreditPayrollIncomeParsingConfigUpdateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditPayrollIncomeParsingConfigUpdateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10091,10 +18076,12 @@ export namespace ThePlaidApiClient {
     body: CreditPayrollIncomePrecheckRequest;
   };
 
-  export class CreditPayrollIncomePrecheckError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditPayrollIncomePrecheckError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditPayrollIncomePrecheckError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10105,10 +18092,12 @@ export namespace ThePlaidApiClient {
     body: CreditPayrollIncomeRefreshRequest;
   };
 
-  export class CreditPayrollIncomeRefreshError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditPayrollIncomeRefreshError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditPayrollIncomeRefreshError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10119,10 +18108,12 @@ export namespace ThePlaidApiClient {
     body: CreditPayrollIncomeRiskSignalsGetRequest;
   };
 
-  export class CreditPayrollIncomeRiskSignalsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditPayrollIncomeRiskSignalsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditPayrollIncomeRiskSignalsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10133,10 +18124,12 @@ export namespace ThePlaidApiClient {
     body: CreditRelayCreateRequest;
   };
 
-  export class CreditRelayCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditRelayCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditRelayCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10147,10 +18140,12 @@ export namespace ThePlaidApiClient {
     body: CreditRelayGetRequest;
   };
 
-  export class CreditRelayGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditRelayGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditRelayGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10161,10 +18156,12 @@ export namespace ThePlaidApiClient {
     body: CreditRelayPdfGetRequest;
   };
 
-  export class CreditRelayPdfGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditRelayPdfGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditRelayPdfGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10175,10 +18172,12 @@ export namespace ThePlaidApiClient {
     body: CreditRelayRefreshRequest;
   };
 
-  export class CreditRelayRefreshError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditRelayRefreshError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditRelayRefreshError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10189,10 +18188,12 @@ export namespace ThePlaidApiClient {
     body: CreditRelayRemoveRequest;
   };
 
-  export class CreditRelayRemoveError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditRelayRemoveError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditRelayRemoveError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10203,10 +18204,12 @@ export namespace ThePlaidApiClient {
     body: CreditAuditCopyTokenRemoveRequest;
   };
 
-  export class CreditReportAuditCopyRemoveError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditReportAuditCopyRemoveError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditReportAuditCopyRemoveError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10217,10 +18220,12 @@ export namespace ThePlaidApiClient {
     body: CreditSessionsGetRequest;
   };
 
-  export class CreditSessionsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class CreditSessionsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<CreditSessionsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10239,10 +18244,12 @@ export namespace ThePlaidApiClient {
     body: EmployersSearchRequest;
   };
 
-  export class EmployersSearchError extends ResponseError<Declared<"error", Error | null>> {
+  export class EmployersSearchError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<EmployersSearchError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10253,10 +18260,12 @@ export namespace ThePlaidApiClient {
     body: EmploymentVerificationGetRequest;
   };
 
-  export class EmploymentVerificationGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class EmploymentVerificationGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<EmploymentVerificationGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10264,13 +18273,16 @@ export namespace ThePlaidApiClient {
   }
 
   export type FdxConsentsGetRequest = {
+    /** Consent Grant Identifier. Uniquely identifies the consent grant */
     consentId: string;
   };
 
-  export class FdxConsentsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class FdxConsentsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<FdxConsentsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10278,14 +18290,21 @@ export namespace ThePlaidApiClient {
   }
 
   export type FdxConsentsListRequest = {
+    /** Data provider customer identifier whose consent grants to return. */
     customerId: string;
+    /**
+     * Optional filter restricting results to a single consent grant status. One of `ACTIVE`,
+     * `REVOKED`, `EXPIRED`.
+     */
     status?: FdxConsentGrantStatus;
   };
 
-  export class FdxConsentsListError extends ResponseError<Declared<"error", Error | null>> {
+  export class FdxConsentsListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<FdxConsentsListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10293,13 +18312,16 @@ export namespace ThePlaidApiClient {
   }
 
   export type FdxConsentsRevocationGetRequest = {
+    /** Consent Grant Identifier. Uniquely identifies the consent grant */
     consentId: string;
   };
 
-  export class FdxConsentsRevocationGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class FdxConsentsRevocationGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<FdxConsentsRevocationGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10307,14 +18329,17 @@ export namespace ThePlaidApiClient {
   }
 
   export type FdxConsentsRevokeRequest = {
+    /** Consent Grant Identifier. Uniquely identifies the consent grant */
     consentId: string;
     body: FdxConsentRevocation;
   };
 
-  export class FdxConsentsRevokeError extends ResponseError<Declared<"error", Error | null>> {
+  export class FdxConsentsRevokeError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<FdxConsentsRevokeError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10325,10 +18350,12 @@ export namespace ThePlaidApiClient {
     body: FdxNotificationEntity;
   };
 
-  export class FdxNotificationsError extends ResponseError<Declared<"error", Error | null>> {
+  export class FdxNotificationsError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<FdxNotificationsError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10336,24 +18363,30 @@ export namespace ThePlaidApiClient {
   }
 
   export type GetRecipientRequest = {
+    /** Recipient Identifier. Uniquely identifies the recipient */
     recipientId: string;
+    /** The value that is passed into the OAuth URI 'state' query parameter. */
     oauthStateId?: string;
   };
 
-  export class GetRecipientError extends ResponseError<Declared<"error", Error | null>> {
+  export class GetRecipientError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<GetRecipientError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
     ];
   }
 
-  export class GetRecipientsError extends ResponseError<Declared<"error", Error | null>> {
+  export class GetRecipientsError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<GetRecipientsError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10364,10 +18397,12 @@ export namespace ThePlaidApiClient {
     body: IdentityDocumentsUploadsGetRequest;
   };
 
-  export class IdentityDocumentsUploadsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class IdentityDocumentsUploadsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<IdentityDocumentsUploadsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10378,10 +18413,12 @@ export namespace ThePlaidApiClient {
     body: IdentityGetRequest;
   };
 
-  export class IdentityGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class IdentityGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<IdentityGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10392,10 +18429,12 @@ export namespace ThePlaidApiClient {
     body: IdentityMatchRequest;
   };
 
-  export class IdentityMatchError extends ResponseError<Declared<"error", Error | null>> {
+  export class IdentityMatchError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<IdentityMatchError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10406,10 +18445,12 @@ export namespace ThePlaidApiClient {
     body: IdentityRefreshRequest;
   };
 
-  export class IdentityRefreshError extends ResponseError<Declared<"error", Error | null>> {
+  export class IdentityRefreshError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<IdentityRefreshError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10440,10 +18481,12 @@ export namespace ThePlaidApiClient {
     body: IncomeVerificationCreateRequest;
   };
 
-  export class IncomeVerificationCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class IncomeVerificationCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<IncomeVerificationCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10454,12 +18497,12 @@ export namespace ThePlaidApiClient {
     body: IncomeVerificationDocumentsDownloadRequest;
   };
 
-  export class IncomeVerificationDocumentsDownloadError extends ResponseError<
-    Declared<"error", Error | null>
-  > {
+  export class IncomeVerificationDocumentsDownloadError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<IncomeVerificationDocumentsDownloadError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10470,10 +18513,12 @@ export namespace ThePlaidApiClient {
     body: IncomeVerificationPaystubsGetRequest;
   };
 
-  export class IncomeVerificationPaystubsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class IncomeVerificationPaystubsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<IncomeVerificationPaystubsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10484,10 +18529,12 @@ export namespace ThePlaidApiClient {
     body: IncomeVerificationPrecheckRequest;
   };
 
-  export class IncomeVerificationPrecheckError extends ResponseError<Declared<"error", Error | null>> {
+  export class IncomeVerificationPrecheckError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<IncomeVerificationPrecheckError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10498,10 +18545,12 @@ export namespace ThePlaidApiClient {
     body: IncomeVerificationTaxformsGetRequest;
   };
 
-  export class IncomeVerificationTaxformsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class IncomeVerificationTaxformsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<IncomeVerificationTaxformsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10512,10 +18561,12 @@ export namespace ThePlaidApiClient {
     body: InstitutionsGetRequest;
   };
 
-  export class InstitutionsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class InstitutionsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<InstitutionsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10526,10 +18577,12 @@ export namespace ThePlaidApiClient {
     body: InstitutionsGetByIdRequest;
   };
 
-  export class InstitutionsGetByIdError extends ResponseError<Declared<"error", Error | null>> {
+  export class InstitutionsGetByIdError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<InstitutionsGetByIdError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10540,10 +18593,12 @@ export namespace ThePlaidApiClient {
     body: InstitutionsSearchRequest;
   };
 
-  export class InstitutionsSearchError extends ResponseError<Declared<"error", Error | null>> {
+  export class InstitutionsSearchError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<InstitutionsSearchError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10554,10 +18609,12 @@ export namespace ThePlaidApiClient {
     body: InvestmentsAuthGetRequest;
   };
 
-  export class InvestmentsAuthGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class InvestmentsAuthGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<InvestmentsAuthGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10568,10 +18625,12 @@ export namespace ThePlaidApiClient {
     body: InvestmentsHoldingsGetRequest;
   };
 
-  export class InvestmentsHoldingsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class InvestmentsHoldingsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<InvestmentsHoldingsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10582,10 +18641,12 @@ export namespace ThePlaidApiClient {
     body: InvestmentsRefreshRequest;
   };
 
-  export class InvestmentsRefreshError extends ResponseError<Declared<"error", Error | null>> {
+  export class InvestmentsRefreshError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<InvestmentsRefreshError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10596,10 +18657,12 @@ export namespace ThePlaidApiClient {
     body: InvestmentsTransactionsGetRequest;
   };
 
-  export class InvestmentsTransactionsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class InvestmentsTransactionsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<InvestmentsTransactionsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10610,10 +18673,12 @@ export namespace ThePlaidApiClient {
     body: IssuesGetRequest;
   };
 
-  export class IssuesGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class IssuesGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<IssuesGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10624,10 +18689,12 @@ export namespace ThePlaidApiClient {
     body: IssuesSearchRequest;
   };
 
-  export class IssuesSearchError extends ResponseError<Declared<"error", Error | null>> {
+  export class IssuesSearchError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<IssuesSearchError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10638,10 +18705,12 @@ export namespace ThePlaidApiClient {
     body: IssuesSubscribeRequest;
   };
 
-  export class IssuesSubscribeError extends ResponseError<Declared<"error", Error | null>> {
+  export class IssuesSubscribeError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<IssuesSubscribeError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10652,10 +18721,12 @@ export namespace ThePlaidApiClient {
     body: ItemAccessTokenInvalidateRequest;
   };
 
-  export class ItemAccessTokenInvalidateError extends ResponseError<Declared<"error", Error | null>> {
+  export class ItemAccessTokenInvalidateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ItemAccessTokenInvalidateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10666,10 +18737,12 @@ export namespace ThePlaidApiClient {
     body: ItemActivityListRequest;
   };
 
-  export class ItemActivityListError extends ResponseError<Declared<"error", Error | null>> {
+  export class ItemActivityListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ItemActivityListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10680,10 +18753,12 @@ export namespace ThePlaidApiClient {
     body: ItemApplicationListRequest;
   };
 
-  export class ItemApplicationListError extends ResponseError<Declared<"error", Error | null>> {
+  export class ItemApplicationListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ItemApplicationListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10694,10 +18769,12 @@ export namespace ThePlaidApiClient {
     body: ItemApplicationScopesUpdateRequest;
   };
 
-  export class ItemApplicationScopesUpdateError extends ResponseError<Declared<"error", Error | null>> {
+  export class ItemApplicationScopesUpdateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ItemApplicationScopesUpdateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10708,10 +18785,12 @@ export namespace ThePlaidApiClient {
     body: ItemApplicationUnlinkRequest;
   };
 
-  export class ItemApplicationUnlinkError extends ResponseError<Declared<"error", Error | null>> {
+  export class ItemApplicationUnlinkError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ItemApplicationUnlinkError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10722,10 +18801,12 @@ export namespace ThePlaidApiClient {
     body: ItemPublicTokenCreateRequest;
   };
 
-  export class ItemCreatePublicTokenError extends ResponseError<Declared<"error", Error | null>> {
+  export class ItemCreatePublicTokenError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ItemCreatePublicTokenError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10736,10 +18817,12 @@ export namespace ThePlaidApiClient {
     body: ItemGetRequest;
   };
 
-  export class ItemGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class ItemGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ItemGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10750,10 +18833,12 @@ export namespace ThePlaidApiClient {
     body: ItemImportRequest;
   };
 
-  export class ItemImportError extends ResponseError<Declared<"error", Error | null>> {
+  export class ItemImportError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ItemImportError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10764,10 +18849,12 @@ export namespace ThePlaidApiClient {
     body: ItemProductsTerminateRequest;
   };
 
-  export class ItemProductsTerminateError extends ResponseError<Declared<"error", Error | null>> {
+  export class ItemProductsTerminateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ItemProductsTerminateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10778,10 +18865,12 @@ export namespace ThePlaidApiClient {
     body: ItemPublicTokenExchangeRequest;
   };
 
-  export class ItemPublicTokenExchangeError extends ResponseError<Declared<"error", Error | null>> {
+  export class ItemPublicTokenExchangeError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ItemPublicTokenExchangeError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10792,10 +18881,12 @@ export namespace ThePlaidApiClient {
     body: ItemRemoveRequest;
   };
 
-  export class ItemRemoveError extends ResponseError<Declared<"error", Error | null>> {
+  export class ItemRemoveError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ItemRemoveError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10806,10 +18897,12 @@ export namespace ThePlaidApiClient {
     body: ItemWebhookUpdateRequest;
   };
 
-  export class ItemWebhookUpdateError extends ResponseError<Declared<"error", Error | null>> {
+  export class ItemWebhookUpdateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ItemWebhookUpdateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10820,10 +18913,12 @@ export namespace ThePlaidApiClient {
     body: LiabilitiesGetRequest;
   };
 
-  export class LiabilitiesGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class LiabilitiesGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<LiabilitiesGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10834,10 +18929,12 @@ export namespace ThePlaidApiClient {
     body: LinkDeliveryCreateRequest;
   };
 
-  export class LinkDeliveryCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class LinkDeliveryCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<LinkDeliveryCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10848,10 +18945,12 @@ export namespace ThePlaidApiClient {
     body: LinkDeliveryGetRequest;
   };
 
-  export class LinkDeliveryGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class LinkDeliveryGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<LinkDeliveryGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10862,10 +18961,12 @@ export namespace ThePlaidApiClient {
     body: LinkOAuthCorrelationIdExchangeRequest;
   };
 
-  export class LinkOauthCorrelationIdExchangeError extends ResponseError<Declared<"error", Error | null>> {
+  export class LinkOauthCorrelationIdExchangeError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<LinkOauthCorrelationIdExchangeError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10876,10 +18977,12 @@ export namespace ThePlaidApiClient {
     body: LinkTokenCreateRequest;
   };
 
-  export class LinkTokenCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class LinkTokenCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<LinkTokenCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10890,10 +18993,12 @@ export namespace ThePlaidApiClient {
     body: LinkTokenGetRequest;
   };
 
-  export class LinkTokenGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class LinkTokenGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<LinkTokenGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10904,10 +19009,12 @@ export namespace ThePlaidApiClient {
     body: NetworkStatusGetRequest;
   };
 
-  export class NetworkStatusGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class NetworkStatusGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<NetworkStatusGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10918,12 +19025,12 @@ export namespace ThePlaidApiClient {
     body: OAuthIntrospectRequest;
   };
 
-  export class OauthIntrospectError extends ResponseError<
-    Declared<"oAuthErrorResponse", OAuthErrorResponse>
-  > {
+  export class OauthIntrospectError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"oAuthErrorResponse", OAuthErrorResponse>>;
+
     static readonly errors: ErrorDecoders<OauthIntrospectError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "oAuthErrorResponse",
         decode: { kind: "json", schema: oAuthErrorResponseSchema },
       },
@@ -10934,10 +19041,12 @@ export namespace ThePlaidApiClient {
     body: OAuthRevokeRequest;
   };
 
-  export class OauthRevokeError extends ResponseError<Declared<"oAuthErrorResponse", OAuthErrorResponse>> {
+  export class OauthRevokeError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"oAuthErrorResponse", OAuthErrorResponse>>;
+
     static readonly errors: ErrorDecoders<OauthRevokeError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "oAuthErrorResponse",
         decode: { kind: "json", schema: oAuthErrorResponseSchema },
       },
@@ -10948,10 +19057,12 @@ export namespace ThePlaidApiClient {
     body: OAuthTokenRequest;
   };
 
-  export class OauthTokenError extends ResponseError<Declared<"oAuthErrorResponse", OAuthErrorResponse>> {
+  export class OauthTokenError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"oAuthErrorResponse", OAuthErrorResponse>>;
+
     static readonly errors: ErrorDecoders<OauthTokenError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "oAuthErrorResponse",
         decode: { kind: "json", schema: oAuthErrorResponseSchema },
       },
@@ -10962,10 +19073,12 @@ export namespace ThePlaidApiClient {
     body: PartnerCustomerCreateRequest;
   };
 
-  export class PartnerCustomerCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class PartnerCustomerCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PartnerCustomerCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10976,10 +19089,12 @@ export namespace ThePlaidApiClient {
     body: PartnerCustomerEnableRequest;
   };
 
-  export class PartnerCustomerEnableError extends ResponseError<Declared<"error", Error | null>> {
+  export class PartnerCustomerEnableError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PartnerCustomerEnableError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -10990,10 +19105,12 @@ export namespace ThePlaidApiClient {
     body: PartnerCustomerGetRequest;
   };
 
-  export class PartnerCustomerGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class PartnerCustomerGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PartnerCustomerGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11004,12 +19121,12 @@ export namespace ThePlaidApiClient {
     body: PartnerCustomerOAuthInstitutionsGetRequest;
   };
 
-  export class PartnerCustomerOauthInstitutionsGetError extends ResponseError<
-    Declared<"error", Error | null>
-  > {
+  export class PartnerCustomerOauthInstitutionsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PartnerCustomerOauthInstitutionsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11020,10 +19137,12 @@ export namespace ThePlaidApiClient {
     body: PartnerCustomerRemoveRequest;
   };
 
-  export class PartnerCustomerRemoveError extends ResponseError<Declared<"error", Error | null>> {
+  export class PartnerCustomerRemoveError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PartnerCustomerRemoveError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11034,10 +19153,12 @@ export namespace ThePlaidApiClient {
     body: PaymentInitiationConsentCreateRequest;
   };
 
-  export class PaymentInitiationConsentCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class PaymentInitiationConsentCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PaymentInitiationConsentCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11048,10 +19169,12 @@ export namespace ThePlaidApiClient {
     body: PaymentInitiationConsentGetRequest;
   };
 
-  export class PaymentInitiationConsentGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class PaymentInitiationConsentGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PaymentInitiationConsentGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11062,12 +19185,12 @@ export namespace ThePlaidApiClient {
     body: PaymentInitiationConsentPaymentExecuteRequest;
   };
 
-  export class PaymentInitiationConsentPaymentExecuteError extends ResponseError<
-    Declared<"error", Error | null>
-  > {
+  export class PaymentInitiationConsentPaymentExecuteError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PaymentInitiationConsentPaymentExecuteError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11078,10 +19201,12 @@ export namespace ThePlaidApiClient {
     body: PaymentInitiationConsentRevokeRequest;
   };
 
-  export class PaymentInitiationConsentRevokeError extends ResponseError<Declared<"error", Error | null>> {
+  export class PaymentInitiationConsentRevokeError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PaymentInitiationConsentRevokeError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11092,10 +19217,12 @@ export namespace ThePlaidApiClient {
     body: PaymentInitiationPaymentCreateRequest;
   };
 
-  export class PaymentInitiationPaymentCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class PaymentInitiationPaymentCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PaymentInitiationPaymentCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11106,10 +19233,12 @@ export namespace ThePlaidApiClient {
     body: PaymentInitiationPaymentGetRequest;
   };
 
-  export class PaymentInitiationPaymentGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class PaymentInitiationPaymentGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PaymentInitiationPaymentGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11120,10 +19249,12 @@ export namespace ThePlaidApiClient {
     body: PaymentInitiationPaymentListRequest;
   };
 
-  export class PaymentInitiationPaymentListError extends ResponseError<Declared<"error", Error | null>> {
+  export class PaymentInitiationPaymentListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PaymentInitiationPaymentListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11134,10 +19265,12 @@ export namespace ThePlaidApiClient {
     body: PaymentInitiationPaymentReverseRequest;
   };
 
-  export class PaymentInitiationPaymentReverseError extends ResponseError<Declared<"error", Error | null>> {
+  export class PaymentInitiationPaymentReverseError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PaymentInitiationPaymentReverseError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11148,10 +19281,12 @@ export namespace ThePlaidApiClient {
     body: PaymentInitiationRecipientCreateRequest;
   };
 
-  export class PaymentInitiationRecipientCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class PaymentInitiationRecipientCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PaymentInitiationRecipientCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11162,10 +19297,12 @@ export namespace ThePlaidApiClient {
     body: PaymentInitiationRecipientGetRequest;
   };
 
-  export class PaymentInitiationRecipientGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class PaymentInitiationRecipientGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PaymentInitiationRecipientGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11176,10 +19313,12 @@ export namespace ThePlaidApiClient {
     body: PaymentInitiationRecipientListRequest;
   };
 
-  export class PaymentInitiationRecipientListError extends ResponseError<Declared<"error", Error | null>> {
+  export class PaymentInitiationRecipientListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PaymentInitiationRecipientListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11190,10 +19329,12 @@ export namespace ThePlaidApiClient {
     body: PaymentProfileCreateRequest;
   };
 
-  export class PaymentProfileCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class PaymentProfileCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PaymentProfileCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11204,10 +19345,12 @@ export namespace ThePlaidApiClient {
     body: PaymentProfileGetRequest;
   };
 
-  export class PaymentProfileGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class PaymentProfileGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PaymentProfileGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11218,10 +19361,12 @@ export namespace ThePlaidApiClient {
     body: PaymentProfileRemoveRequest;
   };
 
-  export class PaymentProfileRemoveError extends ResponseError<Declared<"error", Error | null>> {
+  export class PaymentProfileRemoveError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<PaymentProfileRemoveError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11232,10 +19377,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorAccountGetRequest;
   };
 
-  export class ProcessorAccountGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorAccountGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorAccountGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11246,10 +19393,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorApexProcessorTokenCreateRequest;
   };
 
-  export class ProcessorApexProcessorTokenCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorApexProcessorTokenCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorApexProcessorTokenCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11260,10 +19409,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorAuthGetRequest;
   };
 
-  export class ProcessorAuthGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorAuthGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorAuthGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11271,13 +19422,26 @@ export namespace ThePlaidApiClient {
   }
 
   export type ProcessorBalanceGetRequestParams = {
+    /**
+     * The `/processor/balance/get` endpoint returns the real-time balance for the account
+     * associated with a given `processor_token`.
+     *
+     * The current balance is the total amount of funds in the account. The available balance is the
+     * current balance less any outstanding holds or debits that have not yet posted to the account.
+     *
+     * Note that not all institutions calculate the available balance. In the event that available
+     * balance is unavailable from the institution, Plaid will return an available balance value of
+     * `null`.
+     */
     body: ProcessorBalanceGetRequest;
   };
 
-  export class ProcessorBalanceGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorBalanceGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorBalanceGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11288,10 +19452,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorBankTransferCreateRequest;
   };
 
-  export class ProcessorBankTransferCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorBankTransferCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorBankTransferCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11302,10 +19468,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorIdentityGetRequest;
   };
 
-  export class ProcessorIdentityGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorIdentityGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorIdentityGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11316,10 +19484,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorIdentityMatchRequest;
   };
 
-  export class ProcessorIdentityMatchError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorIdentityMatchError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorIdentityMatchError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11330,10 +19500,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorInvestmentsAuthGetRequest;
   };
 
-  export class ProcessorInvestmentsAuthGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorInvestmentsAuthGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorInvestmentsAuthGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11344,10 +19516,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorInvestmentsHoldingsGetRequest;
   };
 
-  export class ProcessorInvestmentsHoldingsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorInvestmentsHoldingsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorInvestmentsHoldingsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11358,12 +19532,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorInvestmentsTransactionsGetRequest;
   };
 
-  export class ProcessorInvestmentsTransactionsGetError extends ResponseError<
-    Declared<"error", Error | null>
-  > {
+  export class ProcessorInvestmentsTransactionsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorInvestmentsTransactionsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11374,10 +19548,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorLiabilitiesGetRequest;
   };
 
-  export class ProcessorLiabilitiesGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorLiabilitiesGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorLiabilitiesGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11388,10 +19564,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorSignalDecisionReportRequest;
   };
 
-  export class ProcessorSignalDecisionReportError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorSignalDecisionReportError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorSignalDecisionReportError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11402,10 +19580,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorSignalEvaluateRequest;
   };
 
-  export class ProcessorSignalEvaluateError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorSignalEvaluateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorSignalEvaluateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11416,10 +19596,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorSignalPrepareRequest;
   };
 
-  export class ProcessorSignalPrepareError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorSignalPrepareError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorSignalPrepareError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11430,10 +19612,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorSignalReturnReportRequest;
   };
 
-  export class ProcessorSignalReturnReportError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorSignalReturnReportError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorSignalReturnReportError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11444,12 +19628,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorStripeBankAccountTokenCreateRequest;
   };
 
-  export class ProcessorStripeBankAccountTokenCreateError extends ResponseError<
-    Declared<"error", Error | null>
-  > {
+  export class ProcessorStripeBankAccountTokenCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorStripeBankAccountTokenCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11460,10 +19644,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorTokenCreateRequest;
   };
 
-  export class ProcessorTokenCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorTokenCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorTokenCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11474,10 +19660,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorTokenPermissionsGetRequest;
   };
 
-  export class ProcessorTokenPermissionsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorTokenPermissionsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorTokenPermissionsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11488,10 +19676,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorTokenPermissionsSetRequest;
   };
 
-  export class ProcessorTokenPermissionsSetError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorTokenPermissionsSetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorTokenPermissionsSetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11502,10 +19692,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorTokenWebhookUpdateRequest;
   };
 
-  export class ProcessorTokenWebhookUpdateError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorTokenWebhookUpdateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorTokenWebhookUpdateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11516,10 +19708,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorTransactionsGetRequest;
   };
 
-  export class ProcessorTransactionsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorTransactionsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorTransactionsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11530,10 +19724,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorTransactionsRecurringGetRequest;
   };
 
-  export class ProcessorTransactionsRecurringGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorTransactionsRecurringGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorTransactionsRecurringGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11544,10 +19740,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorTransactionsRefreshRequest;
   };
 
-  export class ProcessorTransactionsRefreshError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorTransactionsRefreshError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorTransactionsRefreshError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11558,10 +19756,12 @@ export namespace ThePlaidApiClient {
     body: ProcessorTransactionsSyncRequest;
   };
 
-  export class ProcessorTransactionsSyncError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProcessorTransactionsSyncError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProcessorTransactionsSyncError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11572,10 +19772,12 @@ export namespace ThePlaidApiClient {
     body: ProfileNetworkStatusGetRequest;
   };
 
-  export class ProfileNetworkStatusGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class ProfileNetworkStatusGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<ProfileNetworkStatusGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11606,10 +19808,12 @@ export namespace ThePlaidApiClient {
     body: SandboxBankIncomeFireWebhookRequest;
   };
 
-  export class SandboxBankIncomeFireWebhookError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxBankIncomeFireWebhookError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxBankIncomeFireWebhookError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11620,10 +19824,12 @@ export namespace ThePlaidApiClient {
     body: SandboxBankTransferFireWebhookRequest;
   };
 
-  export class SandboxBankTransferFireWebhookError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxBankTransferFireWebhookError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxBankTransferFireWebhookError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11634,10 +19840,12 @@ export namespace ThePlaidApiClient {
     body: SandboxBankTransferSimulateRequest;
   };
 
-  export class SandboxBankTransferSimulateError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxBankTransferSimulateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxBankTransferSimulateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11648,10 +19856,12 @@ export namespace ThePlaidApiClient {
     body: SandboxCraCashflowUpdatesUpdateRequest;
   };
 
-  export class SandboxCraCashflowUpdatesUpdateError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxCraCashflowUpdatesUpdateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxCraCashflowUpdatesUpdateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11662,10 +19872,12 @@ export namespace ThePlaidApiClient {
     body: SandboxFdxConsentSeedRequest;
   };
 
-  export class SandboxFdxConsentSeedError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxFdxConsentSeedError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxFdxConsentSeedError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11676,10 +19888,12 @@ export namespace ThePlaidApiClient {
     body: SandboxIncomeFireWebhookRequest;
   };
 
-  export class SandboxIncomeFireWebhookError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxIncomeFireWebhookError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxIncomeFireWebhookError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11690,10 +19904,12 @@ export namespace ThePlaidApiClient {
     body: SandboxItemApplicationSeedRequest;
   };
 
-  export class SandboxItemApplicationSeedError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxItemApplicationSeedError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxItemApplicationSeedError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11704,10 +19920,12 @@ export namespace ThePlaidApiClient {
     body: SandboxItemFireWebhookRequest;
   };
 
-  export class SandboxItemFireWebhookError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxItemFireWebhookError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxItemFireWebhookError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11718,10 +19936,12 @@ export namespace ThePlaidApiClient {
     body: SandboxItemResetLoginRequest;
   };
 
-  export class SandboxItemResetLoginError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxItemResetLoginError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxItemResetLoginError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11732,10 +19952,12 @@ export namespace ThePlaidApiClient {
     body: SandboxItemSetVerificationStatusRequest;
   };
 
-  export class SandboxItemSetVerificationStatusError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxItemSetVerificationStatusError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxItemSetVerificationStatusError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11746,10 +19968,12 @@ export namespace ThePlaidApiClient {
     body: SandboxOauthSelectAccountsRequest;
   };
 
-  export class SandboxOauthSelectAccountsError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxOauthSelectAccountsError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxOauthSelectAccountsError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11760,10 +19984,12 @@ export namespace ThePlaidApiClient {
     body: SandboxPaymentProfileResetLoginRequest;
   };
 
-  export class SandboxPaymentProfileResetLoginError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxPaymentProfileResetLoginError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxPaymentProfileResetLoginError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11774,10 +20000,12 @@ export namespace ThePlaidApiClient {
     body: SandboxPaymentSimulateRequest;
   };
 
-  export class SandboxPaymentSimulateError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxPaymentSimulateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxPaymentSimulateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11788,10 +20016,12 @@ export namespace ThePlaidApiClient {
     body: SandboxProcessorTokenCreateRequest;
   };
 
-  export class SandboxProcessorTokenCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxProcessorTokenCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxProcessorTokenCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11802,10 +20032,12 @@ export namespace ThePlaidApiClient {
     body: SandboxPublicTokenCreateRequest;
   };
 
-  export class SandboxPublicTokenCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxPublicTokenCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxPublicTokenCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11816,13 +20048,15 @@ export namespace ThePlaidApiClient {
     body: SandboxTransactionsCreateRequest;
   };
 
-  export class SandboxTransactionsCreateError extends ResponseError<
-    Declared<"error", Error | null> | Declared<"error2", Error | null>
-  > {
+  export class SandboxTransactionsCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<
+      Declared<"error", Error | null> | Declared<"error2", Error | null>
+    >;
+
     static readonly errors: ErrorDecoders<SandboxTransactionsCreateError> = [
       { on: 400, kind: "error", decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) } },
       {
-        on: [400, 599],
+        on: "default",
         kind: "error2",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11833,10 +20067,12 @@ export namespace ThePlaidApiClient {
     body: SandboxTransferFireWebhookRequest;
   };
 
-  export class SandboxTransferFireWebhookError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxTransferFireWebhookError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxTransferFireWebhookError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11847,12 +20083,12 @@ export namespace ThePlaidApiClient {
     body: SandboxTransferLedgerDepositSimulateRequest;
   };
 
-  export class SandboxTransferLedgerDepositSimulateError extends ResponseError<
-    Declared<"error", Error | null>
-  > {
+  export class SandboxTransferLedgerDepositSimulateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxTransferLedgerDepositSimulateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11863,12 +20099,12 @@ export namespace ThePlaidApiClient {
     body: SandboxTransferLedgerSimulateAvailableRequest;
   };
 
-  export class SandboxTransferLedgerSimulateAvailableError extends ResponseError<
-    Declared<"error", Error | null>
-  > {
+  export class SandboxTransferLedgerSimulateAvailableError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxTransferLedgerSimulateAvailableError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11879,12 +20115,12 @@ export namespace ThePlaidApiClient {
     body: SandboxTransferLedgerWithdrawSimulateRequest;
   };
 
-  export class SandboxTransferLedgerWithdrawSimulateError extends ResponseError<
-    Declared<"error", Error | null>
-  > {
+  export class SandboxTransferLedgerWithdrawSimulateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxTransferLedgerWithdrawSimulateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11895,10 +20131,12 @@ export namespace ThePlaidApiClient {
     body: SandboxTransferRefundSimulateRequest;
   };
 
-  export class SandboxTransferRefundSimulateError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxTransferRefundSimulateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxTransferRefundSimulateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11909,10 +20147,12 @@ export namespace ThePlaidApiClient {
     body: SandboxTransferRepaymentSimulateRequest;
   };
 
-  export class SandboxTransferRepaymentSimulateError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxTransferRepaymentSimulateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxTransferRepaymentSimulateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11923,10 +20163,12 @@ export namespace ThePlaidApiClient {
     body: SandboxTransferSimulateRequest;
   };
 
-  export class SandboxTransferSimulateError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxTransferSimulateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxTransferSimulateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11937,10 +20179,12 @@ export namespace ThePlaidApiClient {
     body: SandboxTransferSweepSimulateRequest;
   };
 
-  export class SandboxTransferSweepSimulateError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxTransferSweepSimulateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxTransferSweepSimulateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11951,10 +20195,12 @@ export namespace ThePlaidApiClient {
     body: SandboxTransferTestClockAdvanceRequest;
   };
 
-  export class SandboxTransferTestClockAdvanceError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxTransferTestClockAdvanceError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxTransferTestClockAdvanceError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11965,10 +20211,12 @@ export namespace ThePlaidApiClient {
     body: SandboxTransferTestClockCreateRequest;
   };
 
-  export class SandboxTransferTestClockCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxTransferTestClockCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxTransferTestClockCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11979,10 +20227,12 @@ export namespace ThePlaidApiClient {
     body: SandboxTransferTestClockGetRequest;
   };
 
-  export class SandboxTransferTestClockGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxTransferTestClockGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxTransferTestClockGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -11993,10 +20243,12 @@ export namespace ThePlaidApiClient {
     body: SandboxTransferTestClockListRequest;
   };
 
-  export class SandboxTransferTestClockListError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxTransferTestClockListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxTransferTestClockListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12007,10 +20259,12 @@ export namespace ThePlaidApiClient {
     body: SandboxUserResetLoginRequest;
   };
 
-  export class SandboxUserResetLoginError extends ResponseError<Declared<"error", Error | null>> {
+  export class SandboxUserResetLoginError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SandboxUserResetLoginError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12021,10 +20275,12 @@ export namespace ThePlaidApiClient {
     body: SessionTokenCreateRequest;
   };
 
-  export class SessionTokenCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class SessionTokenCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SessionTokenCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12035,10 +20291,12 @@ export namespace ThePlaidApiClient {
     body: SignalDecisionReportRequest;
   };
 
-  export class SignalDecisionReportError extends ResponseError<Declared<"error", Error | null>> {
+  export class SignalDecisionReportError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SignalDecisionReportError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12049,10 +20307,12 @@ export namespace ThePlaidApiClient {
     body: SignalEvaluateRequest;
   };
 
-  export class SignalEvaluateError extends ResponseError<Declared<"error", Error | null>> {
+  export class SignalEvaluateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SignalEvaluateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12063,10 +20323,12 @@ export namespace ThePlaidApiClient {
     body: SignalPrepareRequest;
   };
 
-  export class SignalPrepareError extends ResponseError<Declared<"error", Error | null>> {
+  export class SignalPrepareError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SignalPrepareError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12077,10 +20339,12 @@ export namespace ThePlaidApiClient {
     body: SignalReturnReportRequest;
   };
 
-  export class SignalReturnReportError extends ResponseError<Declared<"error", Error | null>> {
+  export class SignalReturnReportError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SignalReturnReportError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12091,10 +20355,12 @@ export namespace ThePlaidApiClient {
     body: SignalScheduleRequest;
   };
 
-  export class SignalScheduleError extends ResponseError<Declared<"error", Error | null>> {
+  export class SignalScheduleError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<SignalScheduleError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12105,10 +20371,12 @@ export namespace ThePlaidApiClient {
     body: StatementsDownloadRequest;
   };
 
-  export class StatementsDownloadError extends ResponseError<Declared<"error", Error | null>> {
+  export class StatementsDownloadError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<StatementsDownloadError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12119,10 +20387,12 @@ export namespace ThePlaidApiClient {
     body: StatementsListRequest;
   };
 
-  export class StatementsListError extends ResponseError<Declared<"error", Error | null>> {
+  export class StatementsListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<StatementsListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12133,10 +20403,12 @@ export namespace ThePlaidApiClient {
     body: StatementsRefreshRequest;
   };
 
-  export class StatementsRefreshError extends ResponseError<Declared<"error", Error | null>> {
+  export class StatementsRefreshError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<StatementsRefreshError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12147,10 +20419,12 @@ export namespace ThePlaidApiClient {
     body: TransactionsEnhanceGetRequest;
   };
 
-  export class TransactionsEnhanceError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransactionsEnhanceError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransactionsEnhanceError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12161,10 +20435,12 @@ export namespace ThePlaidApiClient {
     body: TransactionsEnrichRequest;
   };
 
-  export class TransactionsEnrichError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransactionsEnrichError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransactionsEnrichError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12175,10 +20451,12 @@ export namespace ThePlaidApiClient {
     body: TransactionsGetRequest;
   };
 
-  export class TransactionsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransactionsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransactionsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12189,10 +20467,12 @@ export namespace ThePlaidApiClient {
     body: TransactionsRecurringGetRequest;
   };
 
-  export class TransactionsRecurringGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransactionsRecurringGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransactionsRecurringGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12203,10 +20483,12 @@ export namespace ThePlaidApiClient {
     body: TransactionsRefreshRequest;
   };
 
-  export class TransactionsRefreshError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransactionsRefreshError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransactionsRefreshError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12217,10 +20499,12 @@ export namespace ThePlaidApiClient {
     body: TransactionsRulesCreateRequest;
   };
 
-  export class TransactionsRulesCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransactionsRulesCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransactionsRulesCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12231,10 +20515,12 @@ export namespace ThePlaidApiClient {
     body: TransactionsRulesListRequest;
   };
 
-  export class TransactionsRulesListError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransactionsRulesListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransactionsRulesListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12245,10 +20531,12 @@ export namespace ThePlaidApiClient {
     body: TransactionsRulesRemoveRequest;
   };
 
-  export class TransactionsRulesRemoveError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransactionsRulesRemoveError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransactionsRulesRemoveError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12259,10 +20547,12 @@ export namespace ThePlaidApiClient {
     body: TransactionsSyncRequest;
   };
 
-  export class TransactionsSyncError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransactionsSyncError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransactionsSyncError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12273,10 +20563,12 @@ export namespace ThePlaidApiClient {
     body: TransactionsUserInsightsGetRequest;
   };
 
-  export class TransactionsUserInsightsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransactionsUserInsightsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransactionsUserInsightsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12287,10 +20579,12 @@ export namespace ThePlaidApiClient {
     body: TransferAuthorizationCancelRequest;
   };
 
-  export class TransferAuthorizationCancelError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferAuthorizationCancelError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferAuthorizationCancelError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12301,10 +20595,12 @@ export namespace ThePlaidApiClient {
     body: TransferAuthorizationCreateRequest;
   };
 
-  export class TransferAuthorizationCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferAuthorizationCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferAuthorizationCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12315,10 +20611,12 @@ export namespace ThePlaidApiClient {
     body: TransferBalanceGetRequest;
   };
 
-  export class TransferBalanceGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferBalanceGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferBalanceGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12329,10 +20627,12 @@ export namespace ThePlaidApiClient {
     body: TransferCancelRequest;
   };
 
-  export class TransferCancelError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferCancelError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferCancelError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12343,10 +20643,12 @@ export namespace ThePlaidApiClient {
     body: TransferCapabilitiesGetRequest;
   };
 
-  export class TransferCapabilitiesGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferCapabilitiesGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferCapabilitiesGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12357,10 +20659,12 @@ export namespace ThePlaidApiClient {
     body: TransferConfigurationGetRequest;
   };
 
-  export class TransferConfigurationGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferConfigurationGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferConfigurationGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12371,10 +20675,12 @@ export namespace ThePlaidApiClient {
     body: TransferCreateRequest;
   };
 
-  export class TransferCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12385,10 +20691,12 @@ export namespace ThePlaidApiClient {
     body: TransferDiligenceDocumentUploadRequest;
   };
 
-  export class TransferDiligenceDocumentUploadError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferDiligenceDocumentUploadError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferDiligenceDocumentUploadError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12399,10 +20707,12 @@ export namespace ThePlaidApiClient {
     body: TransferDiligenceSubmitRequest;
   };
 
-  export class TransferDiligenceSubmitError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferDiligenceSubmitError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferDiligenceSubmitError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12413,10 +20723,12 @@ export namespace ThePlaidApiClient {
     body: TransferEventListRequest;
   };
 
-  export class TransferEventListError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferEventListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferEventListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12427,10 +20739,12 @@ export namespace ThePlaidApiClient {
     body: TransferEventSyncRequest;
   };
 
-  export class TransferEventSyncError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferEventSyncError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferEventSyncError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12441,10 +20755,12 @@ export namespace ThePlaidApiClient {
     body: TransferGetRequest;
   };
 
-  export class TransferGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12455,10 +20771,12 @@ export namespace ThePlaidApiClient {
     body: TransferIntentCreateRequest;
   };
 
-  export class TransferIntentCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferIntentCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferIntentCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12469,10 +20787,12 @@ export namespace ThePlaidApiClient {
     body: TransferIntentGetRequest;
   };
 
-  export class TransferIntentGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferIntentGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferIntentGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12483,10 +20803,12 @@ export namespace ThePlaidApiClient {
     body: TransferLedgerDepositRequest;
   };
 
-  export class TransferLedgerDepositError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferLedgerDepositError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferLedgerDepositError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12497,10 +20819,12 @@ export namespace ThePlaidApiClient {
     body: TransferLedgerDistributeRequest;
   };
 
-  export class TransferLedgerDistributeError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferLedgerDistributeError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferLedgerDistributeError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12511,10 +20835,12 @@ export namespace ThePlaidApiClient {
     body: TransferLedgerEventListRequest;
   };
 
-  export class TransferLedgerEventListError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferLedgerEventListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferLedgerEventListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12525,10 +20851,12 @@ export namespace ThePlaidApiClient {
     body: TransferLedgerGetRequest;
   };
 
-  export class TransferLedgerGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferLedgerGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferLedgerGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12539,10 +20867,12 @@ export namespace ThePlaidApiClient {
     body: TransferLedgerWithdrawRequest;
   };
 
-  export class TransferLedgerWithdrawError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferLedgerWithdrawError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferLedgerWithdrawError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12553,10 +20883,12 @@ export namespace ThePlaidApiClient {
     body: TransferListRequest;
   };
 
-  export class TransferListError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12567,10 +20899,12 @@ export namespace ThePlaidApiClient {
     body: TransferMetricsGetRequest;
   };
 
-  export class TransferMetricsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferMetricsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferMetricsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12581,10 +20915,12 @@ export namespace ThePlaidApiClient {
     body: TransferMigrateAccountRequest;
   };
 
-  export class TransferMigrateAccountError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferMigrateAccountError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferMigrateAccountError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12595,10 +20931,12 @@ export namespace ThePlaidApiClient {
     body: TransferOriginatorCreateRequest;
   };
 
-  export class TransferOriginatorCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferOriginatorCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferOriginatorCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12609,12 +20947,12 @@ export namespace ThePlaidApiClient {
     body: TransferOriginatorFundingAccountCreateRequest;
   };
 
-  export class TransferOriginatorFundingAccountCreateError extends ResponseError<
-    Declared<"error", Error | null>
-  > {
+  export class TransferOriginatorFundingAccountCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferOriginatorFundingAccountCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12625,12 +20963,12 @@ export namespace ThePlaidApiClient {
     body: TransferOriginatorFundingAccountUpdateRequest;
   };
 
-  export class TransferOriginatorFundingAccountUpdateError extends ResponseError<
-    Declared<"error", Error | null>
-  > {
+  export class TransferOriginatorFundingAccountUpdateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferOriginatorFundingAccountUpdateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12641,10 +20979,12 @@ export namespace ThePlaidApiClient {
     body: TransferOriginatorGetRequest;
   };
 
-  export class TransferOriginatorGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferOriginatorGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferOriginatorGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12655,10 +20995,12 @@ export namespace ThePlaidApiClient {
     body: TransferOriginatorListRequest;
   };
 
-  export class TransferOriginatorListError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferOriginatorListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferOriginatorListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12669,10 +21011,12 @@ export namespace ThePlaidApiClient {
     body: TransferPlatformOriginatorCreateRequest;
   };
 
-  export class TransferPlatformOriginatorCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferPlatformOriginatorCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferPlatformOriginatorCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12683,10 +21027,12 @@ export namespace ThePlaidApiClient {
     body: TransferPlatformPersonCreateRequest;
   };
 
-  export class TransferPlatformPersonCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferPlatformPersonCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferPlatformPersonCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12697,10 +21043,12 @@ export namespace ThePlaidApiClient {
     body: TransferPlatformRequirementSubmitRequest;
   };
 
-  export class TransferPlatformRequirementSubmitError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferPlatformRequirementSubmitError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferPlatformRequirementSubmitError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12711,10 +21059,12 @@ export namespace ThePlaidApiClient {
     body: TransferQuestionnaireCreateRequest;
   };
 
-  export class TransferQuestionnaireCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferQuestionnaireCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferQuestionnaireCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12725,10 +21075,12 @@ export namespace ThePlaidApiClient {
     body: TransferRecurringCancelRequest;
   };
 
-  export class TransferRecurringCancelError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferRecurringCancelError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferRecurringCancelError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12739,10 +21091,12 @@ export namespace ThePlaidApiClient {
     body: TransferRecurringCreateRequest;
   };
 
-  export class TransferRecurringCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferRecurringCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferRecurringCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12753,10 +21107,12 @@ export namespace ThePlaidApiClient {
     body: TransferRecurringGetRequest;
   };
 
-  export class TransferRecurringGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferRecurringGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferRecurringGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12767,10 +21123,12 @@ export namespace ThePlaidApiClient {
     body: TransferRecurringListRequest;
   };
 
-  export class TransferRecurringListError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferRecurringListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferRecurringListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12781,10 +21139,12 @@ export namespace ThePlaidApiClient {
     body: TransferRefundCancelRequest;
   };
 
-  export class TransferRefundCancelError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferRefundCancelError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferRefundCancelError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12795,10 +21155,12 @@ export namespace ThePlaidApiClient {
     body: TransferRefundCreateRequest;
   };
 
-  export class TransferRefundCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferRefundCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferRefundCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12809,10 +21171,12 @@ export namespace ThePlaidApiClient {
     body: TransferRefundGetRequest;
   };
 
-  export class TransferRefundGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferRefundGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferRefundGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12823,10 +21187,12 @@ export namespace ThePlaidApiClient {
     body: TransferRepaymentListRequest;
   };
 
-  export class TransferRepaymentListError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferRepaymentListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferRepaymentListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12837,10 +21203,12 @@ export namespace ThePlaidApiClient {
     body: TransferRepaymentReturnListRequest;
   };
 
-  export class TransferRepaymentReturnListError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferRepaymentReturnListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferRepaymentReturnListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12851,10 +21219,12 @@ export namespace ThePlaidApiClient {
     body: TransferReturnRecoverRequest;
   };
 
-  export class TransferReturnRecoverError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferReturnRecoverError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferReturnRecoverError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12865,10 +21235,12 @@ export namespace ThePlaidApiClient {
     body: TransferSweepGetRequest;
   };
 
-  export class TransferSweepGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferSweepGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferSweepGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12879,10 +21251,12 @@ export namespace ThePlaidApiClient {
     body: TransferSweepListRequest;
   };
 
-  export class TransferSweepListError extends ResponseError<Declared<"error", Error | null>> {
+  export class TransferSweepListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<TransferSweepListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12893,10 +21267,12 @@ export namespace ThePlaidApiClient {
     body: UserAccountSessionEventSendRequest;
   };
 
-  export class UserAccountSessionEventSendError extends ResponseError<Declared<"error", Error | null>> {
+  export class UserAccountSessionEventSendError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<UserAccountSessionEventSendError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12907,10 +21283,12 @@ export namespace ThePlaidApiClient {
     body: UserAccountSessionGetRequest;
   };
 
-  export class UserAccountSessionGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class UserAccountSessionGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<UserAccountSessionGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12918,14 +21296,22 @@ export namespace ThePlaidApiClient {
   }
 
   export type UserCreateRequestParams = {
+    /**
+     * The HTTP header used in API requests to determine which set of User APIs to invoke: the
+     * legacy CRA version or the new User API version.
+     *
+     * @default false
+     */
     plaidNewUserApiEnabled?: boolean;
     body: UserCreateRequest;
   };
 
-  export class UserCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class UserCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<UserCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12936,10 +21322,12 @@ export namespace ThePlaidApiClient {
     body: UserFinancialDataRefreshRequest;
   };
 
-  export class UserFinancialDataRefreshError extends ResponseError<Declared<"error", Error | null>> {
+  export class UserFinancialDataRefreshError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<UserFinancialDataRefreshError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12947,14 +21335,22 @@ export namespace ThePlaidApiClient {
   }
 
   export type UserGetRequestParams = {
+    /**
+     * The HTTP header used in API requests to determine which set of User APIs to invoke: the
+     * legacy CRA version or the new User API version.
+     *
+     * @default false
+     */
     plaidNewUserApiEnabled?: boolean;
     body: UserGetRequest;
   };
 
-  export class UserGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class UserGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<UserGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12962,14 +21358,22 @@ export namespace ThePlaidApiClient {
   }
 
   export type UserIdentityRemoveRequestParams = {
+    /**
+     * The HTTP header used in API requests to determine which set of User APIs to invoke: the
+     * legacy CRA version or the new User API version.
+     *
+     * @default false
+     */
     plaidNewUserApiEnabled?: boolean;
     body: UserIdentityRemoveRequest;
   };
 
-  export class UserIdentityRemoveError extends ResponseError<Declared<"error", Error | null>> {
+  export class UserIdentityRemoveError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<UserIdentityRemoveError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12980,10 +21384,12 @@ export namespace ThePlaidApiClient {
     body: UserItemsAssociateRequest;
   };
 
-  export class UserItemsAssociateError extends ResponseError<Declared<"error", Error | null>> {
+  export class UserItemsAssociateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<UserItemsAssociateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -12994,10 +21400,12 @@ export namespace ThePlaidApiClient {
     body: UserItemsGetRequest;
   };
 
-  export class UserItemsGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class UserItemsGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<UserItemsGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -13008,10 +21416,12 @@ export namespace ThePlaidApiClient {
     body: UserItemsRemoveRequest;
   };
 
-  export class UserItemsRemoveError extends ResponseError<Declared<"error", Error | null>> {
+  export class UserItemsRemoveError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<UserItemsRemoveError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -13022,10 +21432,12 @@ export namespace ThePlaidApiClient {
     body: UserProductsTerminateRequest;
   };
 
-  export class UserProductsTerminateError extends ResponseError<Declared<"error", Error | null>> {
+  export class UserProductsTerminateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<UserProductsTerminateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -13033,14 +21445,22 @@ export namespace ThePlaidApiClient {
   }
 
   export type UserRemoveRequestParams = {
+    /**
+     * The HTTP header used in API requests to determine which set of User APIs to invoke: the
+     * legacy CRA version or the new User API version.
+     *
+     * @default false
+     */
     plaidNewUserApiEnabled?: boolean;
     body: UserRemoveRequest;
   };
 
-  export class UserRemoveError extends ResponseError<Declared<"error", Error | null>> {
+  export class UserRemoveError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<UserRemoveError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -13051,10 +21471,12 @@ export namespace ThePlaidApiClient {
     body: UserThirdPartyTokenCreateRequest;
   };
 
-  export class UserThirdPartyTokenCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class UserThirdPartyTokenCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<UserThirdPartyTokenCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -13065,10 +21487,12 @@ export namespace ThePlaidApiClient {
     body: UserThirdPartyTokenRemoveRequest;
   };
 
-  export class UserThirdPartyTokenRemoveError extends ResponseError<Declared<"error", Error | null>> {
+  export class UserThirdPartyTokenRemoveError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<UserThirdPartyTokenRemoveError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -13079,10 +21503,12 @@ export namespace ThePlaidApiClient {
     body: UserTransactionsRefreshRequest;
   };
 
-  export class UserTransactionsRefreshError extends ResponseError<Declared<"error", Error | null>> {
+  export class UserTransactionsRefreshError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<UserTransactionsRefreshError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -13090,14 +21516,22 @@ export namespace ThePlaidApiClient {
   }
 
   export type UserUpdateRequestParams = {
+    /**
+     * The HTTP header used in API requests to determine which set of User APIs to invoke: the
+     * legacy CRA version or the new User API version.
+     *
+     * @default false
+     */
     plaidNewUserApiEnabled?: boolean;
     body: UserUpdateRequest;
   };
 
-  export class UserUpdateError extends ResponseError<Declared<"error", Error | null>> {
+  export class UserUpdateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<UserUpdateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -13108,10 +21542,12 @@ export namespace ThePlaidApiClient {
     body: WalletCreateRequest;
   };
 
-  export class WalletCreateError extends ResponseError<Declared<"error", Error | null>> {
+  export class WalletCreateError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<WalletCreateError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -13122,10 +21558,12 @@ export namespace ThePlaidApiClient {
     body: WalletGetRequest;
   };
 
-  export class WalletGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class WalletGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<WalletGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -13136,10 +21574,12 @@ export namespace ThePlaidApiClient {
     body: WalletListRequest;
   };
 
-  export class WalletListError extends ResponseError<Declared<"error", Error | null>> {
+  export class WalletListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<WalletListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -13150,10 +21590,12 @@ export namespace ThePlaidApiClient {
     body: WalletTransactionExecuteRequest;
   };
 
-  export class WalletTransactionExecuteError extends ResponseError<Declared<"error", Error | null>> {
+  export class WalletTransactionExecuteError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<WalletTransactionExecuteError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -13164,10 +21606,12 @@ export namespace ThePlaidApiClient {
     body: WalletTransactionGetRequest;
   };
 
-  export class WalletTransactionGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class WalletTransactionGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<WalletTransactionGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -13178,10 +21622,12 @@ export namespace ThePlaidApiClient {
     body: WalletTransactionListRequest;
   };
 
-  export class WalletTransactionListError extends ResponseError<Declared<"error", Error | null>> {
+  export class WalletTransactionListError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<WalletTransactionListError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },
@@ -13225,6 +21671,7 @@ export namespace ThePlaidApiClient {
   };
 
   export type WatchlistScreeningEntityUpdateRequestParams = {
+    /** The entity screening was successfully updated. */
     body: WatchlistScreeningEntityUpdateRequest;
   };
 
@@ -13272,10 +21719,12 @@ export namespace ThePlaidApiClient {
     body: WebhookVerificationKeyGetRequest;
   };
 
-  export class WebhookVerificationKeyGetError extends ResponseError<Declared<"error", Error | null>> {
+  export class WebhookVerificationKeyGetError extends ApiError {
+    declare readonly payload: ErrorPayload<Declared<"error", Error | null>>;
+
     static readonly errors: ErrorDecoders<WebhookVerificationKeyGetError> = [
       {
-        on: [400, 599],
+        on: "default",
         kind: "error",
         decode: { kind: "json", schema: s.nullable(s.lazy(() => errorSchema)) },
       },

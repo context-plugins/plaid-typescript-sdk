@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Webhook code for a Cash Flow Updates event. */
 export const CashFlowUpdatesEventWebhookCodes = {
   LargeDepositDetected: "LARGE_DEPOSIT_DETECTED",
   LowBalanceDetected: "LOW_BALANCE_DETECTED",

@@ -5,10 +5,18 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/**
+ * Fired when one of your existing Beacon Reports has been modified or removed from the Beacon
+ * Network.
+ */
 export type BeaconReportUpdatedWebhook = {
+  /** `BEACON` */
   webhookType: string;
+  /** `REPORT_UPDATED` */
   webhookCode: string;
+  /** The ID of the associated Beacon Report. */
   beaconReportId: string;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

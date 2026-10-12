@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The processor you are integrating with. */
 export const Processor = {
   Dwolla: "dwolla",
   Galileo: "galileo",

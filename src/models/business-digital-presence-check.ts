@@ -10,20 +10,30 @@ import {
 } from "./business-verification-status-web-presence-check.js";
 import { businessWebsiteAnalysisSchema, type BusinessWebsiteAnalysis } from "./business-website-analysis.js";
 
+/** Results from the digital presence check. */
 export type BusinessDigitalPresenceCheck = {
+  /** Status of the digital presence check */
   status: BusinessVerificationStatusWebPresenceCheck;
+  /** A score from 0 to 100 indicating digital presence confidence. */
   score: number;
+  /** Summary of how a specific business field matched against data provider results */
   address: BusinessFieldMatchSummary;
+  /** Summary of how a specific business field matched against data provider results */
   phoneNumber: BusinessFieldMatchSummary;
+  /** Summary of how a specific business field matched against data provider results */
   emailAddress: BusinessFieldMatchSummary;
+  /** Summary of how a specific business field matched against data provider results */
   website: BusinessFieldMatchSummary;
+  /**
+   * Website analysis details if a website is found for the provided website in the search terms.
+   */
   websiteAnalysis: BusinessWebsiteAnalysis | null;
 };
 
 export const businessDigitalPresenceCheckSchema: Schema<BusinessDigitalPresenceCheck> =
   s.object<BusinessDigitalPresenceCheck>({
     status: businessVerificationStatusWebPresenceCheckSchema,
-    score: s.number(),
+    score: s.int(),
     address: businessFieldMatchSummarySchema,
     phoneNumber: businessFieldMatchSummarySchema,
     emailAddress: businessFieldMatchSummarySchema,

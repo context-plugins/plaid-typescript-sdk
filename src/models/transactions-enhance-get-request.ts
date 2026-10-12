@@ -5,10 +5,21 @@ import {
   type ClientProvidedRawTransaction,
 } from "./client-provided-raw-transaction.js";
 
+/** TransactionsEnhanceGetRequest defines the request schema for `/beta/transactions/v1/enhance`. */
 export type TransactionsEnhanceGetRequest = {
+  /**
+   * Your Plaid API `client_id`. The `client_id` is required and may be provided either in the
+   * `PLAID-CLIENT-ID` header or as part of a request body.
+   */
   clientId?: string;
+  /**
+   * Your Plaid API `secret`. The `secret` is required and may be provided either in the
+   * `PLAID-SECRET` header or as part of a request body.
+   */
   secret?: string;
+  /** The type of account for the requested transactions (`depository` or `credit`). */
   accountType: string;
+  /** An array of raw transactions to be enhanced. */
   transactions: ClientProvidedRawTransaction[];
 };
 

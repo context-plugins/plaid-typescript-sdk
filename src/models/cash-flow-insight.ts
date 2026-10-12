@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** An insight that can be detected by the Cash Flow Updates product */
 export const CashFlowInsight = {
   LargeDepositDetected: "LARGE_DEPOSIT_DETECTED",
   LowBalanceDetected: "LOW_BALANCE_DETECTED",

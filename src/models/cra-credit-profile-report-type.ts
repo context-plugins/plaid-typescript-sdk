@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The product type for the credit profile report request. */
 export const CraCreditProfileReportType = {
   Qualify: "QUALIFY",
 } as const;

@@ -7,13 +7,21 @@ import { businessWebsiteSchema, type BusinessWebsite } from "./business-website.
 import { providerBusinessAddressSchema, type ProviderBusinessAddress } from "./provider-business-address.js";
 import { providerBusinessNameSchema, type ProviderBusinessName } from "./provider-business-name.js";
 
+/** Detailed information about the business from data provider results */
 export type BusinessKybMatchDetails = {
+  /** Names associated with the business. */
   names: ProviderBusinessName[];
+  /** The legal structure or type of business entity */
   entityType: BusinessEntityType | null;
+  /** Addresses associated with the business */
   addresses: ProviderBusinessAddress[];
+  /** Phone numbers associated with the business */
   phoneNumbers: BusinessPhoneNumber[];
+  /** Email addresses associated with the business */
   emailAddresses: BusinessEmailAddress[];
+  /** Websites associated with the business */
   websites: BusinessWebsite[];
+  /** A date in the format YYYY-MM-DD (RFC 3339 Section 5.6). */
   formationDate: string | null;
 };
 

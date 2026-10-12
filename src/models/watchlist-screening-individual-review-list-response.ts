@@ -5,9 +5,16 @@ import {
   type WatchlistScreeningReview,
 } from "./watchlist-screening-review.js";
 
+/** Paginated list of screening reviews */
 export type WatchlistScreeningIndividualReviewListResponse = {
+  /** List of screening reviews */
   watchlistScreeningReviews: WatchlistScreeningReview[];
+  /** An identifier that determines which page of results you receive. */
   nextCursor: string | null;
+  /**
+   * A unique identifier for the request, which can be used for troubleshooting. This identifier,
+   * like all Plaid identifiers, is case sensitive.
+   */
   requestId: string;
 };
 

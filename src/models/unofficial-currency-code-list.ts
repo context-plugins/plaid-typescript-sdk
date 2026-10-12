@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** List of unofficial currency codes */
 export const UnofficialCurrencyCodeList = {
   Ada: "ADA",
   Bat: "BAT",

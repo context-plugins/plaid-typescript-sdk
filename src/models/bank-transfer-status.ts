@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The status of the transfer. */
 export const BankTransferStatus = {
   Pending: "pending",
   Posted: "posted",

@@ -6,12 +6,38 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/**
+ * Fired when an Item's historical transaction pull is completed and Plaid has prepared as much
+ * historical transaction data as possible for the Item. Once this webhook has been fired,
+ * transaction data beyond the most recent 30 days can be fetched for the Item. This webhook will
+ * also be fired if account selections for the Item are updated, with `new_transactions` set to the
+ * number of net new transactions pulled after the account selection update.
+ *
+ * This webhook is intended for use with `/transactions/get`; if you are using the newer
+ * `/transactions/sync` endpoint, this webhook will still be fired to maintain backwards
+ * compatibility, but it is recommended to listen for and respond to the `SYNC_UPDATES_AVAILABLE`
+ * webhook instead.
+ */
 export type HistoricalUpdateWebhook = {
+  /** `TRANSACTIONS` */
   webhookType: string;
+  /** `HISTORICAL_UPDATE` */
   webhookCode: string;
+  /**
+   * Errors are identified by `error_code` and categorized by `error_type`. Use these in preference
+   * to HTTP status codes to identify and handle specific errors. HTTP status codes are set and
+   * provide the broadest categorization of errors: 4xx codes are for developer- or user-related
+   * errors, and 5xx codes are for Plaid-related errors, and the status will be 2xx in non-error
+   * cases. An Item with a non-`null` error object will only be part of an API response when calling
+   * `/item/get` to view Item status. Otherwise, error fields will be `null` if no error has
+   * occurred; if an error has occurred, an error code will be returned instead.
+   */
   error?: Error | null;
+  /** The number of new transactions available */
   newTransactions: number;
+  /** The `item_id` of the Item associated with this webhook, warning, or error */
   itemId: string;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 
@@ -20,7 +46,7 @@ export const historicalUpdateWebhookSchema: Schema<HistoricalUpdateWebhook> =
     webhookType: s.string(),
     webhookCode: s.string(),
     error: s.optionalNullable(s.lazy(() => errorSchema)),
-    newTransactions: s.number(),
+    newTransactions: s.float64(),
     itemId: s.string(),
     environment: webhookEnvironmentValuesSchema,
     _keysMap: {

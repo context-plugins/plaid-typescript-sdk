@@ -9,11 +9,31 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/**
+ * Fired when refreshed statements extraction is completed or failed to be completed. Triggered by
+ * calling `/statements/refresh`.
+ */
 export type StatementsRefreshCompleteWebhook = {
+  /** `STATEMENTS` */
   webhookType: string;
+  /** `STATEMENTS_REFRESH_COMPLETE` */
   webhookCode: string;
+  /**
+   * The Plaid Item ID. The `item_id` is always unique; linking the same account at the same
+   * institution twice will result in two Items with different `item_id` values. Like all Plaid
+   * identifiers, the `item_id` is case-sensitive.
+   */
   itemId: string;
+  /**
+   * The result of the statement refresh extraction
+   *
+   * `SUCCESS`: The statements were successfully extracted and can be listed via `/statements/list`
+   * and downloaded via `/statements/download`.
+   *
+   * `FAILURE`: The statements failed to be extracted.
+   */
   result: StatementsRefreshCompleteResult;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

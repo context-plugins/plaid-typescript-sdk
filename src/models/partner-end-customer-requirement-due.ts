@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** A field that may be required to be submitted for enablement. */
 export const PartnerEndCustomerRequirementDue = {
   LegalEntityName: "legal_entity_name",
   Website: "website",

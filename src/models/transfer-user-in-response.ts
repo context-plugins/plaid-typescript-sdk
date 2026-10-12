@@ -5,10 +5,15 @@ import {
   type TransferUserAddressInResponse,
 } from "./transfer-user-address-in-response.js";
 
+/** The legal name and other information for the account holder. */
 export type TransferUserInResponse = {
+  /** The user's legal name. */
   legalName: string;
+  /** The user's phone number. */
   phoneNumber: string | null;
+  /** The user's email address. */
   emailAddress: string | null;
+  /** The address associated with the account holder. */
   address: TransferUserAddressInResponse | null;
 };
 

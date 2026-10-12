@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Codes describing the object of a consent event. */
 export const ConsentEventCode = {
   UserAgreement: "USER_AGREEMENT",
   UseCases: "USE_CASES",

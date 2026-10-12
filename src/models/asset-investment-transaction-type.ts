@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Asset Investment Transaction Type Enumerated derived by Vendor. */
 export const AssetInvestmentTransactionType = {
   Buy: "Buy",
   Sell: "Sell",

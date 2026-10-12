@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The income category for a specified income source */
 export const UserStatedIncomeSourceCategory = {
   Other: "OTHER",
   Salary: "SALARY",

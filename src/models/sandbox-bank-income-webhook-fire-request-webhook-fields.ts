@@ -5,8 +5,18 @@ import {
   type BankIncomeRefreshCompleteResult,
 } from "./bank-income-refresh-complete-result.js";
 
+/** Optional fields which will be populated in the simulated webhook */
 export type SandboxBankIncomeWebhookFireRequestWebhookFields = {
+  /** The user id to be returned in INCOME webhooks */
   userId: string;
+  /**
+   * The result of the bank income refresh report generation
+   *
+   * `SUCCESS`: The refreshed report was successfully generated and can be retrieved via
+   * `/credit/bank_income/get`.
+   *
+   * `FAILURE`: The refreshed report failed to be generated
+   */
   bankIncomeRefreshCompleteResult?: BankIncomeRefreshCompleteResult;
 };
 

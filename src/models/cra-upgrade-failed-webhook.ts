@@ -5,11 +5,19 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/** Fired when a Check Report upgrade attempt has failed */
 export type CraUpgradeFailedWebhook = {
+  /** `CHECK_REPORT` */
   webhookType: string;
+  /** `UPGRADE_FAILED` */
   webhookCode: string;
+  /** The `user_id` corresponding to the user the webhook has fired for. */
   userId: string;
+  /**
+   * An array of `item_id`s for items that failed to be upgraded by a Check Report upgrade attempt.
+   */
   itemIds: string[];
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

@@ -2,6 +2,7 @@ import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 import { assetHoldingSchema, type AssetHolding } from "./asset-holding.js";
 
+/** Documentation not found in the MISMO model viewer and not provided by Freddie Mac. */
 export type AssetHoldings = {
   assetHolding: AssetHolding[];
 };

@@ -1,6 +1,10 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * Enum representing the desired appearance mode for Link, used to force light or dark modes or set
+ * Link to change depending on user system settings. Currently in closed beta.
+ */
 export const LinkTokenCreateRequestAppearanceMode = {
   Light: "LIGHT",
   Dark: "DARK",

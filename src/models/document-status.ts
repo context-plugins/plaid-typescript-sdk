@@ -1,6 +1,11 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/**
+ * An outcome status for this specific document submission. Distinct from the overall
+ * `documentary_verification.status` that summarizes the verification outcome from one or more
+ * documents.
+ */
 export const DocumentStatus = {
   Success: "success",
   Failed: "failed",

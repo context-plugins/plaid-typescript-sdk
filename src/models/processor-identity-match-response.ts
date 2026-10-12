@@ -5,8 +5,14 @@ import {
   type AccountIdentityMatchScore,
 } from "./account-identity-match-score.js";
 
+/** ProcessorIdentityMatchResponse defines the response schema for `/processor/identity/match` */
 export type ProcessorIdentityMatchResponse = {
+  /** Identity match scores for an account */
   account: AccountIdentityMatchScore;
+  /**
+   * A unique identifier for the request, which can be used for troubleshooting. This identifier,
+   * like all Plaid identifiers, is case sensitive.
+   */
   requestId: string;
 };
 

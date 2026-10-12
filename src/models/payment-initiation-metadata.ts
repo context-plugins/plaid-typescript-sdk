@@ -5,12 +5,32 @@ import {
   type PaymentInitiationStandingOrderMetadata,
 } from "./payment-initiation-standing-order-metadata.js";
 
+/**
+ * Metadata that captures what specific payment configurations an institution supports when making
+ * Payment Initiation requests.
+ */
 export type PaymentInitiationMetadata = {
+  /** Indicates whether the institution supports payments from a different country. */
   supportsInternationalPayments: boolean;
+  /** Indicates whether the institution supports SEPA Instant payments. */
   supportsSepaInstant: boolean;
+  /**
+   * A mapping of currency to maximum payment amount (denominated in the smallest unit of currency)
+   * supported by the institution.
+   *
+   * Example: `{"GBP": "10000"}`
+   */
   maximumPaymentAmount: Record<string, string>;
+  /**
+   * Indicates whether the institution supports returning refund details when initiating a payment.
+   */
   supportsRefundDetails: boolean;
+  /**
+   * Metadata specifically related to valid Payment Initiation standing order configurations for the
+   * institution.
+   */
   standingOrderMetadata: PaymentInitiationStandingOrderMetadata | null;
+  /** Indicates whether the institution supports payment consents. */
   supportsPaymentConsents: boolean;
 };
 

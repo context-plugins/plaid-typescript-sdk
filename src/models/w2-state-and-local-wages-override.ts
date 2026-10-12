@@ -1,13 +1,21 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/** W2 state and local wages */
 export type W2StateAndLocalWagesOverride = {
+  /** State associated with the wage. */
   state?: string | null;
+  /** State identification number of the employer. */
   employerStateIdNumber?: string | null;
+  /** Wages and tips from the specified state. */
   stateWagesTips?: string | null;
+  /** Income tax from the specified state. */
   stateIncomeTax?: string | null;
+  /** Wages and tips from the locality. */
   localWagesTips?: string | null;
+  /** Income tax from the locality. */
   localIncomeTax?: string | null;
+  /** Name of the locality. */
   localityName?: string | null;
 };
 

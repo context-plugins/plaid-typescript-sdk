@@ -9,11 +9,36 @@ import {
 import { loanPaymentsIndicatorsSchema, type LoanPaymentsIndicators } from "./loan-payments-indicators.js";
 import { negativeBalanceInsightsSchema, type NegativeBalanceInsights } from "./negative-balance-insights.js";
 
+/**
+ * Risk indicators focus on providing signal on the possibility of a borrower defaulting on their
+ * loan repayments by providing data points related to its payment behavior, debt, and other
+ * relevant financial information, helping lenders gauge the level of risk involved in a certain
+ * operation.
+ */
 export type RiskIndicators = {
+  /**
+   * Insights into bank penalties and fees, including overdraft fees, NSF fees, and other
+   * bank-imposed charges.
+   */
   bankPenalties?: BankPenaltiesIndicators | null;
+  /**
+   * Insights into gambling-related transactions, including frequency, amounts, and top merchants.
+   */
   gambling?: GamblingIndicators | null;
+  /**
+   * Insights into loan disbursement transactions received by the user, tracking incoming funds from
+   * loan providers.
+   */
   loanDisbursements?: LoanDisbursementsIndicators | null;
+  /**
+   * Insights into loan payment transactions made by the user, tracking outgoing payments to loan
+   * providers.
+   */
   loanPayments?: LoanPaymentsIndicators | null;
+  /**
+   * Insights into negative balance occurrences, including frequency, duration, and minimum balance
+   * details.
+   */
   negativeBalance?: NegativeBalanceInsights | null;
 };
 

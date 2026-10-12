@@ -6,8 +6,11 @@ import {
 } from "./cra-partner-insights-fico-input.js";
 import { prismVersionsSchema, type PrismVersions } from "./prism-versions.js";
 
+/** Defines configuration to generate Partner Insights. */
 export type CraCheckReportCreatePartnerInsightsOptions = {
+  /** The versions of Prism products to evaluate */
   prismVersions?: PrismVersions | null;
+  /** Configuration for the FICO products used in the Partner Insights product. */
   fico?: CraPartnerInsightsFicoInput | null;
 };
 

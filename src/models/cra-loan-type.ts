@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** The type of loan the user applied for. */
 export const CraLoanType = {
   Personal: "PERSONAL",
   CreditCard: "CREDIT_CARD",

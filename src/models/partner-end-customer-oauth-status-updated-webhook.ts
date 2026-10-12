@@ -9,13 +9,24 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/**
+ * The webhook of type `PARTNER` and code `END_CUSTOMER_OAUTH_STATUS_UPDATED` will be fired when a
+ * partner's end customer has an update on their OAuth registration status with an institution.
+ */
 export type PartnerEndCustomerOAuthStatusUpdatedWebhook = {
+  /** `PARTNER` */
   webhookType: string;
+  /** `END_CUSTOMER_OAUTH_STATUS_UPDATED` */
   webhookCode: string;
+  /** The client ID of the end customer */
   endCustomerClientId: string;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
+  /** The institution ID */
   institutionId: string;
+  /** The institution name */
   institutionName: string;
+  /** The OAuth status of the update */
   status: PartnerEndCustomerOAuthStatusUpdatedValues;
 };
 

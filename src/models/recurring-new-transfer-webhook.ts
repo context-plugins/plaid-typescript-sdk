@@ -5,11 +5,17 @@ import {
   type WebhookEnvironmentValues,
 } from "./webhook-environment-values.js";
 
+/** Fired when a new transfer of a recurring transfer is originated. */
 export type RecurringNewTransferWebhook = {
+  /** `TRANSFER` */
   webhookType: string;
+  /** `RECURRING_NEW_TRANSFER` */
   webhookCode: string;
+  /** Plaid's unique identifier for a recurring transfer. */
   recurringTransferId: string;
+  /** Plaid's unique identifier for a transfer. */
   transferId: string;
+  /** The Plaid environment the webhook was sent from */
   environment: WebhookEnvironmentValues;
 };
 

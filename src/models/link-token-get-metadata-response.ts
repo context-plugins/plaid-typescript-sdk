@@ -8,14 +8,23 @@ import {
 } from "./link-token-create-institution-data.js";
 import { productsSchema, type Products } from "./products.js";
 
+/** An object specifying the arguments originally provided to the `/link/token/create` call. */
 export type LinkTokenGetMetadataResponse = {
+  /** The `products` specified in the `/link/token/create` call. */
   initialProducts: Products[];
+  /** The `webhook` specified in the `/link/token/create` call. */
   webhook: string | null;
+  /** The `country_codes` specified in the `/link/token/create` call. */
   countryCodes: CountryCode[];
+  /** The `language` specified in the `/link/token/create` call. */
   language: string | null;
+  /** A map containing data used to highlight institutions in Link. */
   institutionData?: LinkTokenCreateInstitutionData;
+  /** The `account_filters` specified in the original call to `/link/token/create`. */
   accountFilters?: AccountFiltersResponse;
+  /** The `redirect_uri` specified in the `/link/token/create` call. */
   redirectUri: string | null;
+  /** The `client_name` specified in the `/link/token/create` call. */
   clientName: string | null;
 };
 

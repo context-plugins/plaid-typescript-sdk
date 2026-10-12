@@ -6,7 +6,7 @@ Accessor: `client` (the client itself) · Source: `src/client.ts` · 335 operati
 
 Operations the spec leaves untagged are methods on the client rather than on a resource, so there is no accessor property to go through. The request type still lives in a namespace merged onto the exported class, so you write `ThePlaidApiClient.AccountsBalanceGetRequestParams`.
 
-**Type sources**: every type an operation names, with the file that declares it and the schema value exported beside it. Import every name from `the-plaid-api`; the `Source` path is where to **read** the shape, never what to import. `ResponseError` and the runtime error family are excluded — see sdk-map.md.
+**Type sources**: every type an operation names, with the file that declares it and the schema value exported beside it. Import every name from `the-plaid-api`; the `Source` path is where to **read** the shape, never what to import. `ApiError`, the runtime error family and the file vocabulary are excluded — see sdk-map.md.
 
 ### accountsBalanceGet
 
@@ -14,9 +14,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /accounts/balance/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `AccountsGetResponse`
-- **Error**: `ThePlaidApiClient.AccountsBalanceGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.AccountsBalanceGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.AccountsBalanceGetRequestParams` (1):
 
@@ -36,9 +37,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /accounts/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `AccountsGetResponse`
-- **Error**: `ThePlaidApiClient.AccountsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.AccountsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.AccountsGetRequestParams` (1):
 
@@ -58,9 +60,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /application/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ApplicationGetResponse`
-- **Error**: `ThePlaidApiClient.ApplicationGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ApplicationGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ApplicationGetRequestParams` (1):
 
@@ -80,9 +83,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /asset_report/audit_copy/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `AssetReportAuditCopyCreateResponse`
-- **Error**: `ThePlaidApiClient.AssetReportAuditCopyCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.AssetReportAuditCopyCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.AssetReportAuditCopyCreateRequestParams` (1):
 
@@ -102,9 +106,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /asset_report/audit_copy/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `AssetReportGetResponse`
-- **Error**: `ThePlaidApiClient.AssetReportAuditCopyGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.AssetReportAuditCopyGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.AssetReportAuditCopyGetRequestParams` (1):
 
@@ -124,9 +129,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /asset_report/audit_copy/pdf/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `undefined` — the operation resolves to nothing
-- **Error**: `ThePlaidApiClient.AssetReportAuditCopyPdfGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.AssetReportAuditCopyPdfGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.AssetReportAuditCopyPdfGetRequestParams` (1):
 
@@ -145,9 +151,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /asset_report/audit_copy/remove`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `AssetReportAuditCopyRemoveResponse`
-- **Error**: `ThePlaidApiClient.AssetReportAuditCopyRemoveError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.AssetReportAuditCopyRemoveError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.AssetReportAuditCopyRemoveRequestParams` (1):
 
@@ -167,9 +174,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /asset_report/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `AssetReportCreateResponse`
-- **Error**: `ThePlaidApiClient.AssetReportCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.AssetReportCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.AssetReportCreateRequestParams` (1):
 
@@ -189,9 +197,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /asset_report/filter`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `AssetReportFilterResponse`
-- **Error**: `ThePlaidApiClient.AssetReportFilterError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.AssetReportFilterError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.AssetReportFilterRequestParams` (1):
 
@@ -211,9 +220,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /asset_report/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `AssetReportGetResponse`
-- **Error**: `ThePlaidApiClient.AssetReportGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.AssetReportGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.AssetReportGetRequestParams` (1):
 
@@ -233,9 +243,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /asset_report/pdf/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `undefined` — the operation resolves to nothing
-- **Error**: `ThePlaidApiClient.AssetReportPdfGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.AssetReportPdfGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.AssetReportPdfGetRequestParams` (1):
 
@@ -254,9 +265,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /asset_report/refresh`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `AssetReportRefreshResponse`
-- **Error**: `ThePlaidApiClient.AssetReportRefreshError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.AssetReportRefreshError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.AssetReportRefreshRequestParams` (1):
 
@@ -276,9 +288,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /asset_report/remove`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `AssetReportRemoveResponse`
-- **Error**: `ThePlaidApiClient.AssetReportRemoveError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.AssetReportRemoveError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.AssetReportRemoveRequestParams` (1):
 
@@ -298,9 +311,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /auth/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `AuthGetResponse`
-- **Error**: `ThePlaidApiClient.AuthGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.AuthGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.AuthGetRequestParams` (1):
 
@@ -320,9 +334,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /auth/verify`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `AuthVerifyResponse`
-- **Error**: `ThePlaidApiClient.AuthVerifyError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.AuthVerifyError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.AuthVerifyRequestParams` (1):
 
@@ -339,12 +354,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### bankTransferBalanceGet
 
 - **Signature**: `bankTransferBalanceGet(request: ThePlaidApiClient.BankTransferBalanceGetRequestParams, options?: RequestOptions): ApiPromise<BankTransferBalanceGetResponse, ThePlaidApiClient.BankTransferBalanceGetError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /bank_transfer/balance/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BankTransferBalanceGetResponse`
-- **Error**: `ThePlaidApiClient.BankTransferBalanceGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.BankTransferBalanceGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.BankTransferBalanceGetRequestParams` (1):
 
@@ -361,12 +378,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### bankTransferCancel
 
 - **Signature**: `bankTransferCancel(request: ThePlaidApiClient.BankTransferCancelRequestParams, options?: RequestOptions): ApiPromise<BankTransferCancelResponse, ThePlaidApiClient.BankTransferCancelError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /bank_transfer/cancel`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BankTransferCancelResponse`
-- **Error**: `ThePlaidApiClient.BankTransferCancelError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.BankTransferCancelError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.BankTransferCancelRequestParams` (1):
 
@@ -383,12 +402,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### bankTransferCreate
 
 - **Signature**: `bankTransferCreate(request: ThePlaidApiClient.BankTransferCreateRequestParams, options?: RequestOptions): ApiPromise<BankTransferCreateResponse, ThePlaidApiClient.BankTransferCreateError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /bank_transfer/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BankTransferCreateResponse`
-- **Error**: `ThePlaidApiClient.BankTransferCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.BankTransferCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.BankTransferCreateRequestParams` (1):
 
@@ -408,9 +429,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /bank_transfer/event/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BankTransferEventListResponse`
-- **Error**: `ThePlaidApiClient.BankTransferEventListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.BankTransferEventListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.BankTransferEventListRequestParams` (1):
 
@@ -430,9 +452,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /bank_transfer/event/sync`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BankTransferEventSyncResponse`
-- **Error**: `ThePlaidApiClient.BankTransferEventSyncError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.BankTransferEventSyncError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.BankTransferEventSyncRequestParams` (1):
 
@@ -449,12 +472,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### bankTransferGet
 
 - **Signature**: `bankTransferGet(request: ThePlaidApiClient.BankTransferGetRequestParams, options?: RequestOptions): ApiPromise<BankTransferGetResponse, ThePlaidApiClient.BankTransferGetError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /bank_transfer/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BankTransferGetResponse`
-- **Error**: `ThePlaidApiClient.BankTransferGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.BankTransferGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.BankTransferGetRequestParams` (1):
 
@@ -471,12 +496,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### bankTransferList
 
 - **Signature**: `bankTransferList(request: ThePlaidApiClient.BankTransferListRequestParams, options?: RequestOptions): ApiPromise<BankTransferListResponse, ThePlaidApiClient.BankTransferListError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /bank_transfer/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BankTransferListResponse`
-- **Error**: `ThePlaidApiClient.BankTransferListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.BankTransferListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.BankTransferListRequestParams` (1):
 
@@ -493,12 +520,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### bankTransferMigrateAccount
 
 - **Signature**: `bankTransferMigrateAccount(request: ThePlaidApiClient.BankTransferMigrateAccountRequestParams, options?: RequestOptions): ApiPromise<BankTransferMigrateAccountResponse, ThePlaidApiClient.BankTransferMigrateAccountError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /bank_transfer/migrate_account`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BankTransferMigrateAccountResponse`
-- **Error**: `ThePlaidApiClient.BankTransferMigrateAccountError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.BankTransferMigrateAccountError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.BankTransferMigrateAccountRequestParams` (1):
 
@@ -515,12 +544,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### bankTransferSweepGet
 
 - **Signature**: `bankTransferSweepGet(request: ThePlaidApiClient.BankTransferSweepGetRequestParams, options?: RequestOptions): ApiPromise<BankTransferSweepGetResponse, ThePlaidApiClient.BankTransferSweepGetError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /bank_transfer/sweep/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BankTransferSweepGetResponse`
-- **Error**: `ThePlaidApiClient.BankTransferSweepGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.BankTransferSweepGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.BankTransferSweepGetRequestParams` (1):
 
@@ -537,12 +568,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### bankTransferSweepList
 
 - **Signature**: `bankTransferSweepList(request: ThePlaidApiClient.BankTransferSweepListRequestParams, options?: RequestOptions): ApiPromise<BankTransferSweepListResponse, ThePlaidApiClient.BankTransferSweepListError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /bank_transfer/sweep/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BankTransferSweepListResponse`
-- **Error**: `ThePlaidApiClient.BankTransferSweepListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.BankTransferSweepListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.BankTransferSweepListRequestParams` (1):
 
@@ -559,12 +592,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### beaconAccountRiskEvaluate
 
 - **Signature**: `beaconAccountRiskEvaluate(request: ThePlaidApiClient.BeaconAccountRiskEvaluateRequestParams, options?: RequestOptions): ApiPromise<BeaconAccountRiskEvaluateResponse, ThePlaidApiClient.BeaconAccountRiskEvaluateError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /beacon/account_risk/v1/evaluate`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BeaconAccountRiskEvaluateResponse`
-- **Error**: `ThePlaidApiClient.BeaconAccountRiskEvaluateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.BeaconAccountRiskEvaluateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.BeaconAccountRiskEvaluateRequestParams` (1):
 
@@ -580,12 +615,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### beaconDuplicateGet
 
-- **Signature**: `beaconDuplicateGet(request: ThePlaidApiClient.BeaconDuplicateGetRequestParams, options?: RequestOptions): ApiPromise<BeaconDuplicateGetResponse, ResponseError>`
+- **Signature**: `beaconDuplicateGet(request: ThePlaidApiClient.BeaconDuplicateGetRequestParams, options?: RequestOptions): ApiPromise<BeaconDuplicateGetResponse, ApiError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /beacon/duplicate/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BeaconDuplicateGetResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.BeaconDuplicateGetRequestParams` (1):
 
@@ -600,12 +637,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### beaconReportCreate
 
-- **Signature**: `beaconReportCreate(request: ThePlaidApiClient.BeaconReportCreateRequestParams, options?: RequestOptions): ApiPromise<BeaconReportCreateResponse, ResponseError>`
+- **Signature**: `beaconReportCreate(request: ThePlaidApiClient.BeaconReportCreateRequestParams, options?: RequestOptions): ApiPromise<BeaconReportCreateResponse, ApiError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /beacon/report/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BeaconReportCreateResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.BeaconReportCreateRequestParams` (1):
 
@@ -620,12 +659,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### beaconReportGet
 
-- **Signature**: `beaconReportGet(request: ThePlaidApiClient.BeaconReportGetRequestParams, options?: RequestOptions): ApiPromise<BeaconReportGetResponse, ResponseError>`
+- **Signature**: `beaconReportGet(request: ThePlaidApiClient.BeaconReportGetRequestParams, options?: RequestOptions): ApiPromise<BeaconReportGetResponse, ApiError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /beacon/report/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BeaconReportGetResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.BeaconReportGetRequestParams` (1):
 
@@ -640,12 +681,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### beaconReportList
 
-- **Signature**: `beaconReportList(request: ThePlaidApiClient.BeaconReportListRequestParams, options?: RequestOptions): ApiPromise<BeaconReportListResponse, ResponseError>`
+- **Signature**: `beaconReportList(request: ThePlaidApiClient.BeaconReportListRequestParams, options?: RequestOptions): ApiPromise<BeaconReportListResponse, ApiError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /beacon/report/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BeaconReportListResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.BeaconReportListRequestParams` (1):
 
@@ -660,12 +703,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### beaconReportSyndicationGet
 
-- **Signature**: `beaconReportSyndicationGet(request: ThePlaidApiClient.BeaconReportSyndicationGetRequestParams, options?: RequestOptions): ApiPromise<BeaconReportSyndicationGetResponse, ResponseError>`
+- **Signature**: `beaconReportSyndicationGet(request: ThePlaidApiClient.BeaconReportSyndicationGetRequestParams, options?: RequestOptions): ApiPromise<BeaconReportSyndicationGetResponse, ApiError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /beacon/report_syndication/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BeaconReportSyndicationGetResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.BeaconReportSyndicationGetRequestParams` (1):
 
@@ -680,12 +725,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### beaconReportSyndicationList
 
-- **Signature**: `beaconReportSyndicationList(request: ThePlaidApiClient.BeaconReportSyndicationListRequestParams, options?: RequestOptions): ApiPromise<BeaconReportSyndicationListResponse, ResponseError>`
+- **Signature**: `beaconReportSyndicationList(request: ThePlaidApiClient.BeaconReportSyndicationListRequestParams, options?: RequestOptions): ApiPromise<BeaconReportSyndicationListResponse, ApiError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /beacon/report_syndication/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BeaconReportSyndicationListResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.BeaconReportSyndicationListRequestParams` (1):
 
@@ -700,12 +747,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### beaconUserAccountInsightsGet
 
-- **Signature**: `beaconUserAccountInsightsGet(request: ThePlaidApiClient.BeaconUserAccountInsightsGetRequestParams, options?: RequestOptions): ApiPromise<BeaconUserAccountInsightsGetResponse, ResponseError>`
+- **Signature**: `beaconUserAccountInsightsGet(request: ThePlaidApiClient.BeaconUserAccountInsightsGetRequestParams, options?: RequestOptions): ApiPromise<BeaconUserAccountInsightsGetResponse, ApiError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /beacon/user/account_insights/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BeaconUserAccountInsightsGetResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.BeaconUserAccountInsightsGetRequestParams` (1):
 
@@ -720,12 +769,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### beaconUserCreate
 
-- **Signature**: `beaconUserCreate(request: ThePlaidApiClient.BeaconUserCreateRequestParams, options?: RequestOptions): ApiPromise<BeaconUserCreateResponse, ResponseError>`
+- **Signature**: `beaconUserCreate(request: ThePlaidApiClient.BeaconUserCreateRequestParams, options?: RequestOptions): ApiPromise<BeaconUserCreateResponse, ApiError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /beacon/user/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BeaconUserCreateResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.BeaconUserCreateRequestParams` (1):
 
@@ -740,12 +791,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### beaconUserGet
 
-- **Signature**: `beaconUserGet(request: ThePlaidApiClient.BeaconUserGetRequestParams, options?: RequestOptions): ApiPromise<BeaconUserGetResponse, ResponseError>`
+- **Signature**: `beaconUserGet(request: ThePlaidApiClient.BeaconUserGetRequestParams, options?: RequestOptions): ApiPromise<BeaconUserGetResponse, ApiError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /beacon/user/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BeaconUserGetResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.BeaconUserGetRequestParams` (1):
 
@@ -760,12 +813,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### beaconUserHistoryList
 
-- **Signature**: `beaconUserHistoryList(request: ThePlaidApiClient.BeaconUserHistoryListRequestParams, options?: RequestOptions): ApiPromise<BeaconUserHistoryListResponse, ResponseError>`
+- **Signature**: `beaconUserHistoryList(request: ThePlaidApiClient.BeaconUserHistoryListRequestParams, options?: RequestOptions): ApiPromise<BeaconUserHistoryListResponse, ApiError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /beacon/user/history/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BeaconUserHistoryListResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.BeaconUserHistoryListRequestParams` (1):
 
@@ -780,12 +835,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### beaconUserReview
 
-- **Signature**: `beaconUserReview(request: ThePlaidApiClient.BeaconUserReviewRequestParams, options?: RequestOptions): ApiPromise<BeaconUserGetResponse, ResponseError>`
+- **Signature**: `beaconUserReview(request: ThePlaidApiClient.BeaconUserReviewRequestParams, options?: RequestOptions): ApiPromise<BeaconUserGetResponse, ApiError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /beacon/user/review`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BeaconUserGetResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.BeaconUserReviewRequestParams` (1):
 
@@ -800,12 +857,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### beaconUserUpdate
 
-- **Signature**: `beaconUserUpdate(request: ThePlaidApiClient.BeaconUserUpdateRequestParams, options?: RequestOptions): ApiPromise<BeaconUserUpdateResponse, ResponseError>`
+- **Signature**: `beaconUserUpdate(request: ThePlaidApiClient.BeaconUserUpdateRequestParams, options?: RequestOptions): ApiPromise<BeaconUserUpdateResponse, ApiError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /beacon/user/update`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BeaconUserUpdateResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.BeaconUserUpdateRequestParams` (1):
 
@@ -824,9 +883,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /beta/ewa_report/v1/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BetaEwaReportV1GetResponse`
-- **Error**: `ThePlaidApiClient.BetaEwaReportV1GetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.BetaEwaReportV1GetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.BetaEwaReportV1GetRequestParams` (1):
 
@@ -846,9 +906,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /beta/partner/customer/v1/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BetaPartnerCustomerV1CreateResponse`
-- **Error**: `ThePlaidApiClient.BetaPartnerCustomerV1CreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.BetaPartnerCustomerV1CreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.BetaPartnerCustomerV1CreateRequestParams` (1):
 
@@ -868,9 +929,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /beta/partner/customer/v1/enable`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BetaPartnerCustomerV1EnableResponse`
-- **Error**: `ThePlaidApiClient.BetaPartnerCustomerV1EnableError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.BetaPartnerCustomerV1EnableError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.BetaPartnerCustomerV1EnableRequestParams` (1):
 
@@ -890,9 +952,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /beta/partner/customer/v1/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BetaPartnerCustomerV1GetResponse`
-- **Error**: `ThePlaidApiClient.BetaPartnerCustomerV1GetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.BetaPartnerCustomerV1GetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.BetaPartnerCustomerV1GetRequestParams` (1):
 
@@ -912,9 +975,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /beta/partner/customer/v1/update`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BetaPartnerCustomerV1UpdateResponse`
-- **Error**: `ThePlaidApiClient.BetaPartnerCustomerV1UpdateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.BetaPartnerCustomerV1UpdateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.BetaPartnerCustomerV1UpdateRequestParams` (1):
 
@@ -930,12 +994,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### businessVerificationCreate
 
-- **Signature**: `businessVerificationCreate(request: ThePlaidApiClient.BusinessVerificationCreateRequestParams, options?: RequestOptions): ApiPromise<BusinessVerificationCreateResponse, ResponseError>`
+- **Signature**: `businessVerificationCreate(request: ThePlaidApiClient.BusinessVerificationCreateRequestParams, options?: RequestOptions): ApiPromise<BusinessVerificationCreateResponse, ApiError>`
 - **Wire**: `POST /business_verification/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BusinessVerificationCreateResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.BusinessVerificationCreateRequestParams` (1):
 
@@ -950,12 +1015,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### businessVerificationGet
 
-- **Signature**: `businessVerificationGet(request: ThePlaidApiClient.BusinessVerificationGetRequestParams, options?: RequestOptions): ApiPromise<BusinessVerificationGetResponse, ResponseError>`
+- **Signature**: `businessVerificationGet(request: ThePlaidApiClient.BusinessVerificationGetRequestParams, options?: RequestOptions): ApiPromise<BusinessVerificationGetResponse, ApiError>`
 - **Wire**: `POST /business_verification/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `BusinessVerificationGetResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.BusinessVerificationGetRequestParams` (1):
 
@@ -974,9 +1040,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cashflow_report/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CashflowReportGetResponse`
-- **Error**: `ThePlaidApiClient.CashflowReportGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CashflowReportGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CashflowReportGetRequestParams` (1):
 
@@ -996,9 +1063,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cashflow_report/insights/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CashflowReportInsightsGetResponse`
-- **Error**: `ThePlaidApiClient.CashflowReportInsightsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CashflowReportInsightsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CashflowReportInsightsGetRequestParams` (1):
 
@@ -1018,9 +1086,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cashflow_report/refresh`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CashflowReportRefreshResponse`
-- **Error**: `ThePlaidApiClient.CashflowReportRefreshError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CashflowReportRefreshError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CashflowReportRefreshRequestParams` (1):
 
@@ -1040,9 +1109,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cashflow_report/transactions/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CashflowReportTransactionsGetResponse`
-- **Error**: `ThePlaidApiClient.CashflowReportTransactionsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CashflowReportTransactionsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CashflowReportTransactionsGetRequestParams` (1):
 
@@ -1059,12 +1129,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### categoriesGet
 
 - **Signature**: `categoriesGet(request: ThePlaidApiClient.CategoriesGetRequest, options?: RequestOptions): ApiPromise<CategoriesGetResponse, ThePlaidApiClient.CategoriesGetError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /categories/get`
 - **Auth**: none — public; no credential is sent
 - **Request body**: `application/json` — the `body` field, a bare top-level JSON map with no fixed keys
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CategoriesGetResponse`
-- **Error**: `ThePlaidApiClient.CategoriesGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CategoriesGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CategoriesGetRequest` (1):
 
@@ -1083,9 +1155,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /consent/events/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ConsentEventsGetResponse`
-- **Error**: `ThePlaidApiClient.ConsentEventsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ConsentEventsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ConsentEventsGetRequestParams` (1):
 
@@ -1105,9 +1178,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /consumer_report/pdf/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `undefined` — the operation resolves to nothing
-- **Error**: `ThePlaidApiClient.ConsumerReportPdfGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ConsumerReportPdfGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ConsumerReportPdfGetRequestParams` (1):
 
@@ -1126,9 +1200,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/check_report/base_report/get`
 - **Auth**: any of (all of `clientId`, `secret`, `plaidVersion`), `oauth2` — the first branch fully configured is sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraCheckReportBaseReportGetResponse`
-- **Error**: `ThePlaidApiClient.CraCheckReportBaseReportGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraCheckReportBaseReportGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraCheckReportBaseReportGetRequestParams` (1):
 
@@ -1148,9 +1223,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/check_report/cashflow_insights/get`
 - **Auth**: any of (all of `clientId`, `secret`, `plaidVersion`), `oauth2` — the first branch fully configured is sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraCheckReportCashflowInsightsGetResponse`
-- **Error**: `ThePlaidApiClient.CraCheckReportCashflowInsightsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraCheckReportCashflowInsightsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraCheckReportCashflowInsightsGetRequestParams` (1):
 
@@ -1170,9 +1246,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/check_report/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraCheckReportCreateResponse`
-- **Error**: `ThePlaidApiClient.CraCheckReportCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraCheckReportCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraCheckReportCreateRequestParams` (1):
 
@@ -1192,9 +1269,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/check_report/income_insights/get`
 - **Auth**: any of (all of `clientId`, `secret`, `plaidVersion`), `oauth2` — the first branch fully configured is sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraCheckReportIncomeInsightsGetResponse`
-- **Error**: `ThePlaidApiClient.CraCheckReportIncomeInsightsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraCheckReportIncomeInsightsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraCheckReportIncomeInsightsGetRequestParams` (1):
 
@@ -1214,9 +1292,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/check_report/lend_score/get`
 - **Auth**: any of (all of `clientId`, `secret`, `plaidVersion`), `oauth2` — the first branch fully configured is sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraCheckReportLendScoreGetResponse`
-- **Error**: `ThePlaidApiClient.CraCheckReportLendScoreGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraCheckReportLendScoreGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraCheckReportLendScoreGetRequestParams` (1):
 
@@ -1236,9 +1315,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/check_report/network_insights/get`
 - **Auth**: any of (all of `clientId`, `secret`, `plaidVersion`), `oauth2` — the first branch fully configured is sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraCheckReportNetworkInsightsGetResponse`
-- **Error**: `ThePlaidApiClient.CraCheckReportNetworkInsightsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraCheckReportNetworkInsightsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraCheckReportNetworkInsightsGetRequestParams` (1):
 
@@ -1258,9 +1338,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/check_report/partner_insights/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraCheckReportPartnerInsightsGetResponse`
-- **Error**: `ThePlaidApiClient.CraCheckReportPartnerInsightsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraCheckReportPartnerInsightsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraCheckReportPartnerInsightsGetRequestParams` (1):
 
@@ -1280,9 +1361,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/check_report/pdf/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `undefined` — the operation resolves to nothing
-- **Error**: `ThePlaidApiClient.CraCheckReportPdfGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraCheckReportPdfGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraCheckReportPdfGetRequestParams` (1):
 
@@ -1301,9 +1383,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/check_report/verification/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraCheckReportVerificationGetResponse`
-- **Error**: `ThePlaidApiClient.CraCheckReportVerificationGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraCheckReportVerificationGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraCheckReportVerificationGetRequestParams` (1):
 
@@ -1323,9 +1406,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/check_report/verification/pdf/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `undefined` — the operation resolves to nothing
-- **Error**: `ThePlaidApiClient.CraCheckReportVerificationPdfGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraCheckReportVerificationPdfGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraCheckReportVerificationPdfGetRequestParams` (1):
 
@@ -1344,9 +1428,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/credit_profile/report/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraCreditProfileReportGetResponse`
-- **Error**: `ThePlaidApiClient.CraCreditProfileReportGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraCreditProfileReportGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraCreditProfileReportGetRequestParams` (1):
 
@@ -1366,9 +1451,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/loans/applications/register`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraLoansApplicationsRegisterResponse`
-- **Error**: `ThePlaidApiClient.CraLoansApplicationsRegisterError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraLoansApplicationsRegisterError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraLoansApplicationsRegisterRequestParams` (1):
 
@@ -1388,9 +1474,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/loans/register`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraLoansRegisterResponse`
-- **Error**: `ThePlaidApiClient.CraLoansRegisterError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraLoansRegisterError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraLoansRegisterRequestParams` (1):
 
@@ -1410,9 +1497,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/loans/unregister`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraLoanUnregisterResponse`
-- **Error**: `ThePlaidApiClient.CraLoansUnregisterError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraLoansUnregisterError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraLoansUnregisterRequestParams` (1):
 
@@ -1432,9 +1520,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/loans/update`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraLoansUpdateResponse`
-- **Error**: `ThePlaidApiClient.CraLoansUpdateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraLoansUpdateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraLoansUpdateRequestParams` (1):
 
@@ -1454,9 +1543,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/monitoring_insights/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraMonitoringInsightsGetResponse`
-- **Error**: `ThePlaidApiClient.CraMonitoringInsightsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraMonitoringInsightsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraMonitoringInsightsGetRequestParams` (1):
 
@@ -1476,9 +1566,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/monitoring_insights/subscribe`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraMonitoringInsightsSubscribeResponse`
-- **Error**: `ThePlaidApiClient.CraMonitoringInsightsSubscribeError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraMonitoringInsightsSubscribeError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraMonitoringInsightsSubscribeRequestParams` (1):
 
@@ -1498,9 +1589,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/monitoring_insights/unsubscribe`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraMonitoringInsightsUnsubscribeResponse`
-- **Error**: `ThePlaidApiClient.CraMonitoringInsightsUnsubscribeError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraMonitoringInsightsUnsubscribeError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraMonitoringInsightsUnsubscribeRequestParams` (1):
 
@@ -1520,9 +1612,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/partner_insights/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraPartnerInsightsGetResponse`
-- **Error**: `ThePlaidApiClient.CraPartnerInsightsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraPartnerInsightsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraPartnerInsightsGetRequestParams` (1):
 
@@ -1542,9 +1635,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /cra/report/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CraReportGetResponse`
-- **Error**: `ThePlaidApiClient.CraReportGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CraReportGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CraReportGetRequestParams` (1):
 
@@ -1561,12 +1655,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### createPaymentToken
 
 - **Signature**: `createPaymentToken(request: ThePlaidApiClient.CreatePaymentTokenRequest, options?: RequestOptions): ApiPromise<PaymentInitiationPaymentTokenCreateResponse, ThePlaidApiClient.CreatePaymentTokenError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /payment_initiation/payment/token/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PaymentInitiationPaymentTokenCreateResponse`
-- **Error**: `ThePlaidApiClient.CreatePaymentTokenError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreatePaymentTokenError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreatePaymentTokenRequest` (1):
 
@@ -1586,9 +1682,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/asset_report/freddie_mac/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `AssetReportFreddieGetResponse`
-- **Error**: `ThePlaidApiClient.CreditAssetReportFreddieMacGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditAssetReportFreddieMacGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditAssetReportFreddieMacGetRequest` (1):
 
@@ -1608,9 +1705,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/audit_copy_token/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditAuditCopyTokenCreateResponse`
-- **Error**: `ThePlaidApiClient.CreditAuditCopyTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditAuditCopyTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditAuditCopyTokenCreateRequestParams` (1):
 
@@ -1630,9 +1728,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/audit_copy_token/update`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditAuditCopyTokenUpdateResponse`
-- **Error**: `ThePlaidApiClient.CreditAuditCopyTokenUpdateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditAuditCopyTokenUpdateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditAuditCopyTokenUpdateRequestParams` (1):
 
@@ -1652,9 +1751,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /beta/credit/v1/bank_employment/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditBankEmploymentGetResponse`
-- **Error**: `ThePlaidApiClient.CreditBankEmploymentGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditBankEmploymentGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditBankEmploymentGetRequestParams` (1):
 
@@ -1674,9 +1774,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/bank_income/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditBankIncomeGetResponse`
-- **Error**: `ThePlaidApiClient.CreditBankIncomeGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditBankIncomeGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditBankIncomeGetRequestParams` (1):
 
@@ -1696,9 +1797,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/bank_income/pdf/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `undefined` — the operation resolves to nothing
-- **Error**: `ThePlaidApiClient.CreditBankIncomePdfGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditBankIncomePdfGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditBankIncomePdfGetRequestParams` (1):
 
@@ -1714,12 +1816,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### creditBankIncomeRefresh
 
 - **Signature**: `creditBankIncomeRefresh(request: ThePlaidApiClient.CreditBankIncomeRefreshRequestParams, options?: RequestOptions): ApiPromise<CreditBankIncomeRefreshResponse, ThePlaidApiClient.CreditBankIncomeRefreshError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /credit/bank_income/refresh`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditBankIncomeRefreshResponse`
-- **Error**: `ThePlaidApiClient.CreditBankIncomeRefreshError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditBankIncomeRefreshError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditBankIncomeRefreshRequestParams` (1):
 
@@ -1739,9 +1843,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/bank_income/webhook/update`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditBankIncomeWebhookUpdateResponse`
-- **Error**: `ThePlaidApiClient.CreditBankIncomeWebhookUpdateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditBankIncomeWebhookUpdateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditBankIncomeWebhookUpdateRequestParams` (1):
 
@@ -1761,9 +1866,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/bank_statements/uploads/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditBankStatementsUploadsGetResponse`
-- **Error**: `ThePlaidApiClient.CreditBankStatementsUploadsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditBankStatementsUploadsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditBankStatementsUploadsGetRequestParams` (1):
 
@@ -1783,9 +1889,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/employment/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditEmploymentGetResponse`
-- **Error**: `ThePlaidApiClient.CreditEmploymentGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditEmploymentGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditEmploymentGetRequestParams` (1):
 
@@ -1805,9 +1912,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/freddie_mac/reports/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditFreddieMacReportsGetResponse`
-- **Error**: `ThePlaidApiClient.CreditFreddieMacReportsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditFreddieMacReportsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditFreddieMacReportsGetRequestParams` (1):
 
@@ -1827,9 +1935,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/payroll_income/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditPayrollIncomeGetResponse`
-- **Error**: `ThePlaidApiClient.CreditPayrollIncomeGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditPayrollIncomeGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditPayrollIncomeGetRequestParams` (1):
 
@@ -1849,9 +1958,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/payroll_income/parsing_config/update`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditPayrollIncomeParsingConfigUpdateResponse`
-- **Error**: `ThePlaidApiClient.CreditPayrollIncomeParsingConfigUpdateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditPayrollIncomeParsingConfigUpdateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditPayrollIncomeParsingConfigUpdateRequestParams` (1):
 
@@ -1868,12 +1978,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### creditPayrollIncomePrecheck
 
 - **Signature**: `creditPayrollIncomePrecheck(request: ThePlaidApiClient.CreditPayrollIncomePrecheckRequestParams, options?: RequestOptions): ApiPromise<CreditPayrollIncomePrecheckResponse, ThePlaidApiClient.CreditPayrollIncomePrecheckError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /credit/payroll_income/precheck`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditPayrollIncomePrecheckResponse`
-- **Error**: `ThePlaidApiClient.CreditPayrollIncomePrecheckError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditPayrollIncomePrecheckError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditPayrollIncomePrecheckRequestParams` (1):
 
@@ -1893,9 +2005,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/payroll_income/refresh`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditPayrollIncomeRefreshResponse`
-- **Error**: `ThePlaidApiClient.CreditPayrollIncomeRefreshError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditPayrollIncomeRefreshError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditPayrollIncomeRefreshRequestParams` (1):
 
@@ -1915,9 +2028,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/payroll_income/risk_signals/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditPayrollIncomeRiskSignalsGetResponse`
-- **Error**: `ThePlaidApiClient.CreditPayrollIncomeRiskSignalsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditPayrollIncomeRiskSignalsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditPayrollIncomeRiskSignalsGetRequestParams` (1):
 
@@ -1937,9 +2051,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/relay/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditRelayCreateResponse`
-- **Error**: `ThePlaidApiClient.CreditRelayCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditRelayCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditRelayCreateRequestParams` (1):
 
@@ -1959,9 +2074,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/relay/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `AssetReportGetResponse`
-- **Error**: `ThePlaidApiClient.CreditRelayGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditRelayGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditRelayGetRequestParams` (1):
 
@@ -1981,9 +2097,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/relay/pdf/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `undefined` — the operation resolves to nothing
-- **Error**: `ThePlaidApiClient.CreditRelayPdfGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditRelayPdfGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditRelayPdfGetRequestParams` (1):
 
@@ -2002,9 +2119,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/relay/refresh`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditRelayRefreshResponse`
-- **Error**: `ThePlaidApiClient.CreditRelayRefreshError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditRelayRefreshError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditRelayRefreshRequestParams` (1):
 
@@ -2024,9 +2142,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/relay/remove`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditRelayRemoveResponse`
-- **Error**: `ThePlaidApiClient.CreditRelayRemoveError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditRelayRemoveError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditRelayRemoveRequestParams` (1):
 
@@ -2046,9 +2165,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/audit_copy_token/remove`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditAuditCopyTokenRemoveResponse`
-- **Error**: `ThePlaidApiClient.CreditReportAuditCopyRemoveError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditReportAuditCopyRemoveError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditReportAuditCopyRemoveRequest` (1):
 
@@ -2068,9 +2188,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /credit/sessions/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `CreditSessionsGetResponse`
-- **Error**: `ThePlaidApiClient.CreditSessionsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.CreditSessionsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.CreditSessionsGetRequestParams` (1):
 
@@ -2086,12 +2207,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### dashboardUserGet
 
-- **Signature**: `dashboardUserGet(request: ThePlaidApiClient.DashboardUserGetRequestParams, options?: RequestOptions): ApiPromise<DashboardUserGetResponse, ResponseError>`
+- **Signature**: `dashboardUserGet(request: ThePlaidApiClient.DashboardUserGetRequestParams, options?: RequestOptions): ApiPromise<DashboardUserGetResponse, ApiError>`
 - **Wire**: `POST /dashboard_user/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `DashboardUserGetResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.DashboardUserGetRequestParams` (1):
 
@@ -2106,12 +2228,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### dashboardUserList
 
-- **Signature**: `dashboardUserList(request: ThePlaidApiClient.DashboardUserListRequestParams, options?: RequestOptions): ApiPromise<DashboardUserListResponse, ResponseError>`
+- **Signature**: `dashboardUserList(request: ThePlaidApiClient.DashboardUserListRequestParams, options?: RequestOptions): ApiPromise<DashboardUserListResponse, ApiError>`
 - **Wire**: `POST /dashboard_user/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `DashboardUserListResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.DashboardUserListRequestParams` (1):
 
@@ -2127,12 +2250,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### employersSearch
 
 - **Signature**: `employersSearch(request: ThePlaidApiClient.EmployersSearchRequestParams, options?: RequestOptions): ApiPromise<EmployersSearchResponse, ThePlaidApiClient.EmployersSearchError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /employers/search`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `EmployersSearchResponse`
-- **Error**: `ThePlaidApiClient.EmployersSearchError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.EmployersSearchError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.EmployersSearchRequestParams` (1):
 
@@ -2149,12 +2274,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### employmentVerificationGet
 
 - **Signature**: `employmentVerificationGet(request: ThePlaidApiClient.EmploymentVerificationGetRequestParams, options?: RequestOptions): ApiPromise<EmploymentVerificationGetResponse, ThePlaidApiClient.EmploymentVerificationGetError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /employment/verification/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `EmploymentVerificationGetResponse`
-- **Error**: `ThePlaidApiClient.EmploymentVerificationGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.EmploymentVerificationGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.EmploymentVerificationGetRequestParams` (1):
 
@@ -2175,8 +2302,8 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: none — no `Content-Type` header is sent
 - **Returns**: `FdxConsentGrant`
-- **Error**: `ThePlaidApiClient.FdxConsentsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.FdxConsentsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.FdxConsentsGetRequest` (1):
 
@@ -2196,8 +2323,8 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: none — no `Content-Type` header is sent
 - **Returns**: `GetConsentsResponse`
-- **Error**: `ThePlaidApiClient.FdxConsentsListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.FdxConsentsListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.FdxConsentsListRequest` (2):
 
@@ -2219,8 +2346,8 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: none — no `Content-Type` header is sent
 - **Returns**: `FdxConsentRevocations`
-- **Error**: `ThePlaidApiClient.FdxConsentsRevocationGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.FdxConsentsRevocationGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.FdxConsentsRevocationGetRequest` (1):
 
@@ -2239,9 +2366,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `PUT /fdx/consents/{consentId}/revocation`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `undefined` — the operation resolves to nothing
-- **Error**: `ThePlaidApiClient.FdxConsentsRevokeError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.FdxConsentsRevokeError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.FdxConsentsRevokeRequest` (2):
 
@@ -2261,9 +2389,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /fdx/notifications`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `undefined` — the operation resolves to nothing
-- **Error**: `ThePlaidApiClient.FdxNotificationsError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.FdxNotificationsError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.FdxNotificationsRequest` (1):
 
@@ -2283,8 +2412,8 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: none — no `Content-Type` header is sent
 - **Returns**: `FdxRecipientMetadata`
-- **Error**: `ThePlaidApiClient.GetRecipientError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.GetRecipientError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.GetRecipientRequest` (2):
 
@@ -2305,8 +2434,8 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: none — no `Content-Type` header is sent
 - **Returns**: `GetRecipientsResponse`
-- **Error**: `ThePlaidApiClient.GetRecipientsError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.GetRecipientsError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 | Type | Schema value | Source |
 | --- | --- | --- |
@@ -2319,9 +2448,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /identity/documents/uploads/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `IdentityDocumentsUploadsGetResponse`
-- **Error**: `ThePlaidApiClient.IdentityDocumentsUploadsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.IdentityDocumentsUploadsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.IdentityDocumentsUploadsGetRequestParams` (1):
 
@@ -2341,9 +2471,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /identity/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `IdentityGetResponse`
-- **Error**: `ThePlaidApiClient.IdentityGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.IdentityGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.IdentityGetRequestParams` (1):
 
@@ -2363,9 +2494,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /identity/match`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `IdentityMatchResponse`
-- **Error**: `ThePlaidApiClient.IdentityMatchError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.IdentityMatchError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.IdentityMatchRequestParams` (1):
 
@@ -2385,9 +2517,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /identity/refresh`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `IdentityRefreshResponse`
-- **Error**: `ThePlaidApiClient.IdentityRefreshError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.IdentityRefreshError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.IdentityRefreshRequestParams` (1):
 
@@ -2403,12 +2536,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### identityVerificationAutofillCreate
 
-- **Signature**: `identityVerificationAutofillCreate(request: ThePlaidApiClient.IdentityVerificationAutofillCreateRequestParams, options?: RequestOptions): ApiPromise<IdentityVerificationAutofillCreateResponse, ResponseError>`
+- **Signature**: `identityVerificationAutofillCreate(request: ThePlaidApiClient.IdentityVerificationAutofillCreateRequestParams, options?: RequestOptions): ApiPromise<IdentityVerificationAutofillCreateResponse, ApiError>`
 - **Wire**: `POST /identity_verification/autofill/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `IdentityVerificationAutofillCreateResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.IdentityVerificationAutofillCreateRequestParams` (1):
 
@@ -2423,12 +2557,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### identityVerificationCreate
 
-- **Signature**: `identityVerificationCreate(request: ThePlaidApiClient.IdentityVerificationCreateRequestParams, options?: RequestOptions): ApiPromise<IdentityVerificationCreateResponse, ResponseError>`
+- **Signature**: `identityVerificationCreate(request: ThePlaidApiClient.IdentityVerificationCreateRequestParams, options?: RequestOptions): ApiPromise<IdentityVerificationCreateResponse, ApiError>`
 - **Wire**: `POST /identity_verification/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `IdentityVerificationCreateResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.IdentityVerificationCreateRequestParams` (1):
 
@@ -2443,12 +2578,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### identityVerificationGet
 
-- **Signature**: `identityVerificationGet(request: ThePlaidApiClient.IdentityVerificationGetRequestParams, options?: RequestOptions): ApiPromise<IdentityVerificationGetResponse, ResponseError>`
+- **Signature**: `identityVerificationGet(request: ThePlaidApiClient.IdentityVerificationGetRequestParams, options?: RequestOptions): ApiPromise<IdentityVerificationGetResponse, ApiError>`
 - **Wire**: `POST /identity_verification/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `IdentityVerificationGetResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.IdentityVerificationGetRequestParams` (1):
 
@@ -2463,12 +2599,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### identityVerificationList
 
-- **Signature**: `identityVerificationList(request: ThePlaidApiClient.IdentityVerificationListRequestParams, options?: RequestOptions): ApiPromise<IdentityVerificationListResponse, ResponseError>`
+- **Signature**: `identityVerificationList(request: ThePlaidApiClient.IdentityVerificationListRequestParams, options?: RequestOptions): ApiPromise<IdentityVerificationListResponse, ApiError>`
 - **Wire**: `POST /identity_verification/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `IdentityVerificationListResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.IdentityVerificationListRequestParams` (1):
 
@@ -2483,12 +2620,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### identityVerificationRetry
 
-- **Signature**: `identityVerificationRetry(request: ThePlaidApiClient.IdentityVerificationRetryRequestParams, options?: RequestOptions): ApiPromise<IdentityVerificationRetryResponse, ResponseError>`
+- **Signature**: `identityVerificationRetry(request: ThePlaidApiClient.IdentityVerificationRetryRequestParams, options?: RequestOptions): ApiPromise<IdentityVerificationRetryResponse, ApiError>`
 - **Wire**: `POST /identity_verification/retry`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `IdentityVerificationRetryResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.IdentityVerificationRetryRequestParams` (1):
 
@@ -2504,12 +2642,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### incomeVerificationCreate
 
 - **Signature**: `incomeVerificationCreate(request: ThePlaidApiClient.IncomeVerificationCreateRequestParams, options?: RequestOptions): ApiPromise<IncomeVerificationCreateResponse, ThePlaidApiClient.IncomeVerificationCreateError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /income/verification/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `IncomeVerificationCreateResponse`
-- **Error**: `ThePlaidApiClient.IncomeVerificationCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.IncomeVerificationCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.IncomeVerificationCreateRequestParams` (1):
 
@@ -2526,12 +2666,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### incomeVerificationDocumentsDownload
 
 - **Signature**: `incomeVerificationDocumentsDownload(request: ThePlaidApiClient.IncomeVerificationDocumentsDownloadRequestParams, options?: RequestOptions): ApiPromise<undefined, ThePlaidApiClient.IncomeVerificationDocumentsDownloadError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /income/verification/documents/download`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `undefined` — the operation resolves to nothing
-- **Error**: `ThePlaidApiClient.IncomeVerificationDocumentsDownloadError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.IncomeVerificationDocumentsDownloadError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.IncomeVerificationDocumentsDownloadRequestParams` (1):
 
@@ -2547,12 +2689,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### incomeVerificationPaystubsGet
 
 - **Signature**: `incomeVerificationPaystubsGet(request: ThePlaidApiClient.IncomeVerificationPaystubsGetRequestParams, options?: RequestOptions): ApiPromise<IncomeVerificationPaystubsGetResponse, ThePlaidApiClient.IncomeVerificationPaystubsGetError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /income/verification/paystubs/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `IncomeVerificationPaystubsGetResponse`
-- **Error**: `ThePlaidApiClient.IncomeVerificationPaystubsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.IncomeVerificationPaystubsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.IncomeVerificationPaystubsGetRequestParams` (1):
 
@@ -2569,12 +2713,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### incomeVerificationPrecheck
 
 - **Signature**: `incomeVerificationPrecheck(request: ThePlaidApiClient.IncomeVerificationPrecheckRequestParams, options?: RequestOptions): ApiPromise<IncomeVerificationPrecheckResponse, ThePlaidApiClient.IncomeVerificationPrecheckError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /income/verification/precheck`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `IncomeVerificationPrecheckResponse`
-- **Error**: `ThePlaidApiClient.IncomeVerificationPrecheckError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.IncomeVerificationPrecheckError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.IncomeVerificationPrecheckRequestParams` (1):
 
@@ -2591,12 +2737,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### incomeVerificationTaxformsGet
 
 - **Signature**: `incomeVerificationTaxformsGet(request: ThePlaidApiClient.IncomeVerificationTaxformsGetRequestParams, options?: RequestOptions): ApiPromise<IncomeVerificationTaxformsGetResponse, ThePlaidApiClient.IncomeVerificationTaxformsGetError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /income/verification/taxforms/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `IncomeVerificationTaxformsGetResponse`
-- **Error**: `ThePlaidApiClient.IncomeVerificationTaxformsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.IncomeVerificationTaxformsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.IncomeVerificationTaxformsGetRequestParams` (1):
 
@@ -2616,9 +2764,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /institutions/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `InstitutionsGetResponse`
-- **Error**: `ThePlaidApiClient.InstitutionsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.InstitutionsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.InstitutionsGetRequestParams` (1):
 
@@ -2638,9 +2787,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /institutions/get_by_id`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `InstitutionsGetByIdResponse`
-- **Error**: `ThePlaidApiClient.InstitutionsGetByIdError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.InstitutionsGetByIdError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.InstitutionsGetByIdRequestParams` (1):
 
@@ -2660,9 +2810,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /institutions/search`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `InstitutionsSearchResponse`
-- **Error**: `ThePlaidApiClient.InstitutionsSearchError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.InstitutionsSearchError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.InstitutionsSearchRequestParams` (1):
 
@@ -2682,9 +2833,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /investments/auth/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `InvestmentsAuthGetResponse`
-- **Error**: `ThePlaidApiClient.InvestmentsAuthGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.InvestmentsAuthGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.InvestmentsAuthGetRequestParams` (1):
 
@@ -2704,9 +2856,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /investments/holdings/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `InvestmentsHoldingsGetResponse`
-- **Error**: `ThePlaidApiClient.InvestmentsHoldingsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.InvestmentsHoldingsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.InvestmentsHoldingsGetRequestParams` (1):
 
@@ -2726,9 +2879,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /investments/refresh`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `InvestmentsRefreshResponse`
-- **Error**: `ThePlaidApiClient.InvestmentsRefreshError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.InvestmentsRefreshError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.InvestmentsRefreshRequestParams` (1):
 
@@ -2748,9 +2902,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /investments/transactions/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `InvestmentsTransactionsGetResponse`
-- **Error**: `ThePlaidApiClient.InvestmentsTransactionsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.InvestmentsTransactionsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.InvestmentsTransactionsGetRequestParams` (1):
 
@@ -2770,9 +2925,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /issues/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `IssuesGetResponse`
-- **Error**: `ThePlaidApiClient.IssuesGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.IssuesGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.IssuesGetRequestParams` (1):
 
@@ -2792,9 +2948,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /issues/search`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `IssuesSearchResponse`
-- **Error**: `ThePlaidApiClient.IssuesSearchError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.IssuesSearchError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.IssuesSearchRequestParams` (1):
 
@@ -2814,9 +2971,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /issues/subscribe`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `IssuesSubscribeResponse`
-- **Error**: `ThePlaidApiClient.IssuesSubscribeError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.IssuesSubscribeError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.IssuesSubscribeRequestParams` (1):
 
@@ -2836,9 +2994,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /item/access_token/invalidate`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ItemAccessTokenInvalidateResponse`
-- **Error**: `ThePlaidApiClient.ItemAccessTokenInvalidateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ItemAccessTokenInvalidateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ItemAccessTokenInvalidateRequestParams` (1):
 
@@ -2858,9 +3017,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /item/activity/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ItemActivityListResponse`
-- **Error**: `ThePlaidApiClient.ItemActivityListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ItemActivityListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ItemActivityListRequestParams` (1):
 
@@ -2880,9 +3040,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /item/application/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ItemApplicationListResponse`
-- **Error**: `ThePlaidApiClient.ItemApplicationListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ItemApplicationListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ItemApplicationListRequestParams` (1):
 
@@ -2902,9 +3063,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /item/application/scopes/update`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ItemApplicationScopesUpdateResponse`
-- **Error**: `ThePlaidApiClient.ItemApplicationScopesUpdateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ItemApplicationScopesUpdateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ItemApplicationScopesUpdateRequestParams` (1):
 
@@ -2924,9 +3086,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /item/application/unlink`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ItemApplicationUnlinkResponse`
-- **Error**: `ThePlaidApiClient.ItemApplicationUnlinkError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ItemApplicationUnlinkError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ItemApplicationUnlinkRequestParams` (1):
 
@@ -2943,12 +3106,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### itemCreatePublicToken
 
 - **Signature**: `itemCreatePublicToken(request: ThePlaidApiClient.ItemCreatePublicTokenRequest, options?: RequestOptions): ApiPromise<ItemPublicTokenCreateResponse, ThePlaidApiClient.ItemCreatePublicTokenError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /item/public_token/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ItemPublicTokenCreateResponse`
-- **Error**: `ThePlaidApiClient.ItemCreatePublicTokenError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ItemCreatePublicTokenError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ItemCreatePublicTokenRequest` (1):
 
@@ -2968,9 +3133,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /item/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ItemGetResponse`
-- **Error**: `ThePlaidApiClient.ItemGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ItemGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ItemGetRequestParams` (1):
 
@@ -2990,9 +3156,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /item/import`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ItemImportResponse`
-- **Error**: `ThePlaidApiClient.ItemImportError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ItemImportError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ItemImportRequestParams` (1):
 
@@ -3012,9 +3179,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /item/products/terminate`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ItemProductsTerminateResponse`
-- **Error**: `ThePlaidApiClient.ItemProductsTerminateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ItemProductsTerminateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ItemProductsTerminateRequestParams` (1):
 
@@ -3034,9 +3202,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /item/public_token/exchange`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ItemPublicTokenExchangeResponse`
-- **Error**: `ThePlaidApiClient.ItemPublicTokenExchangeError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ItemPublicTokenExchangeError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ItemPublicTokenExchangeRequestParams` (1):
 
@@ -3056,9 +3225,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /item/remove`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ItemRemoveResponse`
-- **Error**: `ThePlaidApiClient.ItemRemoveError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ItemRemoveError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ItemRemoveRequestParams` (1):
 
@@ -3078,9 +3248,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /item/webhook/update`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ItemWebhookUpdateResponse`
-- **Error**: `ThePlaidApiClient.ItemWebhookUpdateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ItemWebhookUpdateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ItemWebhookUpdateRequestParams` (1):
 
@@ -3100,9 +3271,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /liabilities/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `LiabilitiesGetResponse`
-- **Error**: `ThePlaidApiClient.LiabilitiesGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.LiabilitiesGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.LiabilitiesGetRequestParams` (1):
 
@@ -3119,12 +3291,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### linkDeliveryCreate
 
 - **Signature**: `linkDeliveryCreate(request: ThePlaidApiClient.LinkDeliveryCreateRequestParams, options?: RequestOptions): ApiPromise<LinkDeliveryCreateResponse, ThePlaidApiClient.LinkDeliveryCreateError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /link_delivery/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `LinkDeliveryCreateResponse`
-- **Error**: `ThePlaidApiClient.LinkDeliveryCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.LinkDeliveryCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.LinkDeliveryCreateRequestParams` (1):
 
@@ -3141,12 +3315,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### linkDeliveryGet
 
 - **Signature**: `linkDeliveryGet(request: ThePlaidApiClient.LinkDeliveryGetRequestParams, options?: RequestOptions): ApiPromise<LinkDeliveryGetResponse, ThePlaidApiClient.LinkDeliveryGetError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /link_delivery/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `LinkDeliveryGetResponse`
-- **Error**: `ThePlaidApiClient.LinkDeliveryGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.LinkDeliveryGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.LinkDeliveryGetRequestParams` (1):
 
@@ -3166,9 +3342,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /link/oauth/correlation_id/exchange`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `LinkOAuthCorrelationIdExchangeResponse`
-- **Error**: `ThePlaidApiClient.LinkOauthCorrelationIdExchangeError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.LinkOauthCorrelationIdExchangeError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.LinkOauthCorrelationIdExchangeRequest` (1):
 
@@ -3188,9 +3365,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /link/token/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `LinkTokenCreateResponse`
-- **Error**: `ThePlaidApiClient.LinkTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.LinkTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.LinkTokenCreateRequestParams` (1):
 
@@ -3210,9 +3388,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /link/token/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `LinkTokenGetResponse`
-- **Error**: `ThePlaidApiClient.LinkTokenGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.LinkTokenGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.LinkTokenGetRequestParams` (1):
 
@@ -3232,9 +3411,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /network/status/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `NetworkStatusGetResponse`
-- **Error**: `ThePlaidApiClient.NetworkStatusGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.NetworkStatusGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.NetworkStatusGetRequestParams` (1):
 
@@ -3254,9 +3434,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /oauth/introspect`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `OAuthIntrospectResponse`
-- **Error**: `ThePlaidApiClient.OauthIntrospectError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"oAuthErrorResponse"` [400–599] `OAuthErrorResponse` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.OauthIntrospectError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"oAuthErrorResponse"` [default — any status no arm above covers] `OAuthErrorResponse` · `"undeclared"` [a `default`-matched body that did not fit `OAuthErrorResponse`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.OauthIntrospectRequest` (1):
 
@@ -3276,9 +3457,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /oauth/revoke`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `OAuthRevokeResponse`
-- **Error**: `ThePlaidApiClient.OauthRevokeError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"oAuthErrorResponse"` [400–599] `OAuthErrorResponse` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.OauthRevokeError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"oAuthErrorResponse"` [default — any status no arm above covers] `OAuthErrorResponse` · `"undeclared"` [a `default`-matched body that did not fit `OAuthErrorResponse`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.OauthRevokeRequest` (1):
 
@@ -3298,9 +3480,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /oauth/token`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `OAuthTokenResponse`
-- **Error**: `ThePlaidApiClient.OauthTokenError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"oAuthErrorResponse"` [400–599] `OAuthErrorResponse` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.OauthTokenError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"oAuthErrorResponse"` [default — any status no arm above covers] `OAuthErrorResponse` · `"undeclared"` [a `default`-matched body that did not fit `OAuthErrorResponse`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.OauthTokenRequest` (1):
 
@@ -3320,9 +3503,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /partner/customer/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PartnerCustomerCreateResponse`
-- **Error**: `ThePlaidApiClient.PartnerCustomerCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PartnerCustomerCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PartnerCustomerCreateRequestParams` (1):
 
@@ -3342,9 +3526,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /partner/customer/enable`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PartnerCustomerEnableResponse`
-- **Error**: `ThePlaidApiClient.PartnerCustomerEnableError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PartnerCustomerEnableError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PartnerCustomerEnableRequestParams` (1):
 
@@ -3364,9 +3549,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /partner/customer/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PartnerCustomerGetResponse`
-- **Error**: `ThePlaidApiClient.PartnerCustomerGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PartnerCustomerGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PartnerCustomerGetRequestParams` (1):
 
@@ -3386,9 +3572,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /partner/customer/oauth_institutions/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PartnerCustomerOAuthInstitutionsGetResponse`
-- **Error**: `ThePlaidApiClient.PartnerCustomerOauthInstitutionsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PartnerCustomerOauthInstitutionsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PartnerCustomerOauthInstitutionsGetRequest` (1):
 
@@ -3408,9 +3595,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /partner/customer/remove`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PartnerCustomerRemoveResponse`
-- **Error**: `ThePlaidApiClient.PartnerCustomerRemoveError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PartnerCustomerRemoveError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PartnerCustomerRemoveRequestParams` (1):
 
@@ -3430,9 +3618,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /payment_initiation/consent/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PaymentInitiationConsentCreateResponse`
-- **Error**: `ThePlaidApiClient.PaymentInitiationConsentCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PaymentInitiationConsentCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PaymentInitiationConsentCreateRequestParams` (1):
 
@@ -3452,9 +3641,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /payment_initiation/consent/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PaymentInitiationConsentGetResponse`
-- **Error**: `ThePlaidApiClient.PaymentInitiationConsentGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PaymentInitiationConsentGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PaymentInitiationConsentGetRequestParams` (1):
 
@@ -3474,9 +3664,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /payment_initiation/consent/payment/execute`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PaymentInitiationConsentPaymentExecuteResponse`
-- **Error**: `ThePlaidApiClient.PaymentInitiationConsentPaymentExecuteError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PaymentInitiationConsentPaymentExecuteError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PaymentInitiationConsentPaymentExecuteRequestParams` (1):
 
@@ -3496,9 +3687,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /payment_initiation/consent/revoke`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PaymentInitiationConsentRevokeResponse`
-- **Error**: `ThePlaidApiClient.PaymentInitiationConsentRevokeError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PaymentInitiationConsentRevokeError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PaymentInitiationConsentRevokeRequestParams` (1):
 
@@ -3518,9 +3710,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /payment_initiation/payment/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PaymentInitiationPaymentCreateResponse`
-- **Error**: `ThePlaidApiClient.PaymentInitiationPaymentCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PaymentInitiationPaymentCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PaymentInitiationPaymentCreateRequestParams` (1):
 
@@ -3540,9 +3733,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /payment_initiation/payment/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PaymentInitiationPaymentGetResponse`
-- **Error**: `ThePlaidApiClient.PaymentInitiationPaymentGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PaymentInitiationPaymentGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PaymentInitiationPaymentGetRequestParams` (1):
 
@@ -3562,9 +3756,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /payment_initiation/payment/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PaymentInitiationPaymentListResponse`
-- **Error**: `ThePlaidApiClient.PaymentInitiationPaymentListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PaymentInitiationPaymentListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PaymentInitiationPaymentListRequestParams` (1):
 
@@ -3584,9 +3779,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /payment_initiation/payment/reverse`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PaymentInitiationPaymentReverseResponse`
-- **Error**: `ThePlaidApiClient.PaymentInitiationPaymentReverseError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PaymentInitiationPaymentReverseError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PaymentInitiationPaymentReverseRequestParams` (1):
 
@@ -3606,9 +3802,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /payment_initiation/recipient/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PaymentInitiationRecipientCreateResponse`
-- **Error**: `ThePlaidApiClient.PaymentInitiationRecipientCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PaymentInitiationRecipientCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PaymentInitiationRecipientCreateRequestParams` (1):
 
@@ -3628,9 +3825,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /payment_initiation/recipient/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PaymentInitiationRecipientGetResponse`
-- **Error**: `ThePlaidApiClient.PaymentInitiationRecipientGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PaymentInitiationRecipientGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PaymentInitiationRecipientGetRequestParams` (1):
 
@@ -3650,9 +3848,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /payment_initiation/recipient/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PaymentInitiationRecipientListResponse`
-- **Error**: `ThePlaidApiClient.PaymentInitiationRecipientListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PaymentInitiationRecipientListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PaymentInitiationRecipientListRequestParams` (1):
 
@@ -3669,12 +3868,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### paymentProfileCreate
 
 - **Signature**: `paymentProfileCreate(request: ThePlaidApiClient.PaymentProfileCreateRequestParams, options?: RequestOptions): ApiPromise<PaymentProfileCreateResponse, ThePlaidApiClient.PaymentProfileCreateError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /payment_profile/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PaymentProfileCreateResponse`
-- **Error**: `ThePlaidApiClient.PaymentProfileCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PaymentProfileCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PaymentProfileCreateRequestParams` (1):
 
@@ -3691,12 +3892,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### paymentProfileGet
 
 - **Signature**: `paymentProfileGet(request: ThePlaidApiClient.PaymentProfileGetRequestParams, options?: RequestOptions): ApiPromise<PaymentProfileGetResponse, ThePlaidApiClient.PaymentProfileGetError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /payment_profile/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PaymentProfileGetResponse`
-- **Error**: `ThePlaidApiClient.PaymentProfileGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PaymentProfileGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PaymentProfileGetRequestParams` (1):
 
@@ -3713,12 +3916,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### paymentProfileRemove
 
 - **Signature**: `paymentProfileRemove(request: ThePlaidApiClient.PaymentProfileRemoveRequestParams, options?: RequestOptions): ApiPromise<PaymentProfileRemoveResponse, ThePlaidApiClient.PaymentProfileRemoveError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /payment_profile/remove`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `PaymentProfileRemoveResponse`
-- **Error**: `ThePlaidApiClient.PaymentProfileRemoveError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.PaymentProfileRemoveError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.PaymentProfileRemoveRequestParams` (1):
 
@@ -3738,9 +3943,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/account/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorAccountGetResponse`
-- **Error**: `ThePlaidApiClient.ProcessorAccountGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorAccountGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorAccountGetRequestParams` (1):
 
@@ -3760,9 +3966,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/apex/processor_token/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorTokenCreateResponse`
-- **Error**: `ThePlaidApiClient.ProcessorApexProcessorTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorApexProcessorTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorApexProcessorTokenCreateRequestParams` (1):
 
@@ -3782,9 +3989,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/auth/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorAuthGetResponse`
-- **Error**: `ThePlaidApiClient.ProcessorAuthGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorAuthGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorAuthGetRequestParams` (1):
 
@@ -3804,9 +4012,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/balance/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorBalanceGetResponse`
-- **Error**: `ThePlaidApiClient.ProcessorBalanceGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorBalanceGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorBalanceGetRequestParams` (1):
 
@@ -3823,12 +4032,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### processorBankTransferCreate
 
 - **Signature**: `processorBankTransferCreate(request: ThePlaidApiClient.ProcessorBankTransferCreateRequestParams, options?: RequestOptions): ApiPromise<ProcessorBankTransferCreateResponse, ThePlaidApiClient.ProcessorBankTransferCreateError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /processor/bank_transfer/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorBankTransferCreateResponse`
-- **Error**: `ThePlaidApiClient.ProcessorBankTransferCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorBankTransferCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorBankTransferCreateRequestParams` (1):
 
@@ -3848,9 +4059,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/identity/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorIdentityGetResponse`
-- **Error**: `ThePlaidApiClient.ProcessorIdentityGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorIdentityGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorIdentityGetRequestParams` (1):
 
@@ -3870,9 +4082,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/identity/match`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorIdentityMatchResponse`
-- **Error**: `ThePlaidApiClient.ProcessorIdentityMatchError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorIdentityMatchError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorIdentityMatchRequestParams` (1):
 
@@ -3892,9 +4105,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/investments/auth/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorInvestmentsAuthGetResponse`
-- **Error**: `ThePlaidApiClient.ProcessorInvestmentsAuthGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorInvestmentsAuthGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorInvestmentsAuthGetRequestParams` (1):
 
@@ -3914,9 +4128,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/investments/holdings/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorInvestmentsHoldingsGetResponse`
-- **Error**: `ThePlaidApiClient.ProcessorInvestmentsHoldingsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorInvestmentsHoldingsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorInvestmentsHoldingsGetRequestParams` (1):
 
@@ -3936,9 +4151,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/investments/transactions/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorInvestmentsTransactionsGetResponse`
-- **Error**: `ThePlaidApiClient.ProcessorInvestmentsTransactionsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorInvestmentsTransactionsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorInvestmentsTransactionsGetRequestParams` (1):
 
@@ -3958,9 +4174,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/liabilities/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorLiabilitiesGetResponse`
-- **Error**: `ThePlaidApiClient.ProcessorLiabilitiesGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorLiabilitiesGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorLiabilitiesGetRequestParams` (1):
 
@@ -3980,9 +4197,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/signal/decision/report`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorSignalDecisionReportResponse`
-- **Error**: `ThePlaidApiClient.ProcessorSignalDecisionReportError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorSignalDecisionReportError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorSignalDecisionReportRequestParams` (1):
 
@@ -4002,9 +4220,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/signal/evaluate`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorSignalEvaluateResponse`
-- **Error**: `ThePlaidApiClient.ProcessorSignalEvaluateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorSignalEvaluateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorSignalEvaluateRequestParams` (1):
 
@@ -4024,9 +4243,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/signal/prepare`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorSignalPrepareResponse`
-- **Error**: `ThePlaidApiClient.ProcessorSignalPrepareError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorSignalPrepareError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorSignalPrepareRequestParams` (1):
 
@@ -4046,9 +4266,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/signal/return/report`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorSignalReturnReportResponse`
-- **Error**: `ThePlaidApiClient.ProcessorSignalReturnReportError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorSignalReturnReportError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorSignalReturnReportRequestParams` (1):
 
@@ -4068,9 +4289,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/stripe/bank_account_token/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorStripeBankAccountTokenCreateResponse`
-- **Error**: `ThePlaidApiClient.ProcessorStripeBankAccountTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorStripeBankAccountTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorStripeBankAccountTokenCreateRequestParams` (1):
 
@@ -4090,9 +4312,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/token/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorTokenCreateResponse`
-- **Error**: `ThePlaidApiClient.ProcessorTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorTokenCreateRequestParams` (1):
 
@@ -4112,9 +4335,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/token/permissions/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorTokenPermissionsGetResponse`
-- **Error**: `ThePlaidApiClient.ProcessorTokenPermissionsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorTokenPermissionsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorTokenPermissionsGetRequestParams` (1):
 
@@ -4134,9 +4358,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/token/permissions/set`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorTokenPermissionsSetResponse`
-- **Error**: `ThePlaidApiClient.ProcessorTokenPermissionsSetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorTokenPermissionsSetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorTokenPermissionsSetRequestParams` (1):
 
@@ -4156,9 +4381,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/token/webhook/update`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorTokenWebhookUpdateResponse`
-- **Error**: `ThePlaidApiClient.ProcessorTokenWebhookUpdateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorTokenWebhookUpdateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorTokenWebhookUpdateRequestParams` (1):
 
@@ -4178,9 +4404,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/transactions/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorTransactionsGetResponse`
-- **Error**: `ThePlaidApiClient.ProcessorTransactionsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorTransactionsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorTransactionsGetRequestParams` (1):
 
@@ -4200,9 +4427,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/transactions/recurring/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorTransactionsRecurringGetResponse`
-- **Error**: `ThePlaidApiClient.ProcessorTransactionsRecurringGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorTransactionsRecurringGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorTransactionsRecurringGetRequestParams` (1):
 
@@ -4222,9 +4450,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/transactions/refresh`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorTransactionsRefreshResponse`
-- **Error**: `ThePlaidApiClient.ProcessorTransactionsRefreshError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorTransactionsRefreshError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorTransactionsRefreshRequestParams` (1):
 
@@ -4244,9 +4473,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /processor/transactions/sync`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProcessorTransactionsSyncResponse`
-- **Error**: `ThePlaidApiClient.ProcessorTransactionsSyncError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProcessorTransactionsSyncError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProcessorTransactionsSyncRequestParams` (1):
 
@@ -4266,9 +4496,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /profile/network_status/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProfileNetworkStatusGetResponse`
-- **Error**: `ThePlaidApiClient.ProfileNetworkStatusGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.ProfileNetworkStatusGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.ProfileNetworkStatusGetRequestParams` (1):
 
@@ -4284,12 +4515,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### protectCompute
 
-- **Signature**: `protectCompute(request: ThePlaidApiClient.ProtectComputeRequestParams, options?: RequestOptions): ApiPromise<ProtectComputeResponse, ResponseError>`
+- **Signature**: `protectCompute(request: ThePlaidApiClient.ProtectComputeRequestParams, options?: RequestOptions): ApiPromise<ProtectComputeResponse, ApiError>`
 - **Wire**: `POST /protect/compute`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProtectComputeResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.ProtectComputeRequestParams` (1):
 
@@ -4304,12 +4536,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### protectEventGet
 
-- **Signature**: `protectEventGet(request: ThePlaidApiClient.ProtectEventGetRequestParams, options?: RequestOptions): ApiPromise<ProtectEventGetResponse, ResponseError>`
+- **Signature**: `protectEventGet(request: ThePlaidApiClient.ProtectEventGetRequestParams, options?: RequestOptions): ApiPromise<ProtectEventGetResponse, ApiError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /protect/event/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProtectEventGetResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.ProtectEventGetRequestParams` (1):
 
@@ -4324,12 +4558,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### protectEventSend
 
-- **Signature**: `protectEventSend(request: ThePlaidApiClient.ProtectEventSendRequestParams, options?: RequestOptions): ApiPromise<ProtectEventSendResponse, ResponseError>`
+- **Signature**: `protectEventSend(request: ThePlaidApiClient.ProtectEventSendRequestParams, options?: RequestOptions): ApiPromise<ProtectEventSendResponse, ApiError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /protect/event/send`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProtectEventSendResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.ProtectEventSendRequestParams` (1):
 
@@ -4344,12 +4580,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### protectReportCreate
 
-- **Signature**: `protectReportCreate(request: ThePlaidApiClient.ProtectReportCreateRequestParams, options?: RequestOptions): ApiPromise<ProtectReportCreateResponse, ResponseError>`
+- **Signature**: `protectReportCreate(request: ThePlaidApiClient.ProtectReportCreateRequestParams, options?: RequestOptions): ApiPromise<ProtectReportCreateResponse, ApiError>`
 - **Wire**: `POST /protect/report/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProtectReportCreateResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.ProtectReportCreateRequestParams` (1):
 
@@ -4364,12 +4601,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### protectUserInsightsGet
 
-- **Signature**: `protectUserInsightsGet(request: ThePlaidApiClient.ProtectUserInsightsGetRequestParams, options?: RequestOptions): ApiPromise<ProtectUserInsightsGetResponse, ResponseError>`
+- **Signature**: `protectUserInsightsGet(request: ThePlaidApiClient.ProtectUserInsightsGetRequestParams, options?: RequestOptions): ApiPromise<ProtectUserInsightsGetResponse, ApiError>`
 - **Wire**: `POST /protect/user/insights/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `ProtectUserInsightsGetResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.ProtectUserInsightsGetRequestParams` (1):
 
@@ -4385,12 +4623,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### sandboxBankIncomeFireWebhook
 
 - **Signature**: `sandboxBankIncomeFireWebhook(request: ThePlaidApiClient.SandboxBankIncomeFireWebhookRequestParams, options?: RequestOptions): ApiPromise<SandboxBankIncomeFireWebhookResponse, ThePlaidApiClient.SandboxBankIncomeFireWebhookError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /sandbox/bank_income/fire_webhook`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxBankIncomeFireWebhookResponse`
-- **Error**: `ThePlaidApiClient.SandboxBankIncomeFireWebhookError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxBankIncomeFireWebhookError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxBankIncomeFireWebhookRequestParams` (1):
 
@@ -4407,12 +4647,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### sandboxBankTransferFireWebhook
 
 - **Signature**: `sandboxBankTransferFireWebhook(request: ThePlaidApiClient.SandboxBankTransferFireWebhookRequestParams, options?: RequestOptions): ApiPromise<SandboxBankTransferFireWebhookResponse, ThePlaidApiClient.SandboxBankTransferFireWebhookError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /sandbox/bank_transfer/fire_webhook`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxBankTransferFireWebhookResponse`
-- **Error**: `ThePlaidApiClient.SandboxBankTransferFireWebhookError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxBankTransferFireWebhookError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxBankTransferFireWebhookRequestParams` (1):
 
@@ -4429,12 +4671,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### sandboxBankTransferSimulate
 
 - **Signature**: `sandboxBankTransferSimulate(request: ThePlaidApiClient.SandboxBankTransferSimulateRequestParams, options?: RequestOptions): ApiPromise<SandboxBankTransferSimulateResponse, ThePlaidApiClient.SandboxBankTransferSimulateError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /sandbox/bank_transfer/simulate`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxBankTransferSimulateResponse`
-- **Error**: `ThePlaidApiClient.SandboxBankTransferSimulateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxBankTransferSimulateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxBankTransferSimulateRequestParams` (1):
 
@@ -4454,9 +4698,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/cra/cashflow_updates/update`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxCraCashflowUpdatesUpdateResponse`
-- **Error**: `ThePlaidApiClient.SandboxCraCashflowUpdatesUpdateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxCraCashflowUpdatesUpdateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxCraCashflowUpdatesUpdateRequestParams` (1):
 
@@ -4476,9 +4721,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/fdx/consent/seed`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxFdxConsentSeedResponse`
-- **Error**: `ThePlaidApiClient.SandboxFdxConsentSeedError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxFdxConsentSeedError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxFdxConsentSeedRequestParams` (1):
 
@@ -4498,9 +4744,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/income/fire_webhook`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxIncomeFireWebhookResponse`
-- **Error**: `ThePlaidApiClient.SandboxIncomeFireWebhookError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxIncomeFireWebhookError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxIncomeFireWebhookRequestParams` (1):
 
@@ -4520,9 +4767,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/item/application/seed`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxItemApplicationSeedResponse`
-- **Error**: `ThePlaidApiClient.SandboxItemApplicationSeedError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxItemApplicationSeedError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxItemApplicationSeedRequestParams` (1):
 
@@ -4542,9 +4790,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/item/fire_webhook`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxItemFireWebhookResponse`
-- **Error**: `ThePlaidApiClient.SandboxItemFireWebhookError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxItemFireWebhookError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxItemFireWebhookRequestParams` (1):
 
@@ -4564,9 +4813,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/item/reset_login`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxItemResetLoginResponse`
-- **Error**: `ThePlaidApiClient.SandboxItemResetLoginError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxItemResetLoginError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxItemResetLoginRequestParams` (1):
 
@@ -4586,9 +4836,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/item/set_verification_status`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxItemSetVerificationStatusResponse`
-- **Error**: `ThePlaidApiClient.SandboxItemSetVerificationStatusError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxItemSetVerificationStatusError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxItemSetVerificationStatusRequestParams` (1):
 
@@ -4608,9 +4859,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/oauth/select_accounts`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `Record<string, unknown>` — a bare `application/json` map; the success type *is* the map
-- **Error**: `ThePlaidApiClient.SandboxOauthSelectAccountsError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxOauthSelectAccountsError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxOauthSelectAccountsRequestParams` (1):
 
@@ -4626,12 +4878,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### sandboxPaymentProfileResetLogin
 
 - **Signature**: `sandboxPaymentProfileResetLogin(request: ThePlaidApiClient.SandboxPaymentProfileResetLoginRequestParams, options?: RequestOptions): ApiPromise<SandboxPaymentProfileResetLoginResponse, ThePlaidApiClient.SandboxPaymentProfileResetLoginError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /sandbox/payment_profile/reset_login`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxPaymentProfileResetLoginResponse`
-- **Error**: `ThePlaidApiClient.SandboxPaymentProfileResetLoginError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxPaymentProfileResetLoginError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxPaymentProfileResetLoginRequestParams` (1):
 
@@ -4651,9 +4905,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/payment/simulate`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxPaymentSimulateResponse`
-- **Error**: `ThePlaidApiClient.SandboxPaymentSimulateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxPaymentSimulateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxPaymentSimulateRequestParams` (1):
 
@@ -4673,9 +4928,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/processor_token/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxProcessorTokenCreateResponse`
-- **Error**: `ThePlaidApiClient.SandboxProcessorTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxProcessorTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxProcessorTokenCreateRequestParams` (1):
 
@@ -4695,9 +4951,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/public_token/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxPublicTokenCreateResponse`
-- **Error**: `ThePlaidApiClient.SandboxPublicTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxPublicTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxPublicTokenCreateRequestParams` (1):
 
@@ -4717,9 +4974,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/transactions/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxTransactionsCreateResponse`
-- **Error**: `ThePlaidApiClient.SandboxTransactionsCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400] `Error` · `"error2"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxTransactionsCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [400] `Error` · `"error2"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxTransactionsCreateRequestParams` (1):
 
@@ -4739,9 +4997,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/transfer/fire_webhook`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxTransferFireWebhookResponse`
-- **Error**: `ThePlaidApiClient.SandboxTransferFireWebhookError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxTransferFireWebhookError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxTransferFireWebhookRequestParams` (1):
 
@@ -4761,9 +5020,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/transfer/ledger/deposit/simulate`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxTransferLedgerDepositSimulateResponse`
-- **Error**: `ThePlaidApiClient.SandboxTransferLedgerDepositSimulateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxTransferLedgerDepositSimulateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxTransferLedgerDepositSimulateRequestParams` (1):
 
@@ -4783,9 +5043,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/transfer/ledger/simulate_available`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxTransferLedgerSimulateAvailableResponse`
-- **Error**: `ThePlaidApiClient.SandboxTransferLedgerSimulateAvailableError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxTransferLedgerSimulateAvailableError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxTransferLedgerSimulateAvailableRequestParams` (1):
 
@@ -4805,9 +5066,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/transfer/ledger/withdraw/simulate`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxTransferLedgerWithdrawSimulateResponse`
-- **Error**: `ThePlaidApiClient.SandboxTransferLedgerWithdrawSimulateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxTransferLedgerWithdrawSimulateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxTransferLedgerWithdrawSimulateRequestParams` (1):
 
@@ -4827,9 +5089,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/transfer/refund/simulate`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxTransferRefundSimulateResponse`
-- **Error**: `ThePlaidApiClient.SandboxTransferRefundSimulateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxTransferRefundSimulateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxTransferRefundSimulateRequestParams` (1):
 
@@ -4849,9 +5112,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/transfer/repayment/simulate`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxTransferRepaymentSimulateResponse`
-- **Error**: `ThePlaidApiClient.SandboxTransferRepaymentSimulateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxTransferRepaymentSimulateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxTransferRepaymentSimulateRequestParams` (1):
 
@@ -4871,9 +5135,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/transfer/simulate`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxTransferSimulateResponse`
-- **Error**: `ThePlaidApiClient.SandboxTransferSimulateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxTransferSimulateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxTransferSimulateRequestParams` (1):
 
@@ -4893,9 +5158,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/transfer/sweep/simulate`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxTransferSweepSimulateResponse`
-- **Error**: `ThePlaidApiClient.SandboxTransferSweepSimulateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxTransferSweepSimulateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxTransferSweepSimulateRequestParams` (1):
 
@@ -4915,9 +5181,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/transfer/test_clock/advance`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxTransferTestClockAdvanceResponse`
-- **Error**: `ThePlaidApiClient.SandboxTransferTestClockAdvanceError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxTransferTestClockAdvanceError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxTransferTestClockAdvanceRequestParams` (1):
 
@@ -4937,9 +5204,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/transfer/test_clock/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxTransferTestClockCreateResponse`
-- **Error**: `ThePlaidApiClient.SandboxTransferTestClockCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxTransferTestClockCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxTransferTestClockCreateRequestParams` (1):
 
@@ -4959,9 +5227,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/transfer/test_clock/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxTransferTestClockGetResponse`
-- **Error**: `ThePlaidApiClient.SandboxTransferTestClockGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxTransferTestClockGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxTransferTestClockGetRequestParams` (1):
 
@@ -4981,9 +5250,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/transfer/test_clock/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxTransferTestClockListResponse`
-- **Error**: `ThePlaidApiClient.SandboxTransferTestClockListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxTransferTestClockListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxTransferTestClockListRequestParams` (1):
 
@@ -5003,9 +5273,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /sandbox/user/reset_login`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SandboxUserResetLoginResponse`
-- **Error**: `ThePlaidApiClient.SandboxUserResetLoginError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SandboxUserResetLoginError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SandboxUserResetLoginRequestParams` (1):
 
@@ -5025,9 +5296,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /session/token/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SessionTokenCreateResponse`
-- **Error**: `ThePlaidApiClient.SessionTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SessionTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SessionTokenCreateRequestParams` (1):
 
@@ -5047,9 +5319,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /signal/decision/report`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SignalDecisionReportResponse`
-- **Error**: `ThePlaidApiClient.SignalDecisionReportError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SignalDecisionReportError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SignalDecisionReportRequestParams` (1):
 
@@ -5069,9 +5342,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /signal/evaluate`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SignalEvaluateResponse`
-- **Error**: `ThePlaidApiClient.SignalEvaluateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SignalEvaluateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SignalEvaluateRequestParams` (1):
 
@@ -5091,9 +5365,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /signal/prepare`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SignalPrepareResponse`
-- **Error**: `ThePlaidApiClient.SignalPrepareError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SignalPrepareError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SignalPrepareRequestParams` (1):
 
@@ -5113,9 +5388,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /signal/return/report`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SignalReturnReportResponse`
-- **Error**: `ThePlaidApiClient.SignalReturnReportError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SignalReturnReportError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SignalReturnReportRequestParams` (1):
 
@@ -5135,9 +5411,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /signal/schedule`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `SignalScheduleResponse`
-- **Error**: `ThePlaidApiClient.SignalScheduleError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.SignalScheduleError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.SignalScheduleRequestParams` (1):
 
@@ -5157,9 +5434,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /statements/download`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `undefined` — the operation resolves to nothing
-- **Error**: `ThePlaidApiClient.StatementsDownloadError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.StatementsDownloadError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.StatementsDownloadRequestParams` (1):
 
@@ -5178,9 +5456,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /statements/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `StatementsListResponse`
-- **Error**: `ThePlaidApiClient.StatementsListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.StatementsListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.StatementsListRequestParams` (1):
 
@@ -5200,9 +5479,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /statements/refresh`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `StatementsRefreshResponse`
-- **Error**: `ThePlaidApiClient.StatementsRefreshError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.StatementsRefreshError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.StatementsRefreshRequestParams` (1):
 
@@ -5222,9 +5502,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /beta/transactions/v1/enhance`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransactionsEnhanceGetResponse`
-- **Error**: `ThePlaidApiClient.TransactionsEnhanceError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransactionsEnhanceError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransactionsEnhanceRequest` (1):
 
@@ -5244,9 +5525,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transactions/enrich`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransactionsEnrichResponse`
-- **Error**: `ThePlaidApiClient.TransactionsEnrichError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransactionsEnrichError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransactionsEnrichRequestParams` (1):
 
@@ -5266,9 +5548,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transactions/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransactionsGetResponse`
-- **Error**: `ThePlaidApiClient.TransactionsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransactionsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransactionsGetRequestParams` (1):
 
@@ -5288,9 +5571,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transactions/recurring/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransactionsRecurringGetResponse`
-- **Error**: `ThePlaidApiClient.TransactionsRecurringGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransactionsRecurringGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransactionsRecurringGetRequestParams` (1):
 
@@ -5310,9 +5594,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transactions/refresh`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransactionsRefreshResponse`
-- **Error**: `ThePlaidApiClient.TransactionsRefreshError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransactionsRefreshError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransactionsRefreshRequestParams` (1):
 
@@ -5332,9 +5617,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /beta/transactions/rules/v1/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransactionsRulesCreateResponse`
-- **Error**: `ThePlaidApiClient.TransactionsRulesCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransactionsRulesCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransactionsRulesCreateRequestParams` (1):
 
@@ -5354,9 +5640,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /beta/transactions/rules/v1/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransactionsRulesListResponse`
-- **Error**: `ThePlaidApiClient.TransactionsRulesListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransactionsRulesListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransactionsRulesListRequestParams` (1):
 
@@ -5376,9 +5663,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /beta/transactions/rules/v1/remove`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransactionsRulesRemoveResponse`
-- **Error**: `ThePlaidApiClient.TransactionsRulesRemoveError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransactionsRulesRemoveError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransactionsRulesRemoveRequestParams` (1):
 
@@ -5398,9 +5686,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transactions/sync`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransactionsSyncResponse`
-- **Error**: `ThePlaidApiClient.TransactionsSyncError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransactionsSyncError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransactionsSyncRequestParams` (1):
 
@@ -5420,9 +5709,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /beta/transactions/user_insights/v1/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransactionsUserInsightsGetResponse`
-- **Error**: `ThePlaidApiClient.TransactionsUserInsightsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransactionsUserInsightsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransactionsUserInsightsGetRequestParams` (1):
 
@@ -5442,9 +5732,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/authorization/cancel`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferAuthorizationCancelResponse`
-- **Error**: `ThePlaidApiClient.TransferAuthorizationCancelError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferAuthorizationCancelError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferAuthorizationCancelRequestParams` (1):
 
@@ -5464,9 +5755,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/authorization/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferAuthorizationCreateResponse`
-- **Error**: `ThePlaidApiClient.TransferAuthorizationCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferAuthorizationCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferAuthorizationCreateRequestParams` (1):
 
@@ -5483,12 +5775,14 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 ### transferBalanceGet
 
 - **Signature**: `transferBalanceGet(request: ThePlaidApiClient.TransferBalanceGetRequestParams, options?: RequestOptions): ApiPromise<TransferBalanceGetResponse, ThePlaidApiClient.TransferBalanceGetError>`
+- **Deprecated**: the method carries `@deprecated`, so an IDE strikes the call site through; it still works
 - **Wire**: `POST /transfer/balance/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferBalanceGetResponse`
-- **Error**: `ThePlaidApiClient.TransferBalanceGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferBalanceGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferBalanceGetRequestParams` (1):
 
@@ -5508,9 +5802,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/cancel`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferCancelResponse`
-- **Error**: `ThePlaidApiClient.TransferCancelError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferCancelError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferCancelRequestParams` (1):
 
@@ -5530,9 +5825,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/capabilities/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferCapabilitiesGetResponse`
-- **Error**: `ThePlaidApiClient.TransferCapabilitiesGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferCapabilitiesGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferCapabilitiesGetRequestParams` (1):
 
@@ -5552,9 +5848,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/configuration/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferConfigurationGetResponse`
-- **Error**: `ThePlaidApiClient.TransferConfigurationGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferConfigurationGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferConfigurationGetRequestParams` (1):
 
@@ -5574,9 +5871,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferCreateResponse`
-- **Error**: `ThePlaidApiClient.TransferCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferCreateRequestParams` (1):
 
@@ -5596,9 +5894,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/diligence/document/upload`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferDiligenceDocumentUploadResponse`
-- **Error**: `ThePlaidApiClient.TransferDiligenceDocumentUploadError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferDiligenceDocumentUploadError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferDiligenceDocumentUploadRequestParams` (1):
 
@@ -5618,9 +5917,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/diligence/submit`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferDiligenceSubmitResponse`
-- **Error**: `ThePlaidApiClient.TransferDiligenceSubmitError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferDiligenceSubmitError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferDiligenceSubmitRequestParams` (1):
 
@@ -5640,9 +5940,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/event/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferEventListResponse`
-- **Error**: `ThePlaidApiClient.TransferEventListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferEventListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferEventListRequestParams` (1):
 
@@ -5662,9 +5963,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/event/sync`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferEventSyncResponse`
-- **Error**: `ThePlaidApiClient.TransferEventSyncError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferEventSyncError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferEventSyncRequestParams` (1):
 
@@ -5684,9 +5986,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferGetResponse`
-- **Error**: `ThePlaidApiClient.TransferGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferGetRequestParams` (1):
 
@@ -5706,9 +6009,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/intent/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferIntentCreateResponse`
-- **Error**: `ThePlaidApiClient.TransferIntentCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferIntentCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferIntentCreateRequestParams` (1):
 
@@ -5728,9 +6032,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/intent/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferIntentGetResponse`
-- **Error**: `ThePlaidApiClient.TransferIntentGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferIntentGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferIntentGetRequestParams` (1):
 
@@ -5750,9 +6055,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/ledger/deposit`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferLedgerDepositResponse`
-- **Error**: `ThePlaidApiClient.TransferLedgerDepositError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferLedgerDepositError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferLedgerDepositRequestParams` (1):
 
@@ -5772,9 +6078,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/ledger/distribute`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferLedgerDistributeResponse`
-- **Error**: `ThePlaidApiClient.TransferLedgerDistributeError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferLedgerDistributeError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferLedgerDistributeRequestParams` (1):
 
@@ -5794,9 +6101,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/ledger/event/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferLedgerEventListResponse`
-- **Error**: `ThePlaidApiClient.TransferLedgerEventListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferLedgerEventListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferLedgerEventListRequestParams` (1):
 
@@ -5816,9 +6124,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/ledger/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferLedgerGetResponse`
-- **Error**: `ThePlaidApiClient.TransferLedgerGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferLedgerGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferLedgerGetRequestParams` (1):
 
@@ -5838,9 +6147,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/ledger/withdraw`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferLedgerWithdrawResponse`
-- **Error**: `ThePlaidApiClient.TransferLedgerWithdrawError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferLedgerWithdrawError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferLedgerWithdrawRequestParams` (1):
 
@@ -5860,9 +6170,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferListResponse`
-- **Error**: `ThePlaidApiClient.TransferListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferListRequestParams` (1):
 
@@ -5882,9 +6193,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/metrics/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferMetricsGetResponse`
-- **Error**: `ThePlaidApiClient.TransferMetricsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferMetricsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferMetricsGetRequestParams` (1):
 
@@ -5904,9 +6216,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/migrate_account`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferMigrateAccountResponse`
-- **Error**: `ThePlaidApiClient.TransferMigrateAccountError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferMigrateAccountError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferMigrateAccountRequestParams` (1):
 
@@ -5926,9 +6239,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/originator/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferOriginatorCreateResponse`
-- **Error**: `ThePlaidApiClient.TransferOriginatorCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferOriginatorCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferOriginatorCreateRequestParams` (1):
 
@@ -5948,9 +6262,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/originator/funding_account/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferOriginatorFundingAccountCreateResponse`
-- **Error**: `ThePlaidApiClient.TransferOriginatorFundingAccountCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferOriginatorFundingAccountCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferOriginatorFundingAccountCreateRequestParams` (1):
 
@@ -5970,9 +6285,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/originator/funding_account/update`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferOriginatorFundingAccountUpdateResponse`
-- **Error**: `ThePlaidApiClient.TransferOriginatorFundingAccountUpdateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferOriginatorFundingAccountUpdateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferOriginatorFundingAccountUpdateRequestParams` (1):
 
@@ -5992,9 +6308,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/originator/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferOriginatorGetResponse`
-- **Error**: `ThePlaidApiClient.TransferOriginatorGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferOriginatorGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferOriginatorGetRequestParams` (1):
 
@@ -6014,9 +6331,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/originator/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferOriginatorListResponse`
-- **Error**: `ThePlaidApiClient.TransferOriginatorListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferOriginatorListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferOriginatorListRequestParams` (1):
 
@@ -6036,9 +6354,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/platform/originator/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferPlatformOriginatorCreateResponse`
-- **Error**: `ThePlaidApiClient.TransferPlatformOriginatorCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferPlatformOriginatorCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferPlatformOriginatorCreateRequestParams` (1):
 
@@ -6058,9 +6377,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/platform/person/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferPlatformPersonCreateResponse`
-- **Error**: `ThePlaidApiClient.TransferPlatformPersonCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferPlatformPersonCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferPlatformPersonCreateRequestParams` (1):
 
@@ -6080,9 +6400,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/platform/requirement/submit`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferPlatformRequirementSubmitResponse`
-- **Error**: `ThePlaidApiClient.TransferPlatformRequirementSubmitError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferPlatformRequirementSubmitError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferPlatformRequirementSubmitRequestParams` (1):
 
@@ -6102,9 +6423,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/questionnaire/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferQuestionnaireCreateResponse`
-- **Error**: `ThePlaidApiClient.TransferQuestionnaireCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferQuestionnaireCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferQuestionnaireCreateRequestParams` (1):
 
@@ -6124,9 +6446,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/recurring/cancel`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferRecurringCancelResponse`
-- **Error**: `ThePlaidApiClient.TransferRecurringCancelError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferRecurringCancelError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferRecurringCancelRequestParams` (1):
 
@@ -6146,9 +6469,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/recurring/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferRecurringCreateResponse`
-- **Error**: `ThePlaidApiClient.TransferRecurringCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferRecurringCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferRecurringCreateRequestParams` (1):
 
@@ -6168,9 +6492,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/recurring/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferRecurringGetResponse`
-- **Error**: `ThePlaidApiClient.TransferRecurringGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferRecurringGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferRecurringGetRequestParams` (1):
 
@@ -6190,9 +6515,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/recurring/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferRecurringListResponse`
-- **Error**: `ThePlaidApiClient.TransferRecurringListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferRecurringListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferRecurringListRequestParams` (1):
 
@@ -6212,9 +6538,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/refund/cancel`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferRefundCancelResponse`
-- **Error**: `ThePlaidApiClient.TransferRefundCancelError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferRefundCancelError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferRefundCancelRequestParams` (1):
 
@@ -6234,9 +6561,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/refund/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferRefundCreateResponse`
-- **Error**: `ThePlaidApiClient.TransferRefundCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferRefundCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferRefundCreateRequestParams` (1):
 
@@ -6256,9 +6584,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/refund/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferRefundGetResponse`
-- **Error**: `ThePlaidApiClient.TransferRefundGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferRefundGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferRefundGetRequestParams` (1):
 
@@ -6278,9 +6607,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/repayment/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferRepaymentListResponse`
-- **Error**: `ThePlaidApiClient.TransferRepaymentListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferRepaymentListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferRepaymentListRequestParams` (1):
 
@@ -6300,9 +6630,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/repayment/return/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferRepaymentReturnListResponse`
-- **Error**: `ThePlaidApiClient.TransferRepaymentReturnListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferRepaymentReturnListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferRepaymentReturnListRequestParams` (1):
 
@@ -6322,9 +6653,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/return/recover`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferReturnRecoverResponse`
-- **Error**: `ThePlaidApiClient.TransferReturnRecoverError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferReturnRecoverError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferReturnRecoverRequestParams` (1):
 
@@ -6344,9 +6676,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/sweep/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferSweepGetResponse`
-- **Error**: `ThePlaidApiClient.TransferSweepGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferSweepGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferSweepGetRequestParams` (1):
 
@@ -6366,9 +6699,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /transfer/sweep/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `TransferSweepListResponse`
-- **Error**: `ThePlaidApiClient.TransferSweepListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.TransferSweepListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.TransferSweepListRequestParams` (1):
 
@@ -6388,9 +6722,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /user_account/session/event/send`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `UserAccountSessionEventSendResponse`
-- **Error**: `ThePlaidApiClient.UserAccountSessionEventSendError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.UserAccountSessionEventSendError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.UserAccountSessionEventSendRequestParams` (1):
 
@@ -6410,9 +6745,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /user_account/session/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `UserAccountSessionGetResponse`
-- **Error**: `ThePlaidApiClient.UserAccountSessionGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.UserAccountSessionGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.UserAccountSessionGetRequestParams` (1):
 
@@ -6432,9 +6768,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /user/create`
 - **Auth**: any of (all of `clientId`, `secret`, `plaidVersion`), `oauth2` — the first branch fully configured is sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `UserCreateResponse`
-- **Error**: `ThePlaidApiClient.UserCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.UserCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.UserCreateRequestParams` (2):
 
@@ -6455,9 +6792,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /user/financial_data/refresh`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `UserFinancialDataRefreshResponse`
-- **Error**: `ThePlaidApiClient.UserFinancialDataRefreshError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.UserFinancialDataRefreshError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.UserFinancialDataRefreshRequestParams` (1):
 
@@ -6477,9 +6815,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /user/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `UserGetResponse`
-- **Error**: `ThePlaidApiClient.UserGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.UserGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.UserGetRequestParams` (2):
 
@@ -6500,9 +6839,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /user/identity/remove`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `UserIdentityRemoveResponse`
-- **Error**: `ThePlaidApiClient.UserIdentityRemoveError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.UserIdentityRemoveError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.UserIdentityRemoveRequestParams` (2):
 
@@ -6523,9 +6863,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /user/items/associate`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `UserItemsAssociateResponse`
-- **Error**: `ThePlaidApiClient.UserItemsAssociateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.UserItemsAssociateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.UserItemsAssociateRequestParams` (1):
 
@@ -6545,9 +6886,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /user/items/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `UserItemsGetResponse`
-- **Error**: `ThePlaidApiClient.UserItemsGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.UserItemsGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.UserItemsGetRequestParams` (1):
 
@@ -6567,9 +6909,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /user/items/remove`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `UserItemsRemoveResponse`
-- **Error**: `ThePlaidApiClient.UserItemsRemoveError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.UserItemsRemoveError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.UserItemsRemoveRequestParams` (1):
 
@@ -6589,9 +6932,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /user/products/terminate`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `UserProductsTerminateResponse`
-- **Error**: `ThePlaidApiClient.UserProductsTerminateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.UserProductsTerminateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.UserProductsTerminateRequestParams` (1):
 
@@ -6611,9 +6955,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /user/remove`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `UserRemoveResponse`
-- **Error**: `ThePlaidApiClient.UserRemoveError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.UserRemoveError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.UserRemoveRequestParams` (2):
 
@@ -6634,9 +6979,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /user/third_party_token/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `UserThirdPartyTokenCreateResponse`
-- **Error**: `ThePlaidApiClient.UserThirdPartyTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.UserThirdPartyTokenCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.UserThirdPartyTokenCreateRequestParams` (1):
 
@@ -6656,9 +7002,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /user/third_party_token/remove`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `UserThirdPartyTokenRemoveResponse`
-- **Error**: `ThePlaidApiClient.UserThirdPartyTokenRemoveError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.UserThirdPartyTokenRemoveError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.UserThirdPartyTokenRemoveRequestParams` (1):
 
@@ -6678,9 +7025,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /user/transactions/refresh`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `UserTransactionsRefreshResponse`
-- **Error**: `ThePlaidApiClient.UserTransactionsRefreshError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.UserTransactionsRefreshError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.UserTransactionsRefreshRequestParams` (1):
 
@@ -6700,9 +7048,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /user/update`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `UserUpdateResponse`
-- **Error**: `ThePlaidApiClient.UserUpdateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.UserUpdateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.UserUpdateRequestParams` (2):
 
@@ -6723,9 +7072,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /wallet/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WalletCreateResponse`
-- **Error**: `ThePlaidApiClient.WalletCreateError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.WalletCreateError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.WalletCreateRequestParams` (1):
 
@@ -6745,9 +7095,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /wallet/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WalletGetResponse`
-- **Error**: `ThePlaidApiClient.WalletGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.WalletGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.WalletGetRequestParams` (1):
 
@@ -6767,9 +7118,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /wallet/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WalletListResponse`
-- **Error**: `ThePlaidApiClient.WalletListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.WalletListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.WalletListRequestParams` (1):
 
@@ -6789,9 +7141,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /wallet/transaction/execute`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WalletTransactionExecuteResponse`
-- **Error**: `ThePlaidApiClient.WalletTransactionExecuteError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.WalletTransactionExecuteError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.WalletTransactionExecuteRequestParams` (1):
 
@@ -6811,9 +7164,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /wallet/transaction/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WalletTransactionGetResponse`
-- **Error**: `ThePlaidApiClient.WalletTransactionGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.WalletTransactionGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.WalletTransactionGetRequestParams` (1):
 
@@ -6833,9 +7187,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /wallet/transaction/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WalletTransactionListResponse`
-- **Error**: `ThePlaidApiClient.WalletTransactionListError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.WalletTransactionListError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.WalletTransactionListRequestParams` (1):
 
@@ -6851,12 +7206,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningEntityCreate
 
-- **Signature**: `watchlistScreeningEntityCreate(request: ThePlaidApiClient.WatchlistScreeningEntityCreateRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityCreateResponse, ResponseError>`
+- **Signature**: `watchlistScreeningEntityCreate(request: ThePlaidApiClient.WatchlistScreeningEntityCreateRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityCreateResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/entity/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningEntityCreateResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningEntityCreateRequestParams` (1):
 
@@ -6871,12 +7227,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningEntityGet
 
-- **Signature**: `watchlistScreeningEntityGet(request: ThePlaidApiClient.WatchlistScreeningEntityGetRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityGetResponse, ResponseError>`
+- **Signature**: `watchlistScreeningEntityGet(request: ThePlaidApiClient.WatchlistScreeningEntityGetRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityGetResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/entity/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningEntityGetResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningEntityGetRequestParams` (1):
 
@@ -6891,12 +7248,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningEntityHistoryList
 
-- **Signature**: `watchlistScreeningEntityHistoryList(request: ThePlaidApiClient.WatchlistScreeningEntityHistoryListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityHistoryListResponse, ResponseError>`
+- **Signature**: `watchlistScreeningEntityHistoryList(request: ThePlaidApiClient.WatchlistScreeningEntityHistoryListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityHistoryListResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/entity/history/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningEntityHistoryListResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningEntityHistoryListRequestParams` (1):
 
@@ -6911,12 +7269,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningEntityHitList
 
-- **Signature**: `watchlistScreeningEntityHitList(request: ThePlaidApiClient.WatchlistScreeningEntityHitListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityHitListResponse, ResponseError>`
+- **Signature**: `watchlistScreeningEntityHitList(request: ThePlaidApiClient.WatchlistScreeningEntityHitListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityHitListResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/entity/hit/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningEntityHitListResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningEntityHitListRequestParams` (1):
 
@@ -6931,12 +7290,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningEntityList
 
-- **Signature**: `watchlistScreeningEntityList(request: ThePlaidApiClient.WatchlistScreeningEntityListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityListResponse, ResponseError>`
+- **Signature**: `watchlistScreeningEntityList(request: ThePlaidApiClient.WatchlistScreeningEntityListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityListResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/entity/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningEntityListResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningEntityListRequestParams` (1):
 
@@ -6951,12 +7311,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningEntityProgramGet
 
-- **Signature**: `watchlistScreeningEntityProgramGet(request: ThePlaidApiClient.WatchlistScreeningEntityProgramGetRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityProgramGetResponse, ResponseError>`
+- **Signature**: `watchlistScreeningEntityProgramGet(request: ThePlaidApiClient.WatchlistScreeningEntityProgramGetRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityProgramGetResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/entity/program/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningEntityProgramGetResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningEntityProgramGetRequestParams` (1):
 
@@ -6971,12 +7332,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningEntityProgramList
 
-- **Signature**: `watchlistScreeningEntityProgramList(request: ThePlaidApiClient.WatchlistScreeningEntityProgramListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityProgramListResponse, ResponseError>`
+- **Signature**: `watchlistScreeningEntityProgramList(request: ThePlaidApiClient.WatchlistScreeningEntityProgramListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityProgramListResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/entity/program/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningEntityProgramListResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningEntityProgramListRequestParams` (1):
 
@@ -6991,12 +7353,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningEntityReviewCreate
 
-- **Signature**: `watchlistScreeningEntityReviewCreate(request: ThePlaidApiClient.WatchlistScreeningEntityReviewCreateRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityReviewCreateResponse, ResponseError>`
+- **Signature**: `watchlistScreeningEntityReviewCreate(request: ThePlaidApiClient.WatchlistScreeningEntityReviewCreateRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityReviewCreateResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/entity/review/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningEntityReviewCreateResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningEntityReviewCreateRequestParams` (1):
 
@@ -7011,12 +7374,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningEntityReviewList
 
-- **Signature**: `watchlistScreeningEntityReviewList(request: ThePlaidApiClient.WatchlistScreeningEntityReviewListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityReviewListResponse, ResponseError>`
+- **Signature**: `watchlistScreeningEntityReviewList(request: ThePlaidApiClient.WatchlistScreeningEntityReviewListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityReviewListResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/entity/review/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningEntityReviewListResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningEntityReviewListRequestParams` (1):
 
@@ -7031,12 +7395,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningEntityUpdate
 
-- **Signature**: `watchlistScreeningEntityUpdate(request: ThePlaidApiClient.WatchlistScreeningEntityUpdateRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityUpdateResponse, ResponseError>`
+- **Signature**: `watchlistScreeningEntityUpdate(request: ThePlaidApiClient.WatchlistScreeningEntityUpdateRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningEntityUpdateResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/entity/update`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningEntityUpdateResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningEntityUpdateRequestParams` (1):
 
@@ -7051,12 +7416,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningIndividualCreate
 
-- **Signature**: `watchlistScreeningIndividualCreate(request: ThePlaidApiClient.WatchlistScreeningIndividualCreateRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualCreateResponse, ResponseError>`
+- **Signature**: `watchlistScreeningIndividualCreate(request: ThePlaidApiClient.WatchlistScreeningIndividualCreateRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualCreateResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/individual/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningIndividualCreateResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningIndividualCreateRequestParams` (1):
 
@@ -7071,12 +7437,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningIndividualGet
 
-- **Signature**: `watchlistScreeningIndividualGet(request: ThePlaidApiClient.WatchlistScreeningIndividualGetRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualGetResponse, ResponseError>`
+- **Signature**: `watchlistScreeningIndividualGet(request: ThePlaidApiClient.WatchlistScreeningIndividualGetRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualGetResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/individual/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningIndividualGetResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningIndividualGetRequestParams` (1):
 
@@ -7091,12 +7458,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningIndividualHistoryList
 
-- **Signature**: `watchlistScreeningIndividualHistoryList(request: ThePlaidApiClient.WatchlistScreeningIndividualHistoryListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualHistoryListResponse, ResponseError>`
+- **Signature**: `watchlistScreeningIndividualHistoryList(request: ThePlaidApiClient.WatchlistScreeningIndividualHistoryListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualHistoryListResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/individual/history/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningIndividualHistoryListResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningIndividualHistoryListRequestParams` (1):
 
@@ -7111,12 +7479,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningIndividualHitList
 
-- **Signature**: `watchlistScreeningIndividualHitList(request: ThePlaidApiClient.WatchlistScreeningIndividualHitListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualHitListResponse, ResponseError>`
+- **Signature**: `watchlistScreeningIndividualHitList(request: ThePlaidApiClient.WatchlistScreeningIndividualHitListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualHitListResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/individual/hit/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningIndividualHitListResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningIndividualHitListRequestParams` (1):
 
@@ -7131,12 +7500,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningIndividualList
 
-- **Signature**: `watchlistScreeningIndividualList(request: ThePlaidApiClient.WatchlistScreeningIndividualListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualListResponse, ResponseError>`
+- **Signature**: `watchlistScreeningIndividualList(request: ThePlaidApiClient.WatchlistScreeningIndividualListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualListResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/individual/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningIndividualListResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningIndividualListRequestParams` (1):
 
@@ -7151,12 +7521,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningIndividualProgramGet
 
-- **Signature**: `watchlistScreeningIndividualProgramGet(request: ThePlaidApiClient.WatchlistScreeningIndividualProgramGetRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualProgramGetResponse, ResponseError>`
+- **Signature**: `watchlistScreeningIndividualProgramGet(request: ThePlaidApiClient.WatchlistScreeningIndividualProgramGetRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualProgramGetResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/individual/program/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningIndividualProgramGetResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningIndividualProgramGetRequestParams` (1):
 
@@ -7171,12 +7542,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningIndividualProgramList
 
-- **Signature**: `watchlistScreeningIndividualProgramList(request: ThePlaidApiClient.WatchlistScreeningIndividualProgramListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualProgramListResponse, ResponseError>`
+- **Signature**: `watchlistScreeningIndividualProgramList(request: ThePlaidApiClient.WatchlistScreeningIndividualProgramListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualProgramListResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/individual/program/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningIndividualProgramListResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningIndividualProgramListRequestParams` (1):
 
@@ -7191,12 +7563,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningIndividualReviewCreate
 
-- **Signature**: `watchlistScreeningIndividualReviewCreate(request: ThePlaidApiClient.WatchlistScreeningIndividualReviewCreateRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualReviewCreateResponse, ResponseError>`
+- **Signature**: `watchlistScreeningIndividualReviewCreate(request: ThePlaidApiClient.WatchlistScreeningIndividualReviewCreateRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualReviewCreateResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/individual/review/create`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningIndividualReviewCreateResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningIndividualReviewCreateRequestParams` (1):
 
@@ -7211,12 +7584,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningIndividualReviewList
 
-- **Signature**: `watchlistScreeningIndividualReviewList(request: ThePlaidApiClient.WatchlistScreeningIndividualReviewListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualReviewListResponse, ResponseError>`
+- **Signature**: `watchlistScreeningIndividualReviewList(request: ThePlaidApiClient.WatchlistScreeningIndividualReviewListRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualReviewListResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/individual/review/list`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningIndividualReviewListResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningIndividualReviewListRequestParams` (1):
 
@@ -7231,12 +7605,13 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 
 ### watchlistScreeningIndividualUpdate
 
-- **Signature**: `watchlistScreeningIndividualUpdate(request: ThePlaidApiClient.WatchlistScreeningIndividualUpdateRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualUpdateResponse, ResponseError>`
+- **Signature**: `watchlistScreeningIndividualUpdate(request: ThePlaidApiClient.WatchlistScreeningIndividualUpdateRequestParams, options?: RequestOptions): ApiPromise<WatchlistScreeningIndividualUpdateResponse, ApiError>`
 - **Wire**: `POST /watchlist_screening/individual/update`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WatchlistScreeningIndividualUpdateResponse`
-- **Error**: `ResponseError` — untyped, `payload.kind` always `"undeclared"`
+- **Error**: `ThePlaidApiError` with `kind: "api"` — untyped, `payload.kind` always `"undeclared"`
 
 **Fields** — `ThePlaidApiClient.WatchlistScreeningIndividualUpdateRequestParams` (1):
 
@@ -7255,9 +7630,10 @@ Operations the spec leaves untagged are methods on the client rather than on a r
 - **Wire**: `POST /webhook_verification_key/get`
 - **Auth**: all of `clientId`, `secret`, `plaidVersion` — all are sent
 - **Request body**: `application/json` — the `body` field
+- **SDK-sent**: `header Idempotency-Key` (minted per call)
 - **Returns**: `WebhookVerificationKeyGetResponse`
-- **Error**: `ThePlaidApiClient.WebhookVerificationKeyGetError` — **typed arms**, narrowed on `err.payload.kind`
-- **Error arms**: `"error"` [400–599] `Error` · `"undeclared"` [any other] `rawBody: ArrayBuffer`
+- **Error**: `ThePlaidApiError` with `kind: "api"`, an instance of `ThePlaidApiClient.WebhookVerificationKeyGetError` — **typed arms**, narrowed on `err.payload.kind`
+- **Error arms**: `"error"` [default — any status no arm above covers] `Error` · `"undeclared"` [a `default`-matched body that did not fit `Error`] `rawBody: ArrayBuffer`
 
 **Fields** — `ThePlaidApiClient.WebhookVerificationKeyGetRequestParams` (1):
 

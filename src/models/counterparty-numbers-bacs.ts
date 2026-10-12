@@ -1,8 +1,11 @@
 import * as s from "../core/validation/index.js";
 import type { Schema } from "../core/validation/schema.js";
 
+/** Identifying information for a UK bank account via Bacs. */
 export type CounterpartyNumbersBacs = {
+  /** The Bacs account number for the account. */
   account?: string | null;
+  /** The Bacs sort code for the account. */
   sortCode?: string | null;
 };
 

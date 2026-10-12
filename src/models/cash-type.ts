@@ -1,6 +1,7 @@
 import * as s from "../core/validation/index.js";
 import type { EnumSchema } from "../core/validation/schema.js";
 
+/** Activity that modifies a cash position */
 export const CashType = {
   AccountFee: "account fee",
   Contribution: "contribution",

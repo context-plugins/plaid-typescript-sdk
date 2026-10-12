@@ -5,7 +5,9 @@ import {
   type BeaconBankAccountInsights,
 } from "./beacon-bank-account-insights.js";
 
+/** A collection of Bank Accounts linked to an Item that is associated with this Beacon User. */
 export type BeaconBankAccounts = {
+  /** The Plaid Item ID the Bank Accounts belong to. */
   itemId: string;
   accounts: BeaconBankAccountInsights[];
 };

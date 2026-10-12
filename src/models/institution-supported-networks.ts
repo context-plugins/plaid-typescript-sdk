@@ -9,8 +9,11 @@ import {
   type TransferCapabilitiesGetRtp,
 } from "./transfer-capabilities-get-rtp.js";
 
+/** Contains the RTP and RfP network and types supported by the linked Item's institution. */
 export type InstitutionSupportedNetworks = {
+  /** Contains the supported service types in RTP */
   rtp: TransferCapabilitiesGetRtp;
+  /** Contains the supported service types in RfP */
   rfp: TransferCapabilitiesGetRfP;
 };
 
